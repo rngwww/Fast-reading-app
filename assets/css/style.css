@@ -26,9 +26,10 @@ html, body {
   background-color: var(--bg-color);
   color: var(--text-primary);
   font-family: var(--font-family);
-  height: 100vh;
+  min-height: 100vh;
   width: 100vw;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   overscroll-behavior-y: none; /* Prevent bounce on iOS */
   -webkit-font-smoothing: antialiased;
   -webkit-touch-callout: none;
@@ -402,9 +403,16 @@ img, svg, video {
 .nav-track {
   display: flex;
   position: relative;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.nav-track::-webkit-scrollbar {
+  display: none;
 }
 .nav-tab {
   background: transparent;
@@ -415,7 +423,8 @@ img, svg, video {
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
-  flex: 1;
+  flex: 0 0 auto;
+  padding: 0 4px;
   text-align: center;
   transition: color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 2;

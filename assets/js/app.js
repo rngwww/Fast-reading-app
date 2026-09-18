@@ -503,10 +503,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function updateNavIndicator(activeTab) {
-    const rect = activeTab.getBoundingClientRect();
-    const parentRect = activeTab.parentElement.getBoundingClientRect();
-    navIndicator.style.width = `${rect.width}px`;
-    navIndicator.style.left = `${rect.left - parentRect.left}px`;
+    navIndicator.style.width = `${activeTab.offsetWidth}px`;
+    navIndicator.style.left = `${activeTab.offsetLeft}px`;
   }
 
   window.addEventListener('load', () => {

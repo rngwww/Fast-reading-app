@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tachyon-v2';
+const CACHE_NAME = 'tachyon-v3';
 const ASSETS = [
   './',
   './index.html',
