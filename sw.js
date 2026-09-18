@@ -2,10 +2,13 @@ const CACHE_NAME = 'tachyon-v1';
 const ASSETS = [
   './',
   './index.html',
-  './style.css',
-  './app.js',
+  './assets/css/style.css',
+  './assets/js/app.js',
+  './assets/js/rsvp.js',
+  './assets/js/audio.js',
+  './assets/js/storage.js',
   './manifest.json',
-  './icon.svg'
+  './assets/icons/icon.svg'
 ];
 
 self.addEventListener('install', event => {
