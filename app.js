@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const wpmSlider = document.getElementById('wpmSlider');
   const wpmValue = document.getElementById('wpmValue');
   const progressBar = document.getElementById('progressBar');
+  const muteBtn = document.getElementById('muteBtn');
+  const volSlider = document.getElementById('volSlider');
   
   const wordStartEl = document.getElementById('wordStart');
   const focalPointEl = document.getElementById('focalPoint');
@@ -17,6 +19,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const defaultText = "Welcome to TACHYON. Paste your text below to begin high-velocity reading. Focus your eyes on the crimson dot. Let the words flow. Read faster than thought.";
   
+  let audioCtx = null;
+  let isAudioUnlocked = false;
+  let isMuted = false;
+  let masterVolume = parseFloat(volSlider.value);
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    isAudioUnlocked = true;
+  }
+
+  // Unlock audio on first interaction
+  document.body.addEventListener('touchstart', initAudio, { once: true, passive: true });
+  document.body.addEventListener('click', initAudio, { once: true });
+
+  function playTick() {
+    if (!audioCtx || !isAudioUnlocked || isMuted || masterVolume === 0) return;
+
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    osc.type = 'triangle'; // acoustic click/tick tone
+    const wpm = parseInt(wpmSlider.value, 10);
+    const freq = 850 + ((wpm - 350) * 0.15); // Speed-pitch compensation
+    osc.frequency.setValueAtTime(Math.max(200, freq), t);
+
+    // Exponential gain drop (duration 20ms)
+    gainNode.gain.setValueAtTime(masterVolume, t);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
+
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    osc.start(t);
+    osc.stop(t + 0.02);
+  }
+
   function getWords() {
     const text = textInput.value.trim() || defaultText;
     return text.split(/\s+/).filter(w => w.length > 0);
@@ -74,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentIndex < words.length) {
       const currentWord = words[currentIndex];
       displayWord(currentWord);
+      playTick();
       
       currentIndex++;
       updateProgress();
@@ -140,6 +185,28 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       displayWord('');
     }
+  });
+
+  muteBtn.addEventListener('click', () => {
+    isMuted = !isMuted;
+    muteBtn.textContent = isMuted ? '🔇' : '🔊';
+    muteBtn.classList.toggle('muted', isMuted);
+    if (!isAudioUnlocked) initAudio();
+  });
+
+  volSlider.addEventListener('input', (e) => {
+    masterVolume = parseFloat(e.target.value);
+    if (masterVolume > 0 && isMuted) {
+      isMuted = false;
+      muteBtn.textContent = '🔊';
+      muteBtn.classList.remove('muted');
+    }
+    if (masterVolume === 0 && !isMuted) {
+      isMuted = true;
+      muteBtn.textContent = '🔇';
+      muteBtn.classList.add('muted');
+    }
+    if (!isAudioUnlocked) initAudio();
   });
 
   wpmSlider.addEventListener('input', (e) => {
