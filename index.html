@@ -51,12 +51,15 @@
 
       <!-- Countdown HUD -->
       <div id="countdownHud" class="hud-overlay hidden">
-        <div class="countdown-ring">
-          <svg viewBox="0 0 100 100">
-            <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
-            <circle id="ringProgress" class="ring-progress" cx="50" cy="50" r="45"></circle>
-          </svg>
-          <span id="countdownText">3</span>
+        <div class="countdown-ring" style="flex-direction: column; gap: 20px;">
+          <div style="position: relative; width: 120px; height: 120px; display: flex; justify-content: center; align-items: center;">
+            <svg viewBox="0 0 100 100" style="position: absolute; width: 100%; height: 100%; transform: rotate(-90deg);">
+              <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
+              <circle id="ringProgress" class="ring-progress" cx="50" cy="50" r="45"></circle>
+            </svg>
+            <span id="countdownText" style="font-size: 48px; font-weight: 700; color: var(--text-primary); z-index: 10;">3</span>
+          </div>
+          <div id="countdownAffirmation" class="micro-affirmation">Lock In</div>
         </div>
       </div>
 
@@ -70,7 +73,7 @@
 
     <div class="controls-card">
       <div class="wpm-control">
-        <label for="wpmSlider">WPM: <span id="wpmValue">350</span></label>
+        <label for="wpmSlider">WPM: <span id="wpmValue">350</span> <span id="freeWpmWarning" style="color: #FFD700; font-size: 10px; display: none;">(Free Limit: 400)</span></label>
         <input type="range" id="wpmSlider" min="100" max="1200" step="10" value="350">
       </div>
       <div class="audio-control">
@@ -83,21 +86,64 @@
       </div>
     </div>
 
-    <div class="input-card">
+    <div class="input-card" style="position: relative;">
+      <div id="emptyQuote" class="quote-card">Think in paragraphs, absorb in words, unlock in seconds. — Tachyon Principle</div>
       <textarea id="textInput" placeholder="Paste your text here..."></textarea>
     </div>
     
+    <div style="text-align: center; margin-top: 12px; color: var(--text-secondary); font-size: 12px;" id="timerDisplay">Free Tier Time: 10:00 remaining today</div>
+    </div>
+    
     <div class="tab-content" id="tab-library">
-      <div class="reader-card">
-        <h3>Library</h3>
-        <p style="color: var(--text-secondary); text-align: center; margin-top: 10px; font-size: 14px;">Your saved texts will appear here.</p>
+      <div class="reader-card" style="justify-content: flex-start; align-items: flex-start;">
+        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+          <h3>Library</h3>
+          <button id="addDocBtn" class="btn secondary" style="padding: 8px 16px; flex: none;">+ Add</button>
+        </div>
+        <div class="library-list" id="libraryList">
+          <!-- Populated by JS -->
+        </div>
       </div>
     </div>
     
     <div class="tab-content" id="tab-settings">
-      <div class="reader-card">
+      <div class="reader-card" style="justify-content: flex-start; align-items: flex-start;">
         <h3>Settings</h3>
-        <p style="color: var(--text-secondary); text-align: center; margin-top: 10px; font-size: 14px;">Theme and advanced reading config.</p>
+        
+        <div class="settings-list">
+          <div class="setting-item" id="tierToggleBtn">
+            <div>
+              <h4>Tier Mode (Dev)</h4>
+              <span style="font-size: 12px; color: var(--text-secondary);" id="tierStatusText">Current: Free Starter</span>
+            </div>
+            <div style="color: var(--accent-color);">Switch</div>
+          </div>
+          
+          <div class="setting-item">
+            <div style="width: 100%;">
+              <h4>Audio Profile</h4>
+              <select id="audioProfileSelect" style="width: 100%; padding: 8px; margin-top: 8px; background: transparent; color: white; border: 1px solid var(--border-color); border-radius: 8px;">
+                <option value="woodblock">Woodblock (Default)</option>
+                <option value="marimba">Marimba 🔒</option>
+                <option value="cyber_pulse">Cyber Pulse 🔒</option>
+                <option value="sub_bass">Sub-bass 🔒</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="setting-item">
+            <div style="width: 100%;">
+              <h4>Color Palette</h4>
+              <select id="colorPaletteSelect" style="width: 100%; padding: 8px; margin-top: 8px; background: transparent; color: white; border: 1px solid var(--border-color); border-radius: 8px;">
+                <option value="crimson">Crimson Red (Default)</option>
+                <option value="cyan">Laser Cyan 🔒</option>
+                <option value="emerald">Emerald Matrix 🔒</option>
+                <option value="gold">Cyber Gold 🔒</option>
+                <option value="white">Monolith White 🔒</option>
+              </select>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     
@@ -112,6 +158,44 @@
             Your browser does not support the video tag.
           </video>
         </div>
+      </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="paywallModal" class="paywall-modal hidden">
+      <div class="modal-card">
+        <div class="pro-badge">TACHYON PRIME</div>
+        <h3 id="paywallQuote" style="font-size: 14px; font-style: italic; color: var(--text-secondary); margin-bottom: 20px;">Upgrade your mind. Expand your cognitive bandwidth.</h3>
+        <h2 style="margin-bottom: 8px;">Limit Reached</h2>
+        <p style="color: var(--text-secondary); font-size: 14px;">Unlock unlimited speed, infinite daily reading time, and all Pro features.</p>
+        
+        <div class="plan-selector">
+          <div class="plan-option" onclick="document.querySelectorAll('.plan-option').forEach(e=>e.classList.remove('selected')); this.classList.add('selected');">
+            <div><strong>$4.99</strong> / month</div>
+          </div>
+          <div class="plan-option selected" onclick="document.querySelectorAll('.plan-option').forEach(e=>e.classList.remove('selected')); this.classList.add('selected');">
+            <div><strong>$39.99</strong> / year</div>
+            <div style="color: #FFD700; font-size: 12px;">Save 33%</div>
+          </div>
+        </div>
+        
+        <button id="upgradeBtn" class="btn primary" style="width: 100%; background: linear-gradient(45deg, #FFD700, #FF2A54); color: #000;">Start 7-Day Free Trial</button>
+        <button id="closePaywallBtn" class="btn secondary" style="width: 100%; margin-top: 12px; border: none;">Maybe Later</button>
+      </div>
+    </div>
+
+    <div id="completionModal" class="completion-modal hidden">
+      <div class="modal-card">
+        <h2 style="margin-bottom: 12px; color: var(--accent-color);">SESSION COMPLETE</h2>
+        <h3 id="completionQuote" style="font-size: 16px; font-style: italic; color: var(--text-secondary); margin-bottom: 24px;">Knowledge absorbed.</h3>
+        
+        <div class="hud-stats" style="margin-bottom: 24px;">
+          <span>Words Absorbed: <span id="statWords">0</span></span>
+          <span>Average Speed: <span id="statSpeed">0</span> WPM</span>
+          <span>Time Saved: <span id="statTime">0</span> mins</span>
+        </div>
+        
+        <button id="closeCompletionBtn" class="btn primary" style="width: 100%;">Continue</button>
       </div>
     </div>
 
