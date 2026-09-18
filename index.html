@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#08080A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <title>TACHYON | RSVP Reader</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wave-bg"></div>
+  <main class="app-container">
+    <header>
+      <h1>TACHYON</h1>
+      <p class="tagline">Read faster than thought.</p>
+    </header>
+
+    <div class="reader-card">
+      <div class="rsvp-display" id="rsvpDisplay">
+        <span class="word-start" id="wordStart"></span><span class="focal-point" id="focalPoint"></span><span class="word-end" id="wordEnd"></span>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+
+    <div class="controls-card">
+      <div class="wpm-control">
+        <label for="wpmSlider">WPM: <span id="wpmValue">350</span></label>
+        <input type="range" id="wpmSlider" min="100" max="1000" step="10" value="350">
+      </div>
+      <div class="buttons">
+        <button id="resetBtn" class="btn secondary">Reset</button>
+        <button id="playPauseBtn" class="btn primary">Play</button>
+      </div>
+    </div>
+
+    <div class="input-card">
+      <textarea id="textInput" placeholder="Paste your text here..."></textarea>
+    </div>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
