@@ -124,11 +124,25 @@ document.addEventListener('DOMContentLoaded', () => {
   function showCompletion() {
     const wordsRead = words.length;
     const avgWpm = parseInt(wpmSlider.value, 10);
-    const minsSaved = Math.max(0, (wordsRead / 200) - (wordsRead / avgWpm)).toFixed(1);
+    
+    // Average reading baseline is ~250 WPM
+    const baselineSeconds = (wordsRead / 250) * 60;
+    const tachyonSeconds = (wordsRead / avgWpm) * 60;
+    const savedSeconds = Math.max(0, baselineSeconds - tachyonSeconds);
+    
+    let timeSavedStr = "0 seconds";
+    if (savedSeconds > 0) {
+      if (savedSeconds < 60) {
+        timeSavedStr = `${Math.floor(savedSeconds)} seconds`;
+      } else {
+        const mins = Math.floor(savedSeconds / 60);
+        const secs = Math.floor(savedSeconds % 60);
+        timeSavedStr = secs > 0 ? `${mins} min ${secs} sec` : `${mins} min`;
+      }
+    }
     
     document.getElementById('statWords').textContent = wordsRead;
-    document.getElementById('statSpeed').textContent = avgWpm;
-    document.getElementById('statTime').textContent = minsSaved;
+    document.getElementById('statTime').textContent = timeSavedStr;
     completionQuote.textContent = getRandomQuote(Quotes.completion);
     
     completionModal.classList.remove('hidden');
