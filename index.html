@@ -20,7 +20,34 @@
       <p class="tagline">Read faster than thought.</p>
     </header>
 
-    <div class="reader-card">
+    <div class="reader-card" id="readerCard">
+      <!-- Pause HUD -->
+      <div id="pauseHud" class="hud-overlay hidden">
+        <div class="hud-content">
+          <h2 style="letter-spacing: 2px;">PAUSED</h2>
+          <div class="hud-stats">
+            <span>Word: <span id="hudWordPos">0</span> / <span id="hudWordTotal">0</span></span>
+            <span>Speed: <span id="hudWpm">350</span> WPM</span>
+            <span>Progress: <span id="hudProgress">0</span>%</span>
+          </div>
+          <div class="hud-controls">
+            <button id="jumpBackBtn" class="btn secondary">-5 Words</button>
+            <button id="resumeBtn" class="btn primary">Resume</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Countdown HUD -->
+      <div id="countdownHud" class="hud-overlay hidden">
+        <div class="countdown-ring">
+          <svg viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
+            <circle id="ringProgress" class="ring-progress" cx="50" cy="50" r="45"></circle>
+          </svg>
+          <span id="countdownText">3</span>
+        </div>
+      </div>
+
       <div class="rsvp-display" id="rsvpDisplay">
         <span class="word-start" id="wordStart"></span><span class="focal-point" id="focalPoint"></span><span class="word-end" id="wordEnd"></span>
       </div>

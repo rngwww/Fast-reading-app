@@ -7,6 +7,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const progressBar = document.getElementById('progressBar');
   const muteBtn = document.getElementById('muteBtn');
   const volSlider = document.getElementById('volSlider');
+  const readerCard = document.getElementById('readerCard');
+  const pauseHud = document.getElementById('pauseHud');
+  const jumpBackBtn = document.getElementById('jumpBackBtn');
+  const resumeBtn = document.getElementById('resumeBtn');
+  const hudWordPos = document.getElementById('hudWordPos');
+  const hudWordTotal = document.getElementById('hudWordTotal');
+  const hudWpm = document.getElementById('hudWpm');
+  const hudProgress = document.getElementById('hudProgress');
+  const countdownHud = document.getElementById('countdownHud');
+  const countdownText = document.getElementById('countdownText');
+  const ringProgress = document.getElementById('ringProgress');
   
   const wordStartEl = document.getElementById('wordStart');
   const focalPointEl = document.getElementById('focalPoint');
@@ -165,13 +176,112 @@ document.addEventListener('DOMContentLoaded', () => {
     playPauseBtn.classList.add('primary');
     playPauseBtn.classList.remove('secondary');
     clearTimeout(timerId);
+    saveState();
+  }
+
+  // Full-Screen Tap-to-Pause
+  readerCard.addEventListener('click', (e) => {
+    if (e.target.closest('.hud-controls')) return;
+    if (isPlaying) {
+      stop();
+      showPauseHud();
+    }
+  });
+
+  function showPauseHud() {
+    hudWordPos.textContent = currentIndex;
+    hudWordTotal.textContent = words.length;
+    hudWpm.textContent = wpmSlider.value;
+    hudProgress.textContent = words.length ? Math.floor((currentIndex / words.length) * 100) : 0;
+    pauseHud.classList.remove('hidden');
+  }
+
+  jumpBackBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    currentIndex = Math.max(0, currentIndex - 5);
+    hudWordPos.textContent = currentIndex;
+    hudProgress.textContent = words.length ? Math.floor((currentIndex / words.length) * 100) : 0;
+    displayWord(words[currentIndex]);
+    updateProgress();
+    saveState();
+  });
+
+  resumeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    pauseHud.classList.add('hidden');
+    startCountdown();
+  });
+
+  let countdownTimerId = null;
+  function startCountdown() {
+    countdownHud.classList.remove('hidden');
+    let count = 3;
+    ringProgress.style.transition = 'none';
+    ringProgress.style.strokeDashoffset = 0;
+    
+    // Force reflow for css transition
+    void ringProgress.offsetWidth;
+    ringProgress.style.transition = 'stroke-dashoffset 1s linear';
+
+    function tickCountdown() {
+      if (count > 0) {
+        countdownText.textContent = count;
+        ringProgress.style.strokeDashoffset = 283 - ((3 - count + 1) / 3) * 283;
+        
+        // Play beep
+        if (audioCtx && isAudioUnlocked && !isMuted && masterVolume > 0) {
+          const t = audioCtx.currentTime;
+          const osc = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, t);
+          gainNode.gain.setValueAtTime(masterVolume, t);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+          osc.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          osc.start(t);
+          osc.stop(t + 0.1);
+        }
+        
+        count--;
+        countdownTimerId = setTimeout(tickCountdown, 1000);
+      } else {
+        countdownText.textContent = "FOCUS";
+        ringProgress.style.strokeDashoffset = 283;
+        
+        // High pitch beep
+        if (audioCtx && isAudioUnlocked && !isMuted && masterVolume > 0) {
+          const t = audioCtx.currentTime;
+          const osc = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1200, t);
+          gainNode.gain.setValueAtTime(masterVolume, t);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+          osc.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          osc.start(t);
+          osc.stop(t + 0.2);
+        }
+        
+        countdownTimerId = setTimeout(() => {
+          countdownHud.classList.add('hidden');
+          play();
+        }, 800);
+      }
+    }
+    tickCountdown();
   }
 
   playPauseBtn.addEventListener('click', () => {
     if (isPlaying) {
       stop();
     } else {
-      play();
+      if (currentIndex > 0 && currentIndex < words.length) {
+        startCountdown();
+      } else {
+        play();
+      }
     }
   });
 
@@ -185,6 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       displayWord('');
     }
+    saveState();
   });
 
   muteBtn.addEventListener('click', () => {
@@ -223,11 +334,54 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       displayWord('');
     }
+    saveState();
   });
 
+  // Local Storage State Persistence
+  function saveState() {
+    const state = {
+      text: textInput.value,
+      currentIndex: currentIndex,
+      wpm: wpmSlider.value,
+      masterVolume: masterVolume,
+      isMuted: isMuted
+    };
+    localStorage.setItem('tachyonState', JSON.stringify(state));
+  }
+
+  function loadState() {
+    const saved = localStorage.getItem('tachyonState');
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        if (state.text) textInput.value = state.text;
+        if (state.wpm) {
+          wpmSlider.value = state.wpm;
+          wpmValue.textContent = state.wpm;
+        }
+        if (state.masterVolume !== undefined) {
+          masterVolume = state.masterVolume;
+          volSlider.value = masterVolume;
+        }
+        if (state.isMuted !== undefined) {
+          isMuted = state.isMuted;
+          muteBtn.textContent = isMuted ? '🔇' : '🔊';
+          muteBtn.classList.toggle('muted', isMuted);
+        }
+        words = getWords();
+        if (state.currentIndex !== undefined && state.currentIndex < words.length) {
+          currentIndex = state.currentIndex;
+        }
+      } catch (e) {
+        console.error('Failed to parse saved state', e);
+      }
+    }
+  }
+
   // Init
-  words = getWords();
-  if(words.length > 0) displayWord(words[0]);
+  loadState();
+  if (!words || words.length === 0) words = getWords();
+  if (words.length > 0) displayWord(words[currentIndex || 0]);
   updateProgress();
   
   // PWA Service Worker Registration
