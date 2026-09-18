@@ -4,7 +4,7 @@ export const Storage = {
   },
   load() {
     const defaultState = {
-      text: "",
+      text: "Think in paragraphs, absorb in words, unlock in seconds.",
       currentIndex: 0,
       wpm: 350,
       masterVolume: 0.3,
@@ -12,7 +12,7 @@ export const Storage = {
       isPro: false,
       library: [],
       soundProfile: 'organic_pop',
-      colorPalette: 'purple',
+      colorPalette: 'red',
       activeDocId: null
     };
 

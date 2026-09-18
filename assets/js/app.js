@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const countdownText = document.getElementById('countdownText');
   const ringProgress = document.getElementById('ringProgress');
   const countdownAffirmation = document.getElementById('countdownAffirmation');
-  const emptyQuote = document.getElementById('emptyQuote');
   
   const completionModal = document.getElementById('completionModal');
   const closeCompletionBtn = document.getElementById('closeCompletionBtn');
@@ -60,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isPlaying = false;
   let timerId = null;
   let editingBookId = null;
-  let selectedColor = 'purple';
+  let selectedColor = 'red';
   
   const defaultText = "Think in paragraphs, absorb in words, unlock in seconds.";
 
@@ -69,20 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
-  // Quote Engine
-  let emptyQuoteInterval;
-  function startEmptyQuoteRotate() {
-    emptyQuoteInterval = setInterval(() => {
-      if(textInput.value.trim() === '') {
-        emptyQuote.classList.add('quote-fade');
-        setTimeout(() => {
-          emptyQuote.textContent = getRandomQuote(Quotes.emptyState);
-          emptyQuote.classList.remove('quote-fade');
-        }, 500);
-      }
-    }, 6000);
-  }
-  startEmptyQuoteRotate();
 
   // Enforce Tier Visuals
   function enforceTierLimits() {
@@ -208,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (words.length === 0) return;
     
-    emptyQuote.style.opacity = '0';
     isPlaying = true;
     playPauseBtn.textContent = 'Pause';
     playPauseBtn.classList.remove('primary');
@@ -222,7 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
     playPauseBtn.classList.add('primary');
     playPauseBtn.classList.remove('secondary');
     clearTimeout(timerId);
-    if(state.text === "") emptyQuote.style.opacity = '1';
     Storage.save(state);
   }
 
@@ -324,10 +307,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if(words.length > 0) {
       displayWord(words[0]);
-      emptyQuote.style.opacity = '0';
     } else {
       displayWord('');
-      emptyQuote.style.opacity = '1';
     }
     Storage.save(state);
   });
@@ -409,7 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.library.forEach((doc) => {
       const el = document.createElement('div');
       el.className = 'lib-item';
-      el.style.borderLeft = `4px solid var(--palette-${doc.color || 'purple'})`;
+      el.style.borderLeft = `4px solid var(--palette-${doc.color || 'red'})`;
       el.innerHTML = `
         <div style="flex: 1; padding-right: 12px; overflow: hidden; cursor: pointer;" class="lib-click-area">
           <h4 class="glow-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">${doc.title}</h4>
@@ -456,12 +437,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const book = state.library.find(b => b.id === id);
       editBookTitle.value = book.title;
       editBookContent.value = book.content;
-      selectedColor = book.color || 'purple';
+      selectedColor = book.color || 'red';
     } else {
       editingBookId = null;
       editBookTitle.value = "New Book";
       editBookContent.value = "";
-      selectedColor = "purple";
+      selectedColor = "red";
     }
     
     colorSwatches.forEach(s => {
@@ -553,8 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     updateMuteIcon();
     
-    if (state.text) emptyQuote.style.opacity = '0';
-    
+
     words = RSVP.parseText(state.text, defaultText);
     enforceTierLimits();
     renderLibrary();
@@ -563,6 +543,52 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   init();
+
+  // Demo Ad Logic
+  const demoPlayBtn = document.getElementById('demoPlayBtn');
+  const demoOverlay = document.getElementById('demoOverlay');
+  const demoProgress = document.getElementById('demoProgress');
+  const demoWordStart = document.getElementById('demoWordStart');
+  const demoFocalPoint = document.getElementById('demoFocalPoint');
+  const demoWordEnd = document.getElementById('demoWordEnd');
+  
+  if (demoPlayBtn) {
+    let demoWords = RSVP.parseText("Read faster than thought. Unlock your brain's potential. Try Tachyon today! Expand your cognitive bandwidth. With RSVP, you eliminate subvocalization and saccades, reaching speeds of 500 WPM instantly. Focus on the red letter. Feel the speed. Tachyon Prime.", "");
+    let demoIndex = 0;
+    let demoTimerId = null;
+    let demoWpm = 500;
+    
+    function playDemo() {
+      demoOverlay.style.display = 'none';
+      demoIndex = 0;
+      runDemoWord();
+    }
+    
+    function runDemoWord() {
+      if (demoIndex >= demoWords.length) {
+        demoOverlay.style.display = 'flex';
+        demoWordStart.textContent = '';
+        demoFocalPoint.textContent = 'Tachyon';
+        demoWordEnd.textContent = '';
+        demoProgress.style.width = '0%';
+        return;
+      }
+      
+      const word = demoWords[demoIndex];
+      const formatted = RSVP.formatWord(word);
+      demoWordStart.textContent = formatted.start;
+      demoFocalPoint.textContent = formatted.focal;
+      demoWordEnd.textContent = formatted.end;
+      
+      demoProgress.style.width = `${((demoIndex + 1) / demoWords.length) * 100}%`;
+      
+      const delay = RSVP.calculateDelay(word, demoWpm);
+      demoIndex++;
+      demoTimerId = setTimeout(runDemoWord, delay);
+    }
+    
+    demoPlayBtn.addEventListener('click', playDemo);
+  }
 
   // PWA SW
   if ('serviceWorker' in navigator) {

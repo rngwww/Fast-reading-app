@@ -3,9 +3,10 @@
   --surface-color: rgba(18, 18, 22, 0.65);
   --text-primary: #FFFFFF;
   --text-secondary: #8A8A96;
-  --accent-color: #D4C4FB; /* Pastel Purple Default */
+  --accent-color: #FF2A54; /* Red Default */
   
-  /* Pastel Palettes */
+  /* Palettes */
+  --palette-red: #FF2A54;
   --palette-pink: #FFB3BA;
   --palette-orange: #FFDFBA;
   --palette-yellow: #FFF4BA;
@@ -138,7 +139,7 @@ header h1 {
 
 textarea {
   width: 100%;
-  height: 120px;
+  height: 240px;
   background: transparent;
   color: var(--text-primary);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -160,7 +161,7 @@ textarea:focus {
 }
 
 /* Reticle / alignment markers */
-.reader-card::before, .reader-card::after {
+#readerCard::before, #readerCard::after {
   content: '';
   position: absolute;
   left: 50%;
@@ -170,8 +171,8 @@ textarea:focus {
   opacity: 0.3;
   transform: translateX(-50%);
 }
-.reader-card::before { top: 30%; }
-.reader-card::after { bottom: 30%; }
+#readerCard::before { top: 30%; }
+#readerCard::after { bottom: 30%; }
 
 .progress-container {
   width: 80%;
@@ -278,30 +279,7 @@ input[type=range]::-webkit-slider-runnable-track {
   border: 1px solid var(--border-color);
 }
 
-.input-card {
-  height: 120px;
-  display: flex;
-  margin-bottom: 0; /* Last item */
-}
 
-textarea {
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  font-family: inherit;
-  font-size: 15px;
-  line-height: 1.4;
-  resize: none;
-  outline: none;
-  -webkit-user-select: text;
-  user-select: text;
-}
-
-textarea::placeholder {
-  color: rgba(138, 138, 150, 0.5);
-}
 
 /* Adaptive Media */
 img, svg, video {
@@ -545,21 +523,7 @@ img, svg, video {
 }
 .lib-item h4 { margin-bottom: 4px; }
 .lib-item.locked { opacity: 0.6; }
-/* Quotes */
-.quote-card {
-  position: absolute;
-  top: 30px;
-  left: 20px;
-  right: 20px;
-  text-align: center;
-  font-size: 14px;
-  font-style: italic;
-  color: rgba(255, 255, 255, 0.4);
-  pointer-events: none;
-  transition: opacity 1s ease;
-  z-index: 1;
-}
-.quote-fade { opacity: 0; }
+
 .micro-affirmation {
   margin-top: 16px;
   font-size: 18px;
