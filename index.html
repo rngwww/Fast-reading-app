@@ -73,7 +73,7 @@
 
       <div class="controls-card">
         <div class="wpm-control">
-          <label for="wpmSlider">WPM: <span id="wpmValue">350</span> <span id="freeWpmWarning" style="color: #FFD700; font-size: 10px; display: none;">(Limit: 400)</span></label>
+          <label for="wpmSlider">WPM: <span id="wpmValue">350</span></label>
           <input type="range" id="wpmSlider" min="100" max="1200" step="10" value="350">
         </div>
         <div class="audio-control">
@@ -88,19 +88,17 @@
         </div>
       </div>
 
-      <div class="input-card">
-        <div id="emptyQuote" class="quote-card">Think in paragraphs, absorb in words, unlock in seconds. — Tachyon Principle</div>
-        <textarea id="textInput" placeholder="Paste your text here..."></textarea>
+      <div class="input-card" style="position: relative;">
+        <div id="emptyQuote" class="quote-card">Think in paragraphs, absorb in words, unlock in seconds.</div>
+        <textarea id="textInput"></textarea>
       </div>
-      
-      <div style="text-align: center; margin-top: 12px; color: var(--text-secondary); font-size: 12px;" id="timerDisplay">Free Tier Time: 10:00 remaining today</div>
     </div>
     
     <div class="tab-content" id="tab-library">
       <div class="reader-card" style="justify-content: flex-start; align-items: flex-start;">
         <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
           <h3 class="glow-text">Library</h3>
-          <button id="addDocBtn" class="btn secondary" style="padding: 8px 16px; flex: none;">+ Add</button>
+          <button id="addDocBtn" class="btn secondary" style="padding: 8px 16px; flex: none;">+ Add Book</button>
         </div>
         <div class="library-list" id="libraryList">
           <!-- Populated by JS -->
@@ -111,9 +109,9 @@
     <div class="tab-content" id="tab-premium">
       <div class="reader-card" style="justify-content: flex-start; align-items: center; text-align: center;">
         <div class="pro-badge" style="margin-top: 20px;">TACHYON PRIME</div>
-        <h3 id="paywallQuote" style="font-size: 14px; font-style: italic; color: var(--text-secondary); margin-bottom: 20px;">Upgrade your mind. Expand your cognitive bandwidth.</h3>
+        <h3 id="paywallQuote" style="font-size: 14px; font-style: italic; color: var(--text-secondary); margin-bottom: 20px;">Expand your cognitive bandwidth.</h3>
         <h2 class="glow-text" style="margin-bottom: 8px;">Limitless Reading</h2>
-        <p style="color: var(--text-secondary); font-size: 14px; max-width: 300px; margin: 0 auto;">Unlock unlimited speed, infinite daily reading time, pro color palettes, and all audio profiles.</p>
+        <p style="color: var(--text-secondary); font-size: 14px; max-width: 300px; margin: 0 auto;">Read books longer than 500 words, save unlimited texts in your library, and unlock all Pro themes & audio.</p>
         
         <div class="plan-selector" style="width: 100%; max-width: 300px; margin: 30px auto;">
           <div class="plan-option" onclick="document.querySelectorAll('.plan-option').forEach(e=>e.classList.remove('selected')); this.classList.add('selected');">
@@ -197,6 +195,28 @@
         </div>
         
         <button id="closeCompletionBtn" class="btn primary" style="width: 100%;">Continue</button>
+      </div>
+    </div>
+
+    <div id="editBookModal" class="completion-modal hidden">
+      <div class="modal-card" style="text-align: left;">
+        <h2 class="glow-text" style="margin-bottom: 16px;">Edit Book</h2>
+        <input type="text" id="editBookTitle" class="clean-select" style="margin-top: 0; margin-bottom: 12px;" placeholder="Book Title">
+        <textarea id="editBookContent" style="height: 150px; padding: 12px; font-size: 14px;" placeholder="Paste text here..."></textarea>
+        
+        <label style="display: block; margin-top: 16px; font-size: 12px; color: var(--text-secondary);">Label Color:</label>
+        <div style="display: flex; gap: 8px; margin-top: 8px; margin-bottom: 24px;" id="colorPickerContainer">
+          <div class="color-swatch active" data-color="crimson" style="background: var(--palette-crimson);"></div>
+          <div class="color-swatch" data-color="cyan" style="background: var(--palette-cyan);"></div>
+          <div class="color-swatch" data-color="emerald" style="background: var(--palette-emerald);"></div>
+          <div class="color-swatch" data-color="gold" style="background: var(--palette-gold);"></div>
+          <div class="color-swatch" data-color="white" style="background: var(--palette-white);"></div>
+        </div>
+        
+        <div style="display: flex; gap: 12px;">
+          <button id="cancelBookBtn" class="btn secondary" style="flex: 1;">Cancel</button>
+          <button id="saveBookBtn" class="btn primary" style="flex: 1;">Save</button>
+        </div>
       </div>
     </div>
 

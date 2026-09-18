@@ -1,5 +1,3 @@
-import { PreloadedLibrary } from './data.js';
-
 export const Storage = {
   save(state) {
     localStorage.setItem('tachyonState', JSON.stringify(state));
@@ -12,9 +10,7 @@ export const Storage = {
       masterVolume: 0.3,
       isMuted: false,
       isPro: false,
-      freeTimeRemaining: 600, // 10 minutes (in seconds)
-      quotaDate: new Date().toDateString(),
-      library: [...PreloadedLibrary],
+      library: [],
       soundProfile: 'woodblock',
       colorPalette: 'crimson',
       activeDocId: null
@@ -24,15 +20,6 @@ export const Storage = {
       const saved = localStorage.getItem('tachyonState');
       if (saved) {
         const parsed = JSON.parse(saved);
-        
-        // Reset quota if it's a new day
-        const today = new Date().toDateString();
-        if (parsed.quotaDate !== today) {
-          parsed.freeTimeRemaining = 600;
-          parsed.quotaDate = today;
-        }
-
-        // Merge defaults
         return { ...defaultState, ...parsed };
       }
     } catch (e) {

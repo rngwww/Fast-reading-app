@@ -1,7 +1,7 @@
 import { Storage } from './storage.js';
 import { AudioSystem } from './audio.js';
 import { RSVP } from './rsvp.js';
-import { Quotes, PreloadedLibrary } from './data.js';
+import { Quotes } from './data.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const textInput = document.getElementById('textInput');
@@ -9,11 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const resetBtn = document.getElementById('resetBtn');
   const wpmSlider = document.getElementById('wpmSlider');
   const wpmValue = document.getElementById('wpmValue');
-  const freeWpmWarning = document.getElementById('freeWpmWarning');
   const progressBar = document.getElementById('progressBar');
   const muteBtn = document.getElementById('muteBtn');
   const volSlider = document.getElementById('volSlider');
-  const volIconOn = document.getElementById('volIconOn');
   
   // Modals & HUDs
   const readerCard = document.getElementById('readerCard');
@@ -30,8 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeCompletionBtn = document.getElementById('closeCompletionBtn');
   const completionQuote = document.getElementById('completionQuote');
   
+  const editBookModal = document.getElementById('editBookModal');
+  const editBookTitle = document.getElementById('editBookTitle');
+  const editBookContent = document.getElementById('editBookContent');
+  const cancelBookBtn = document.getElementById('cancelBookBtn');
+  const saveBookBtn = document.getElementById('saveBookBtn');
+  const colorSwatches = document.querySelectorAll('.color-swatch');
+  
   // UI Display
-  const timerDisplay = document.getElementById('timerDisplay');
   const wordStartEl = document.getElementById('wordStart');
   const focalPointEl = document.getElementById('focalPoint');
   const wordEndEl = document.getElementById('wordEnd');
@@ -55,9 +59,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let words = [];
   let isPlaying = false;
   let timerId = null;
-  let lastTickTime = performance.now();
+  let editingBookId = null;
+  let selectedColor = 'crimson';
   
-  const defaultText = PreloadedLibrary[0].content;
+  const defaultText = "Think in paragraphs, absorb in words, unlock in seconds.";
 
   // Utilities
   function getRandomQuote(arr) {
@@ -68,59 +73,21 @@ document.addEventListener('DOMContentLoaded', () => {
   let emptyQuoteInterval;
   function startEmptyQuoteRotate() {
     emptyQuoteInterval = setInterval(() => {
-      emptyQuote.classList.add('quote-fade');
-      setTimeout(() => {
-        emptyQuote.textContent = getRandomQuote(Quotes.emptyState);
-        emptyQuote.classList.remove('quote-fade');
-      }, 1000);
-    }, 8000);
+      if(textInput.value.trim() === '') {
+        emptyQuote.classList.add('quote-fade');
+        setTimeout(() => {
+          emptyQuote.textContent = getRandomQuote(Quotes.emptyState);
+          emptyQuote.classList.remove('quote-fade');
+        }, 500);
+      }
+    }, 6000);
   }
   startEmptyQuoteRotate();
 
-  // Tier Checks
+  // Enforce Tier Visuals
   function enforceTierLimits() {
-    // WPM check
-    let wpm = parseInt(wpmSlider.value, 10);
-    if (!state.isPro && wpm > 400) {
-      wpmSlider.value = 400;
-      wpm = 400;
-      wpmValue.textContent = wpm;
-      freeWpmWarning.style.display = 'inline';
-      showPaywall();
-    } else {
-      freeWpmWarning.style.display = 'none';
-      wpmValue.textContent = wpm;
-    }
-    
-    // Timer Display
-    if (state.isPro) {
-      timerDisplay.textContent = 'Tachyon Prime: Unlimited Time';
-      timerDisplay.style.color = '#FFD700';
-    } else {
-      const minutes = Math.floor(state.freeTimeRemaining / 60);
-      const seconds = Math.floor(state.freeTimeRemaining % 60).toString().padStart(2, '0');
-      timerDisplay.textContent = `Free Tier Time: ${minutes}:${seconds} remaining today`;
-      timerDisplay.style.color = 'var(--text-secondary)';
-      if (state.freeTimeRemaining <= 0) {
-        showPaywall();
-        if (isPlaying) stop();
-      }
-    }
-    
-    // UI Update
+    wpmValue.textContent = wpmSlider.value;
     tierStatusText.textContent = state.isPro ? 'Current: Tachyon Prime' : 'Current: Free Starter';
-    
-    // Theme & Audio Enforce
-    if (!state.isPro) {
-      if (state.soundProfile !== 'woodblock') {
-        state.soundProfile = 'woodblock';
-        audioProfileSelect.value = 'woodblock';
-      }
-      if (state.colorPalette !== 'crimson') {
-        state.colorPalette = 'crimson';
-        colorPaletteSelect.value = 'crimson';
-      }
-    }
     applyTheme();
     AudioSystem.profile = state.soundProfile;
   }
@@ -130,9 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     root.style.setProperty('--accent-color', `var(--palette-${state.colorPalette})`);
   }
 
-  // Modals & Tabs
   function showPaywall() {
-    // Switch to premium tab instead of a modal
     const targetTabBtn = document.querySelector('[data-target="tab-premium"]');
     if (targetTabBtn) targetTabBtn.click();
   }
@@ -141,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     upgradeBtn.addEventListener('click', () => {
       const originalText = upgradeBtn.textContent;
       upgradeBtn.textContent = 'Unlocking...';
-      AudioSystem.init(); // ensure unlocked
+      AudioSystem.init(); 
       setTimeout(() => {
         AudioSystem.playSuccessChime();
         state.isPro = true;
@@ -150,7 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderLibrary();
         upgradeBtn.textContent = originalText;
         
-        // Go back to reader
         const readerTabBtn = document.querySelector('[data-target="tab-reader"]');
         if (readerTabBtn) readerTabBtn.click();
       }, 1200);
@@ -206,20 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function tick() {
-    // Delta time for free tier
-    const now = performance.now();
-    const delta = (now - lastTickTime) / 1000;
-    lastTickTime = now;
-    
-    if (!state.isPro) {
-      state.freeTimeRemaining -= delta;
-      if (state.freeTimeRemaining <= 0) {
-        state.freeTimeRemaining = 0;
-        enforceTierLimits();
-        return; // stop execution
-      }
-    }
-
     if (state.currentIndex < words.length) {
       const currentWord = words[state.currentIndex];
       displayWord(currentWord);
@@ -228,11 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
       
       state.currentIndex++;
       updateProgress();
-      
-      // Every few words, update display (performance opt)
-      if (state.currentIndex % 10 === 0 && !state.isPro) {
-         timerDisplay.textContent = `Free Tier Time: ${Math.floor(state.freeTimeRemaining / 60)}:${Math.floor(state.freeTimeRemaining % 60).toString().padStart(2, '0')} remaining today`;
-      }
       
       const delay = RSVP.calculateDelay(currentWord, wpm);
       timerId = setTimeout(tick, delay);
@@ -249,19 +194,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (words.length === 0) return;
     
-    // Tier check
-    if (!state.isPro && state.freeTimeRemaining <= 0) {
-      showPaywall();
-      return;
-    }
-    
     emptyQuote.style.opacity = '0';
     isPlaying = true;
     playPauseBtn.textContent = 'Pause';
     playPauseBtn.classList.remove('primary');
     playPauseBtn.classList.add('secondary');
-    
-    lastTickTime = performance.now();
     tick();
   }
 
@@ -273,7 +210,6 @@ document.addEventListener('DOMContentLoaded', () => {
     clearTimeout(timerId);
     if(state.text === "") emptyQuote.style.opacity = '1';
     Storage.save(state);
-    enforceTierLimits(); // update timer UI accurately
   }
 
   // HUD Logic
@@ -310,10 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let count = 3;
     countdownText.textContent = count;
     ringProgress.style.transition = 'none';
-    
-    // Start empty, animate to full circle
     ringProgress.style.strokeDashoffset = 283;
-    
     countdownAffirmation.textContent = getRandomQuote(Quotes.countdown);
     
     void ringProgress.offsetWidth;
@@ -322,20 +255,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function tickCountdown() {
       if (count > 0) {
         countdownText.textContent = count;
-        // Drain towards full (0 is full circle)
         const targetOffset = ((count - 1) / 3) * 283;
         ringProgress.style.strokeDashoffset = targetOffset;
-        
         AudioSystem.playCountdownBeep(false);
         count--;
         setTimeout(tickCountdown, 1000);
       } else {
         countdownText.textContent = "FOCUS";
-        ringProgress.style.strokeDashoffset = 0; // completely full
+        ringProgress.style.strokeDashoffset = 0; 
         AudioSystem.playCountdownBeep(true);
         setTimeout(() => {
           countdownHud.classList.add('hidden');
-          setTimeout(() => countdownText.textContent = "", 300); // clear focus text
+          setTimeout(() => countdownText.textContent = "", 300);
           play();
         }, 800);
       }
@@ -344,15 +275,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   playPauseBtn.addEventListener('click', () => {
-    if (isPlaying) {
-      stop();
-    } else {
-      if (state.currentIndex > 0 && state.currentIndex < words.length) {
-        startCountdown();
-      } else {
-        play();
-      }
-    }
+    if (isPlaying) stop();
+    else if (state.currentIndex > 0 && state.currentIndex < words.length) startCountdown();
+    else play();
   });
 
   resetBtn.addEventListener('click', () => {
@@ -366,10 +291,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   textInput.addEventListener('input', () => {
     if (isPlaying) stop();
-    state.text = textInput.value;
+    
+    let rawText = textInput.value;
+    let newWords = RSVP.parseText(rawText, defaultText);
+    
+    // Tier Lock: 500 word limit on paste
+    if (!state.isPro && newWords.length > 500) {
+      newWords = newWords.slice(0, 500);
+      rawText = newWords.join(' ') + '... (Free Tier Limit Reached)';
+      textInput.value = rawText;
+      showPaywall();
+    }
+    
+    state.text = rawText;
     state.currentIndex = 0;
-    words = RSVP.parseText(state.text, defaultText);
+    words = newWords;
     updateProgress();
+    
     if(words.length > 0) {
       displayWord(words[0]);
       emptyQuote.style.opacity = '0';
@@ -380,7 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
     Storage.save(state);
   });
 
-  // Settings Events
   wpmSlider.addEventListener('input', (e) => {
     state.wpm = e.target.value;
     enforceTierLimits();
@@ -399,7 +336,6 @@ document.addEventListener('DOMContentLoaded', () => {
     AudioSystem.isMuted = !AudioSystem.isMuted;
     state.isMuted = AudioSystem.isMuted;
     updateMuteIcon();
-    
     if (!AudioSystem.isUnlocked) AudioSystem.init();
     Storage.save(state);
   });
@@ -437,69 +373,125 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   audioProfileSelect.addEventListener('change', (e) => {
-    if (!state.isPro && e.target.value !== 'woodblock') {
-      e.target.value = 'woodblock';
-      showPaywall();
-      return;
-    }
     state.soundProfile = e.target.value;
     AudioSystem.profile = state.soundProfile;
     Storage.save(state);
   });
 
   colorPaletteSelect.addEventListener('change', (e) => {
-    if (!state.isPro && e.target.value !== 'crimson') {
-      e.target.value = 'crimson';
-      showPaywall();
-      return;
-    }
     state.colorPalette = e.target.value;
     applyTheme();
     Storage.save(state);
   });
 
-  // Library
+  // Library Book Logic
   function renderLibrary() {
     libraryList.innerHTML = '';
-    state.library.forEach((doc, idx) => {
-      const isLocked = doc.isLocked && !state.isPro;
+    
+    if (state.library.length === 0) {
+      libraryList.innerHTML = '<div style="color: var(--text-secondary); font-size: 14px; text-align: center; padding: 20px;">Your library is empty.</div>';
+    }
+    
+    state.library.forEach((doc) => {
       const el = document.createElement('div');
-      el.className = 'lib-item' + (isLocked ? ' locked' : '');
+      el.className = 'lib-item';
+      el.style.borderLeft = `4px solid var(--palette-${doc.color || 'crimson'})`;
       el.innerHTML = `
-        <div style="flex: 1; padding-right: 12px; overflow: hidden;">
+        <div style="flex: 1; padding-right: 12px; overflow: hidden; cursor: pointer;" class="lib-click-area">
           <h4 class="glow-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">${doc.title}</h4>
-          <span style="font-size: 12px; color: var(--text-secondary);">${doc.author}</span>
+          <span style="font-size: 12px; color: var(--text-secondary);">${doc.content.split(' ').length} words</span>
         </div>
-        <button class="btn secondary" style="padding: 6px 12px; font-size: 12px; flex-shrink: 0; background: rgba(255,255,255,0.05);">${isLocked ? 'PRO ONLY' : 'Load'}</button>
+        <button class="btn secondary edit-btn" style="padding: 6px 12px; font-size: 12px; flex-shrink: 0; background: rgba(255,255,255,0.05); margin-right: 8px;">Edit</button>
       `;
-      el.addEventListener('click', () => {
-        if (isLocked) {
-          showPaywall();
-        } else {
-          state.text = doc.content;
-          textInput.value = state.text;
-          textInput.dispatchEvent(new Event('input'));
-          document.querySelector('[data-target="tab-reader"]').click();
-        }
+      
+      el.querySelector('.lib-click-area').addEventListener('click', () => {
+        state.text = doc.content;
+        textInput.value = state.text;
+        textInput.dispatchEvent(new Event('input'));
+        document.querySelector('[data-target="tab-reader"]').click();
       });
+      
+      el.querySelector('.edit-btn').addEventListener('click', () => {
+        openEditModal(doc.id);
+      });
+      
       libraryList.appendChild(el);
     });
   }
 
   addDocBtn.addEventListener('click', () => {
-    if (!state.isPro && state.library.length >= 2) {
+    if (!state.isPro && state.library.length >= 1) {
       showPaywall();
       return;
     }
-    state.library.push({
-      id: 'doc' + Date.now(),
-      title: 'New Custom Document',
-      author: 'User',
-      isLocked: false,
-      content: 'This is a new custom document added to the library.'
+    openEditModal(null); // null means new book
+  });
+
+  // Edit Book Modal Logic
+  colorSwatches.forEach(swatch => {
+    swatch.addEventListener('click', () => {
+      colorSwatches.forEach(s => s.classList.remove('active'));
+      swatch.classList.add('active');
+      selectedColor = swatch.dataset.color;
     });
+  });
+
+  function openEditModal(id) {
+    if (id) {
+      editingBookId = id;
+      const book = state.library.find(b => b.id === id);
+      editBookTitle.value = book.title;
+      editBookContent.value = book.content;
+      selectedColor = book.color || 'crimson';
+    } else {
+      editingBookId = null;
+      editBookTitle.value = "New Book";
+      editBookContent.value = "";
+      selectedColor = "crimson";
+    }
+    
+    colorSwatches.forEach(s => {
+      s.classList.toggle('active', s.dataset.color === selectedColor);
+    });
+    
+    editBookModal.classList.remove('hidden');
+  }
+
+  cancelBookBtn.addEventListener('click', () => {
+    editBookModal.classList.add('hidden');
+  });
+
+  saveBookBtn.addEventListener('click', () => {
+    let rawText = editBookContent.value;
+    let wordCount = RSVP.parseText(rawText, "").length;
+    
+    // Tier Lock: 500 word limit on library save
+    if (!state.isPro && wordCount > 500) {
+      showPaywall();
+      rawText = RSVP.parseText(rawText, "").slice(0, 500).join(' ') + '... (Free Tier Limit Reached)';
+      editBookContent.value = rawText; // update in modal so they see it
+      return;
+    }
+
+    if (editingBookId) {
+      const book = state.library.find(b => b.id === editingBookId);
+      if (book) {
+        book.title = editBookTitle.value;
+        book.content = rawText;
+        book.color = selectedColor;
+      }
+    } else {
+      state.library.push({
+        id: 'book_' + Date.now(),
+        title: editBookTitle.value || 'Untitled',
+        content: rawText,
+        color: selectedColor
+      });
+    }
+    
     Storage.save(state);
     renderLibrary();
+    editBookModal.classList.add('hidden');
   });
 
   function updateNavIndicator(activeTab) {
