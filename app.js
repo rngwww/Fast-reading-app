@@ -83,9 +83,9 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Dynamic pacing
       if (currentWord.endsWith('.') || currentWord.endsWith('!') || currentWord.endsWith('?')) {
-        delay *= 2; 
-      } else if (currentWord.endsWith(',') || currentWord.endsWith(';') || currentWord.endsWith(':')) {
-        delay *= 1.5;
+        delay *= 1.6; 
+      } else if (currentWord.endsWith(',') || currentWord.endsWith(';') || currentWord.endsWith(':') || currentWord.endsWith('—')) {
+        delay *= 1.3;
       } else if (currentWord.length > 8) {
         delay *= 1.2;
       }
