@@ -1,109 +1,162 @@
 export const AudioSystem = {
   ctx: null,
   isUnlocked: false,
-  isMuted: false,
   volume: 0.3,
-  profile: 'woodblock',
+  isMuted: false,
+  profile: 'organic_pop', // default
 
   init() {
-    if (!this.ctx) {
-      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (this.isUnlocked) return;
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AudioContext();
+      // Unlock for iOS
+      const buffer = this.ctx.createBuffer(1, 1, 22050);
+      const source = this.ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(this.ctx.destination);
+      source.start(0);
+      this.isUnlocked = true;
+    } catch (e) {
+      console.warn("AudioContext unlock failed", e);
     }
-    if (this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
-    this.isUnlocked = true;
   },
 
-  playTick(wpm) {
-    if (!this.ctx || !this.isUnlocked || this.isMuted || this.volume === 0) return;
+  playTick(wpm = 350) {
+    if (this.isMuted || !this.isUnlocked || !this.ctx) return;
+    
+    // Compensation for higher WPMs so it doesn't get overwhelming
+    const wpmScale = Math.max(0.4, 1 - (wpm - 200) / 2000);
+    const finalVolume = this.volume * wpmScale;
+
     const t = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
-    const gainNode = this.ctx.createGain();
+    const gain = this.ctx.createGain();
     
-    // Dynamic sound profile routing
-    if (this.profile === 'marimba') {
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(600 + ((wpm - 350) * 0.1), t);
-      gainNode.gain.setValueAtTime(this.volume, t);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
-    } else if (this.profile === 'cyber_pulse') {
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(200 + ((wpm - 350) * 0.2), t);
-      gainNode.gain.setValueAtTime(this.volume * 0.5, t);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
-    } else if (this.profile === 'sub_bass') {
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(80, t);
-      gainNode.gain.setValueAtTime(this.volume * 1.5, t);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
-    } else {
-      // Default Woodblock
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(Math.max(200, 850 + ((wpm - 350) * 0.15)), t);
-      gainNode.gain.setValueAtTime(this.volume, t);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    // Premium, non-robotic synthesis
+    switch (this.profile) {
+      case 'organic_pop':
+        // Soft, muted organic pop (like a soft UI tap)
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, t);
+        osc.frequency.exponentialRampToValueAtTime(150, t + 0.05);
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.6 * finalVolume, t + 0.005);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+        break;
+
+      case 'soft_marimba':
+        // Warm, woody marimba hit
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(550, t);
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.5 * finalVolume, t + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        break;
+
+      case 'crystal_drop':
+        // Clear, high-end chime
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, t);
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.2 * finalVolume, t + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+        break;
+
+      case 'deep_focus':
+        // Subtle sub-frequency heartbeat/thump
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(120, t);
+        osc.frequency.exponentialRampToValueAtTime(80, t + 0.1);
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.8 * finalVolume, t + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+        break;
+        
+      default:
+        // Fallback smooth pop
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, t);
+        osc.frequency.exponentialRampToValueAtTime(100, t + 0.05);
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.5 * finalVolume, t + 0.005);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+        break;
     }
+
+    osc.start(t);
+    osc.stop(t + 0.2);
+  },
+
+  playUiTick() {
+    if (this.isMuted || !this.isUnlocked || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
     
-    osc.connect(gainNode);
-    gainNode.connect(this.ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, t);
+    osc.frequency.exponentialRampToValueAtTime(400, t + 0.05);
+    
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.2 * this.volume, t + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+    
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
     osc.start(t);
     osc.stop(t + 0.1);
   },
 
-  playUiTick() {
-    if (!this.ctx || !this.isUnlocked || this.isMuted || this.volume === 0) return;
+  playCountdownBeep(isFinal) {
+    if (this.isMuted || !this.isUnlocked || !this.ctx) return;
     const t = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
-    const gainNode = this.ctx.createGain();
+    const gain = this.ctx.createGain();
     
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(1000, t);
-    gainNode.gain.setValueAtTime(this.volume * 0.5, t);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+    if (isFinal) {
+      osc.frequency.setValueAtTime(1200, t);
+    } else {
+      osc.frequency.setValueAtTime(600, t);
+    }
     
-    osc.connect(gainNode);
-    gainNode.connect(this.ctx.destination);
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.4 * this.volume, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+    
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
     osc.start(t);
-    osc.stop(t + 0.05);
+    osc.stop(t + 0.5);
   },
-
-  playCountdownBeep(highPitch = false) {
-    if (!this.ctx || !this.isUnlocked || this.isMuted || this.volume === 0) return;
-    const t = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    const gainNode = this.ctx.createGain();
-    
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(highPitch ? 1200 : 600, t);
-    gainNode.gain.setValueAtTime(this.volume, t);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, t + (highPitch ? 0.2 : 0.1));
-    
-    osc.connect(gainNode);
-    gainNode.connect(this.ctx.destination);
-    osc.start(t);
-    osc.stop(t + (highPitch ? 0.2 : 0.1));
-  },
-
+  
   playSuccessChime() {
-    if (!this.ctx || !this.isUnlocked || this.isMuted || this.volume === 0) return;
+    if (this.isMuted || !this.isUnlocked || !this.ctx) return;
     const t = this.ctx.currentTime;
+    const osc1 = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
     
-    const freqs = [440, 554.37, 659.25, 880]; // A Major Arpeggio
-    freqs.forEach((freq, i) => {
-      const osc = this.ctx.createOscillator();
-      const gainNode = this.ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, t + (i * 0.1));
-      
-      gainNode.gain.setValueAtTime(0, t + (i * 0.1));
-      gainNode.gain.linearRampToValueAtTime(this.volume * 0.6, t + (i * 0.1) + 0.05);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, t + (i * 0.1) + 0.6);
-      
-      osc.connect(gainNode);
-      gainNode.connect(this.ctx.destination);
-      osc.start(t + (i * 0.1));
-      osc.stop(t + (i * 0.1) + 0.7);
-    });
+    osc1.type = 'sine';
+    osc2.type = 'sine';
+    osc1.frequency.setValueAtTime(880, t);
+    osc2.frequency.setValueAtTime(1100, t);
+    
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.3 * this.volume, t + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 1.0);
+    
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(this.ctx.destination);
+    
+    osc1.start(t);
+    osc2.start(t);
+    osc1.stop(t + 1);
+    osc2.stop(t + 1);
   }
 };

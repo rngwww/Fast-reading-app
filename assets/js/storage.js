@@ -11,8 +11,8 @@ export const Storage = {
       isMuted: false,
       isPro: false,
       library: [],
-      soundProfile: 'woodblock',
-      colorPalette: 'crimson',
+      soundProfile: 'organic_pop',
+      colorPalette: 'purple',
       activeDocId: null
     };
 

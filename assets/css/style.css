@@ -3,14 +3,16 @@
   --surface-color: rgba(18, 18, 22, 0.65);
   --text-primary: #FFFFFF;
   --text-secondary: #8A8A96;
-  --accent-color: #FF2A54; /* Crimson Default */
+  --accent-color: #D4C4FB; /* Pastel Purple Default */
   
-  /* Pro Palettes */
-  --palette-crimson: #FF2A54;
-  --palette-cyan: #00F0FF;
-  --palette-emerald: #00FF66;
-  --palette-gold: #FFD700;
-  --palette-white: #FFFFFF;
+  /* Pastel Palettes */
+  --palette-pink: #FFB3BA;
+  --palette-orange: #FFDFBA;
+  --palette-yellow: #FFF4BA;
+  --palette-green: #BAFFC9;
+  --palette-blue: #BAE1FF;
+  --palette-purple: #D4C4FB;
+  --palette-white: #F4F4F9;
   
   --border-color: rgba(255, 255, 255, 0.08);
   --font-family: 'Helvetica Neue', Helvetica, -apple-system, Arial, sans-serif;

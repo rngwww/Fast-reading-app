@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isPlaying = false;
   let timerId = null;
   let editingBookId = null;
-  let selectedColor = 'crimson';
+  let selectedColor = 'purple';
   
   const defaultText = "Think in paragraphs, absorb in words, unlock in seconds.";
 
@@ -395,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.library.forEach((doc) => {
       const el = document.createElement('div');
       el.className = 'lib-item';
-      el.style.borderLeft = `4px solid var(--palette-${doc.color || 'crimson'})`;
+      el.style.borderLeft = `4px solid var(--palette-${doc.color || 'purple'})`;
       el.innerHTML = `
         <div style="flex: 1; padding-right: 12px; overflow: hidden; cursor: pointer;" class="lib-click-area">
           <h4 class="glow-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">${doc.title}</h4>
@@ -442,12 +442,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const book = state.library.find(b => b.id === id);
       editBookTitle.value = book.title;
       editBookContent.value = book.content;
-      selectedColor = book.color || 'crimson';
+      selectedColor = book.color || 'purple';
     } else {
       editingBookId = null;
       editBookTitle.value = "New Book";
       editBookContent.value = "";
-      selectedColor = "crimson";
+      selectedColor = "purple";
     }
     
     colorSwatches.forEach(s => {
