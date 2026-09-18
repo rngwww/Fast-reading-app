@@ -13,7 +13,11 @@
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-  <div class="wave-bg"></div>
+  <div class="ps3-waves">
+    <div class="ps3-wave ps3-wave1"></div>
+    <div class="ps3-wave ps3-wave2"></div>
+    <div class="ps3-wave ps3-wave3"></div>
+  </div>
   <main class="app-container">
     <header>
       <h1 class="glow-text">TACHYON</h1>
@@ -97,11 +101,11 @@
     <div class="tab-content" id="tab-library">
       <div class="reader-card" style="justify-content: flex-start; align-items: flex-start;">
         <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-          <h3 class="glow-text">Library</h3>
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-size: 12px; color: var(--text-secondary);">Max 500 words with free</span>
-            <button id="addDocBtn" class="btn secondary" style="padding: 8px 16px; flex: none;">+ Add Book</button>
+          <div>
+            <h3 class="glow-text">Library</h3>
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Max 500 words with free</div>
           </div>
+          <button id="addDocBtn" class="btn secondary" style="padding: 8px 16px; flex: none;">+ Add Book</button>
         </div>
         <div class="library-list" id="libraryList">
           <!-- Populated by JS -->

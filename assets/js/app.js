@@ -68,6 +68,22 @@ document.addEventListener('DOMContentLoaded', () => {
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
+  // Quote Engine
+  let emptyQuoteInterval;
+  function startEmptyQuoteRotate() {
+    emptyQuoteInterval = setInterval(() => {
+      if(textInput.value.trim() === '') {
+        textInput.placeholder = getRandomQuote(Quotes.emptyState);
+      }
+    }, 6000);
+  }
+  startEmptyQuoteRotate();
+
+  // Initialize placeholder
+  if (!textInput.value.trim()) {
+    textInput.placeholder = getRandomQuote(Quotes.emptyState);
+  }
+
 
   // Enforce Tier Visuals
   function enforceTierLimits() {
@@ -309,6 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
       displayWord(words[0]);
     } else {
       displayWord('');
+      textInput.placeholder = getRandomQuote(Quotes.emptyState);
     }
     Storage.save(state);
   });
