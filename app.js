@@ -396,4 +396,60 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
   }
+
+  // Navigation Tabs
+  const navTabs = document.querySelectorAll('.nav-tab');
+  const tabContents = document.querySelectorAll('.tab-content');
+  const navIndicator = document.getElementById('navIndicator');
+
+  function updateNavIndicator(activeTab) {
+    const rect = activeTab.getBoundingClientRect();
+    const parentRect = activeTab.parentElement.getBoundingClientRect();
+    navIndicator.style.width = `${rect.width}px`;
+    navIndicator.style.left = `${rect.left - parentRect.left}px`;
+  }
+
+  // Init indicator
+  window.addEventListener('load', () => {
+    const active = document.querySelector('.nav-tab.active');
+    if (active) updateNavIndicator(active);
+  });
+  window.addEventListener('resize', () => {
+    const active = document.querySelector('.nav-tab.active');
+    if (active) updateNavIndicator(active);
+  });
+
+  function playUiTick() {
+    if (!audioCtx || !isAudioUnlocked || isMuted || masterVolume === 0) return;
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1000, t);
+    gainNode.gain.setValueAtTime(masterVolume * 0.5, t);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + 0.05);
+  }
+
+  navTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      if (tab.classList.contains('active')) return;
+      
+      if (!isAudioUnlocked) initAudio();
+      playUiTick();
+      
+      navTabs.forEach(t => t.classList.remove('active'));
+      tabContents.forEach(c => c.classList.remove('active'));
+      
+      tab.classList.add('active');
+      const target = document.getElementById(tab.dataset.target);
+      if (target) target.classList.add('active');
+      
+      updateNavIndicator(tab);
+    });
+  });
+
 });

@@ -38,7 +38,7 @@ html, body {
   background: radial-gradient(ellipse at center, rgba(255, 42, 84, 0.15) 0%, rgba(8, 8, 10, 0) 60%),
               linear-gradient(135deg, rgba(8, 8, 10, 1) 0%, rgba(18, 18, 22, 1) 100%);
   z-index: -1;
-  animation: waveMotion 15s infinite alternate linear;
+  animation: waveMotion 15s infinite alternate ease-in-out;
   opacity: 0.8;
 }
 
@@ -294,7 +294,7 @@ img, svg, video {
   justify-content: center;
   align-items: center;
   opacity: 1;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   border-radius: 24px;
 }
 .hud-overlay.hidden {
@@ -354,4 +354,59 @@ img, svg, video {
   font-weight: 700;
   color: var(--text-primary);
   z-index: 10;
+}
+
+/* XMB Navigation */
+.xmb-nav {
+  position: relative;
+  margin-bottom: 24px;
+}
+.nav-track {
+  display: flex;
+  position: relative;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+}
+.nav-tab {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  flex: 1;
+  text-align: center;
+  transition: color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2;
+}
+.nav-tab.active {
+  color: var(--text-primary);
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+.nav-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-color);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 3;
+}
+/* Tabs */
+.tab-content {
+  display: none;
+  animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.tab-content.active {
+  display: flex;
+  flex-direction: column;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

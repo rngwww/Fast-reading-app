@@ -20,6 +20,18 @@
       <p class="tagline">Read faster than thought.</p>
     </header>
 
+    <nav class="xmb-nav">
+      <div class="nav-track">
+        <button class="nav-tab active" data-target="tab-reader">Reader</button>
+        <button class="nav-tab" data-target="tab-library">Library</button>
+        <button class="nav-tab" data-target="tab-settings">Settings</button>
+        <button class="nav-tab" data-target="tab-guide">Guide</button>
+        <div class="nav-indicator" id="navIndicator"></div>
+      </div>
+    </nav>
+    
+    <div class="tab-content active" id="tab-reader">
+
     <div class="reader-card" id="readerCard">
       <!-- Pause HUD -->
       <div id="pauseHud" class="hud-overlay hidden">
@@ -74,6 +86,28 @@
     <div class="input-card">
       <textarea id="textInput" placeholder="Paste your text here..."></textarea>
     </div>
+    
+    <div class="tab-content" id="tab-library">
+      <div class="reader-card">
+        <h3>Library</h3>
+        <p style="color: var(--text-secondary); text-align: center; margin-top: 10px; font-size: 14px;">Your saved texts will appear here.</p>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="tab-settings">
+      <div class="reader-card">
+        <h3>Settings</h3>
+        <p style="color: var(--text-secondary); text-align: center; margin-top: 10px; font-size: 14px;">Theme and advanced reading config.</p>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="tab-guide">
+      <div class="reader-card">
+        <h3>How It Works</h3>
+        <p style="color: var(--text-secondary); text-align: center; margin-top: 10px; font-size: 14px; line-height: 1.5;">Focus on the crimson dot.<br>Do not move your eyes.<br>Let the words flow through you.</p>
+      </div>
+    </div>
+
   </main>
   <script src="app.js"></script>
 </body>
