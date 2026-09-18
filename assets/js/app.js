@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const progressBar = document.getElementById('progressBar');
   const muteBtn = document.getElementById('muteBtn');
   const volSlider = document.getElementById('volSlider');
+  const volIconOn = document.getElementById('volIconOn');
   
   // Modals & HUDs
   const readerCard = document.getElementById('readerCard');
@@ -25,11 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const countdownAffirmation = document.getElementById('countdownAffirmation');
   const emptyQuote = document.getElementById('emptyQuote');
   
-  const paywallModal = document.getElementById('paywallModal');
-  const closePaywallBtn = document.getElementById('closePaywallBtn');
-  const upgradeBtn = document.getElementById('upgradeBtn');
-  const paywallQuote = document.getElementById('paywallQuote');
-  
   const completionModal = document.getElementById('completionModal');
   const closeCompletionBtn = document.getElementById('closeCompletionBtn');
   const completionQuote = document.getElementById('completionQuote');
@@ -40,13 +36,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const focalPointEl = document.getElementById('focalPoint');
   const wordEndEl = document.getElementById('wordEnd');
   
-  // Settings & Library
+  // Settings & Library & Premium
   const tierToggleBtn = document.getElementById('tierToggleBtn');
   const tierStatusText = document.getElementById('tierStatusText');
   const audioProfileSelect = document.getElementById('audioProfileSelect');
   const colorPaletteSelect = document.getElementById('colorPaletteSelect');
   const libraryList = document.getElementById('libraryList');
   const addDocBtn = document.getElementById('addDocBtn');
+  const upgradeBtn = document.getElementById('upgradeBtn');
+
+  // Navigation
+  const navTabs = document.querySelectorAll('.nav-tab');
+  const tabContents = document.querySelectorAll('.tab-content');
+  const navIndicator = document.getElementById('navIndicator');
 
   // State
   let state = Storage.load();
@@ -54,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let isPlaying = false;
   let timerId = null;
   let lastTickTime = performance.now();
-  let activeReadTime = 0; // tracking for analytics
   
   const defaultText = PreloadedLibrary[0].content;
 
@@ -129,31 +130,32 @@ document.addEventListener('DOMContentLoaded', () => {
     root.style.setProperty('--accent-color', `var(--palette-${state.colorPalette})`);
   }
 
-  // Modals
+  // Modals & Tabs
   function showPaywall() {
-    paywallQuote.textContent = getRandomQuote(Quotes.paywall);
-    paywallModal.classList.remove('hidden');
+    // Switch to premium tab instead of a modal
+    const targetTabBtn = document.querySelector('[data-target="tab-premium"]');
+    if (targetTabBtn) targetTabBtn.click();
   }
 
-  closePaywallBtn.addEventListener('click', () => {
-    paywallModal.classList.add('hidden');
-  });
-
-  upgradeBtn.addEventListener('click', () => {
-    const originalText = upgradeBtn.textContent;
-    upgradeBtn.textContent = 'Unlocking...';
-    AudioSystem.init(); // ensure unlocked
-    setTimeout(() => {
-      AudioSystem.playSuccessChime();
-      state.isPro = true;
-      Storage.save(state);
-      enforceTierLimits();
-      renderLibrary();
-      paywallModal.classList.add('hidden');
-      upgradeBtn.textContent = originalText;
-      alert('Tachyon Prime Activated. All Limits Unlocked.');
-    }, 1200);
-  });
+  if (upgradeBtn) {
+    upgradeBtn.addEventListener('click', () => {
+      const originalText = upgradeBtn.textContent;
+      upgradeBtn.textContent = 'Unlocking...';
+      AudioSystem.init(); // ensure unlocked
+      setTimeout(() => {
+        AudioSystem.playSuccessChime();
+        state.isPro = true;
+        Storage.save(state);
+        enforceTierLimits();
+        renderLibrary();
+        upgradeBtn.textContent = originalText;
+        
+        // Go back to reader
+        const readerTabBtn = document.querySelector('[data-target="tab-reader"]');
+        if (readerTabBtn) readerTabBtn.click();
+      }, 1200);
+    });
+  }
   
   function showCompletion() {
     const wordsRead = words.length;
@@ -306,8 +308,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function startCountdown() {
     countdownHud.classList.remove('hidden');
     let count = 3;
+    countdownText.textContent = count;
     ringProgress.style.transition = 'none';
-    ringProgress.style.strokeDashoffset = 0;
+    
+    // Start empty, animate to full circle
+    ringProgress.style.strokeDashoffset = 283;
+    
     countdownAffirmation.textContent = getRandomQuote(Quotes.countdown);
     
     void ringProgress.offsetWidth;
@@ -316,16 +322,20 @@ document.addEventListener('DOMContentLoaded', () => {
     function tickCountdown() {
       if (count > 0) {
         countdownText.textContent = count;
-        ringProgress.style.strokeDashoffset = 283 - ((3 - count + 1) / 3) * 283;
+        // Drain towards full (0 is full circle)
+        const targetOffset = ((count - 1) / 3) * 283;
+        ringProgress.style.strokeDashoffset = targetOffset;
+        
         AudioSystem.playCountdownBeep(false);
         count--;
         setTimeout(tickCountdown, 1000);
       } else {
         countdownText.textContent = "FOCUS";
-        ringProgress.style.strokeDashoffset = 283;
+        ringProgress.style.strokeDashoffset = 0; // completely full
         AudioSystem.playCountdownBeep(true);
         setTimeout(() => {
           countdownHud.classList.add('hidden');
+          setTimeout(() => countdownText.textContent = "", 300); // clear focus text
           play();
         }, 800);
       }
@@ -377,11 +387,19 @@ document.addEventListener('DOMContentLoaded', () => {
     Storage.save(state);
   });
 
+  function updateMuteIcon() {
+    if (state.isMuted) {
+      muteBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>';
+    } else {
+      muteBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+    }
+  }
+
   muteBtn.addEventListener('click', () => {
     AudioSystem.isMuted = !AudioSystem.isMuted;
     state.isMuted = AudioSystem.isMuted;
-    muteBtn.textContent = state.isMuted ? '🔇' : '🔊';
-    muteBtn.classList.toggle('muted', state.isMuted);
+    updateMuteIcon();
+    
     if (!AudioSystem.isUnlocked) AudioSystem.init();
     Storage.save(state);
   });
@@ -392,14 +410,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.masterVolume > 0 && state.isMuted) {
       state.isMuted = false;
       AudioSystem.isMuted = false;
-      muteBtn.textContent = '🔊';
-      muteBtn.classList.remove('muted');
+      updateMuteIcon();
     }
     if (state.masterVolume === 0 && !state.isMuted) {
       state.isMuted = true;
       AudioSystem.isMuted = true;
-      muteBtn.textContent = '🔇';
-      muteBtn.classList.add('muted');
+      updateMuteIcon();
     }
     if (!AudioSystem.isUnlocked) AudioSystem.init();
     Storage.save(state);
@@ -410,7 +426,14 @@ document.addEventListener('DOMContentLoaded', () => {
     Storage.save(state);
     enforceTierLimits();
     renderLibrary();
-    if(!state.isPro) alert("Switched to Free Tier Simulator");
+    // Simulate toast
+    const originalText = tierStatusText.textContent;
+    tierStatusText.textContent = state.isPro ? "Simulating Prime" : "Simulating Free";
+    tierStatusText.style.color = "var(--accent-color)";
+    setTimeout(() => {
+      tierStatusText.textContent = originalText;
+      tierStatusText.style.color = "var(--text-secondary)";
+    }, 1500);
   });
 
   audioProfileSelect.addEventListener('change', (e) => {
@@ -443,11 +466,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const el = document.createElement('div');
       el.className = 'lib-item' + (isLocked ? ' locked' : '');
       el.innerHTML = `
-        <div>
-          <h4>${doc.title} ${isLocked ? '🔒' : ''}</h4>
+        <div style="flex: 1; padding-right: 12px; overflow: hidden;">
+          <h4 class="glow-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">${doc.title}</h4>
           <span style="font-size: 12px; color: var(--text-secondary);">${doc.author}</span>
         </div>
-        <button class="btn secondary" style="padding: 6px 12px; font-size: 12px;">${isLocked ? 'Unlock' : 'Load'}</button>
+        <button class="btn secondary" style="padding: 6px 12px; font-size: 12px; flex-shrink: 0; background: rgba(255,255,255,0.05);">${isLocked ? 'PRO ONLY' : 'Load'}</button>
       `;
       el.addEventListener('click', () => {
         if (isLocked) {
@@ -456,7 +479,6 @@ document.addEventListener('DOMContentLoaded', () => {
           state.text = doc.content;
           textInput.value = state.text;
           textInput.dispatchEvent(new Event('input'));
-          // Switch to reader tab
           document.querySelector('[data-target="tab-reader"]').click();
         }
       });
@@ -469,7 +491,6 @@ document.addEventListener('DOMContentLoaded', () => {
       showPaywall();
       return;
     }
-    // Add dummy document for demo
     state.library.push({
       id: 'doc' + Date.now(),
       title: 'New Custom Document',
@@ -480,11 +501,6 @@ document.addEventListener('DOMContentLoaded', () => {
     Storage.save(state);
     renderLibrary();
   });
-
-  // Navigation Tabs
-  const navTabs = document.querySelectorAll('.nav-tab');
-  const tabContents = document.querySelectorAll('.tab-content');
-  const navIndicator = document.getElementById('navIndicator');
 
   function updateNavIndicator(activeTab) {
     const rect = activeTab.getBoundingClientRect();
@@ -531,8 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
     AudioSystem.profile = state.soundProfile;
     AudioSystem.isMuted = state.isMuted;
     
-    muteBtn.textContent = state.isMuted ? '🔇' : '🔊';
-    if (state.isMuted) muteBtn.classList.add('muted');
+    updateMuteIcon();
     
     if (state.text) emptyQuote.style.opacity = '0';
     
