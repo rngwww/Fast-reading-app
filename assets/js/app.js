@@ -667,7 +667,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="swipe-actions" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background-color: #FF3B30; border-radius: 12px; display: flex; justify-content: flex-end; align-items: center; padding-right: 20px; color: white; z-index: 1;">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         </div>
-        <div class="lib-item swipe-content" style="position: relative; z-index: 2; background: #08080A; border-left: 4px solid var(--palette-${doc.color || 'red'}); border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; touch-action: pan-y;">
+        <div class="lib-item swipe-content" style="position: relative; z-index: 2; background: var(--bg-secondary); border-left: 4px solid var(--palette-${doc.color || 'red'}); border-top: 1px solid var(--border-subtle); border-right: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; touch-action: pan-y;">
           <div style="display: flex; align-items: center; width: 100%;">
             <div style="flex: 1; padding-right: 12px; overflow: hidden; cursor: pointer;" class="lib-click-area">
               <h4 class="glow-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;">${doc.title}</h4>
@@ -1030,123 +1030,171 @@ document.addEventListener('DOMContentLoaded', async () => {
   await init();
 
   // Demo Video Logic
-  const demoAdContainer = document.getElementById('demoAdContainer');
-  const demoOverlay = document.getElementById('demoOverlay');
-  const demoProgress = document.getElementById('demoProgress');
-  const demoWordStart = document.getElementById('demoWordStart');
-  const demoFocalPoint = document.getElementById('demoFocalPoint');
-  const demoWordEnd = document.getElementById('demoWordEnd');
+  const demoOverlay = document.getElementById("demoOverlay");
+  const iphoneFrame = document.getElementById("demoIphoneFrame");
   
-  if (demoAdContainer) {
-    let demoWords = RSVP.parseText("You are now reading at five hundred words per minute. Without moving your eyes, your brain can process information at the speed of thought. This is the power of Rapid Serial Visual Presentation. Welcome to the future of reading.", "");
-    let demoIndex = 0;
-    let demoTimerId = null;
-    let demoWpm = 500;
+  if (demoOverlay && iphoneFrame) {
+    const scenes = {
+      lib: document.getElementById("scene1Lib"),
+      themes: document.getElementById("scene2Themes"),
+      reader: document.getElementById("scene3Reader"),
+      scratch: document.getElementById("scene4Scratch"),
+      outro: document.getElementById("scene5Outro")
+    };
+
+    const callouts = {
+      c1: document.getElementById("callout1"),
+      c2: document.getElementById("callout2"),
+      c3: document.getElementById("callout3"),
+      c4: document.getElementById("callout4")
+    };
+
     let isPlayingDemo = false;
-    
-    const scenes = [
-      document.getElementById('scene1'),
-      document.getElementById('scene2'),
-      document.getElementById('scene3'),
-      document.getElementById('scene4'),
-      document.getElementById('scene5'),
-      document.getElementById('scene6'),
-      document.getElementById('scene7'),
-      document.getElementById('scene8'),
-      document.getElementById('sceneRsvp'),
-      document.getElementById('sceneOutro')
-    ];
-    
-    function resetDemoScenes() {
-      scenes.forEach(s => {
-        if(s) {
-          s.classList.remove('active', 'exit');
-        }
-      });
-      demoProgress.style.width = '0%';
-    }
 
-    async function wait(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
+    async function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-    async function playScene(sceneIndex, holdTime) {
-      const scene = scenes[sceneIndex];
-      if(!scene) return;
-      scene.classList.add('active');
-      await wait(holdTime);
-      scene.classList.remove('active');
-      scene.classList.add('exit');
-      await wait(800); // Wait for exit animation
+    function moveCursor(id, top, left, doTap) {
+      const c = document.getElementById(id);
+      if(!c) return;
+      c.style.top = top; c.style.left = left;
+      if(doTap) {
+        c.classList.add("tap");
+        setTimeout(()=>c.classList.remove("tap"), 300);
+      }
     }
 
     async function runDemoSequence() {
+      if(isPlayingDemo) return;
       isPlayingDemo = true;
-      demoOverlay.style.opacity = '0';
+      demoOverlay.style.opacity = "0";
       await wait(500);
-      demoOverlay.style.display = 'none';
-      resetDemoScenes();
-      
-      if(!AudioSystem.isUnlocked) AudioSystem.init();
+      demoOverlay.style.display = "none";
 
-      // Kinetic Typography Sequence
-      await playScene(0, 1500); // Meet Tachyon
-      await playScene(1, 1500); // Traditional reading is slow
-      await playScene(2, 1800); // Eyes waste time
-      await playScene(3, 1200); // We fixed that
-      await playScene(4, 2000); // Focus on red letter
+      // Reset all
+      Object.values(scenes).forEach(s => s && s.classList.remove("active"));
+      Object.values(callouts).forEach(c => c && c.classList.remove("show"));
+      iphoneFrame.className = "iphone-mockup zoomed";
       
-      // Countdown
-      AudioSystem.playCountdownBeep(false);
-      await playScene(5, 500); // 3
-      AudioSystem.playCountdownBeep(false);
-      await playScene(6, 500); // 2
-      AudioSystem.playCountdownBeep(false);
-      await playScene(7, 500); // 1
-      AudioSystem.playCountdownBeep(true);
+      // Scene 1
+      scenes.lib.classList.add("active");
+      callouts.c1.classList.add("show");
+      await wait(1000);
+      moveCursor("demoCursor1", "120px", "200px", true);
+      await wait(200);
+      document.getElementById("demoBook1").classList.add("swiped");
+      await wait(1000);
+      moveCursor("demoCursor1", "250px", "140px", true);
+      await wait(200);
+      document.getElementById("demoResumeSheet").classList.add("open");
+      await wait(2000);
+      scenes.lib.classList.remove("active");
+      callouts.c1.classList.remove("show");
+      await wait(400);
+
+      // Scene 2
+      scenes.themes.classList.add("active");
+      callouts.c2.classList.add("show");
+      await wait(800);
+      moveCursor("demoCursor2", "110px", "140px", true);
+      await wait(300);
+      document.getElementById("demoScenesContainer").style.background = "#000";
+      document.getElementById("themePreviewText").style.color = "#fff";
+      await wait(1000);
+      moveCursor("demoCursor2", "160px", "140px", true);
+      await wait(300);
+      document.getElementById("demoScenesContainer").style.background = "#F4EFE6";
+      document.getElementById("themePreviewText").style.color = "#4A3F35";
+      await wait(1000);
+      moveCursor("demoCursor2", "210px", "140px", true);
+      await wait(300);
+      document.getElementById("demoScenesContainer").style.background = "#1A1A1A";
+      document.getElementById("themePreviewText").style.color = "#E0E0E0";
+      await wait(1500);
+      scenes.themes.classList.remove("active");
+      callouts.c2.classList.remove("show");
+      await wait(400);
+
+      // Scene 3
+      scenes.reader.classList.add("active");
+      callouts.c3.classList.add("show");
+      document.getElementById("demoCountdown").style.display = "flex";
+      document.getElementById("demoRsvpDisplay2").style.display = "none";
+      const cText = document.getElementById("demoCountText");
+      const cRing = document.getElementById("dRingProg");
+      cText.textContent = "3"; cRing.style.strokeDashoffset = "0";
+      await wait(500);
+      cRing.style.strokeDashoffset = "283";
+      await wait(1000);
+      cText.textContent = "2"; cRing.style.strokeDashoffset = "0";
+      await wait(50); cRing.style.strokeDashoffset = "283";
+      await wait(1000);
+      cText.textContent = "1"; cRing.style.strokeDashoffset = "0";
+      await wait(50); cRing.style.strokeDashoffset = "283";
+      await wait(1000);
       
-      // Start RSVP
-      scenes[8].classList.add('active');
-      demoIndex = 0;
-      runDemoWord();
-    }
-    
-    function runDemoWord() {
-      if (demoIndex >= demoWords.length) {
-        // Finish RSVP
-        scenes[8].classList.remove('active');
-        scenes[8].classList.add('exit');
-        setTimeout(() => {
-          playScene(9, 2500).then(() => {
-            // Reset to beginning
-            demoOverlay.style.display = 'flex';
-            setTimeout(() => demoOverlay.style.opacity = '1', 50);
-            isPlayingDemo = false;
-          });
-        }, 800);
-        return;
+      document.getElementById("demoCountdown").style.display = "none";
+      document.getElementById("demoRsvpDisplay2").style.display = "grid";
+      
+      const words = ["We", "are", "ramping", "up", "the", "speed", "now.", "Focus", "on", "the", "center."];
+      for(let w of words) {
+         document.getElementById("dFocalPoint").textContent = w;
+         await wait(200);
       }
+      moveCursor("demoCursor3", "300px", "140px", true);
+      await wait(100);
+      document.getElementById("demoPauseGlyph").classList.add("show");
+      await wait(400);
+      document.getElementById("dFocalPoint").textContent = "speed";
+      await wait(1500);
+      scenes.reader.classList.remove("active");
+      callouts.c3.classList.remove("show");
+      await wait(400);
+
+      // Scene 4
+      scenes.scratch.classList.add("active");
+      callouts.c4.classList.add("show");
+      document.getElementById("demoQuote").classList.add("rotating");
+      await wait(1500);
+      moveCursor("demoCursor4", "200px", "140px", true);
+      await wait(200);
+      document.getElementById("demoQuote").classList.add("hidden");
+      document.getElementById("demoPastedText").classList.add("show");
+      await wait(2000);
+      scenes.scratch.classList.remove("active");
+      callouts.c4.classList.remove("show");
+      await wait(400);
+
+      // Scene 5
+      scenes.outro.classList.add("active");
+      iphoneFrame.className = "iphone-mockup zoomed-out";
+      await wait(800);
+      document.querySelector(".demo-outro-logo").classList.add("show");
+      document.querySelector(".demo-outro-tagline").classList.add("show");
+      document.querySelector(".demo-outro-badge").classList.add("show");
       
-      const word = demoWords[demoIndex];
-      const formatted = RSVP.formatWord(word);
-      demoWordStart.textContent = formatted.start;
-      demoFocalPoint.textContent = formatted.focal;
-      demoWordEnd.textContent = formatted.end;
+      await wait(4000);
       
-      demoProgress.style.width = `${((demoIndex + 1) / demoWords.length) * 100}%`;
-      
-      const delay = RSVP.calculateDelay(word, demoWpm);
-      demoIndex++;
-      demoTimerId = setTimeout(runDemoWord, delay);
+      demoOverlay.style.display = "flex";
+      setTimeout(() => demoOverlay.style.opacity = "1", 50);
+      isPlayingDemo = false;
+      iphoneFrame.className = "iphone-mockup";
+      document.getElementById("demoScenesContainer").style.background = "var(--bg-color)";
+      document.getElementById("demoBook1").classList.remove("swiped");
+      document.getElementById("demoResumeSheet").classList.remove("open");
+      document.getElementById("demoQuote").className = "demo-placeholder-quote";
+      document.getElementById("demoQuote").classList.remove("rotating");
+      document.getElementById("demoQuote").classList.remove("hidden");
+      document.getElementById("demoPastedText").className = "demo-pasted-text";
+      document.querySelector(".demo-outro-logo").classList.remove("show");
+      document.querySelector(".demo-outro-tagline").classList.remove("show");
+      document.querySelector(".demo-outro-badge").classList.remove("show");
+      document.getElementById("demoPauseGlyph").classList.remove("show");
     }
-    
-    demoAdContainer.addEventListener('click', () => {
-      if(!isPlayingDemo) {
-        runDemoSequence();
-      }
+
+    demoOverlay.addEventListener("click", () => {
+      if(!isPlayingDemo) runDemoSequence();
     });
   }
-
   // PWA SW
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

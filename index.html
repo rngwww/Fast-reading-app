@@ -257,50 +257,75 @@
         <h3 class="glow-text">How It Works</h3>
         <p style="color: var(--text-secondary); text-align: center; margin-top: 10px; font-size: 14px; line-height: 1.5;">RSVP (Rapid Serial Visual Presentation) eliminates eye saccades and reduces subvocalization.<br>By fixing your eyes on a central focal point, your brain processes words at the speed of thought.</p>
         
-        <div class="demo-video-wrapper">
-          <div id="demoAdContainer" class="demo-screen">
-            <div style="height: 30px; background: rgba(255, 255, 255, 0.05); display: flex; align-items: center; padding: 0 10px; z-index: 20;">
-              <div style="width: 10px; height: 10px; border-radius: 50%; background: #FF5F56; margin-right: 6px;"></div>
-              <div style="width: 10px; height: 10px; border-radius: 50%; background: #FFBD2E; margin-right: 6px;"></div>
-              <div style="width: 10px; height: 10px; border-radius: 50%; background: #27C93F;"></div>
-              <div style="flex: 1; text-align: center; color: rgba(255,255,255,0.3); font-size: 11px; letter-spacing: 1px; font-weight: 500;">TACHYON_KINETIC_DEMO.MP4</div>
-              <div style="width: 34px;"></div> <!-- balance spacer -->
-            </div>
-            
-            <div id="demoVideoCanvas" style="flex: 1; position: relative; overflow: hidden; background: #000;">
-              <!-- Apple-style Kinetic Text Scenes -->
-              <div class="apple-demo-scene" id="scene1"><div class="apple-demo-text">Meet <span class="highlight">Tachyon.</span></div></div>
-              <div class="apple-demo-scene" id="scene2"><div class="apple-demo-text">Traditional reading<br>is slow.</div></div>
-              <div class="apple-demo-scene" id="scene3"><div class="apple-demo-text">Because your eyes<br>waste time moving.</div></div>
-              <div class="apple-demo-scene" id="scene4"><div class="apple-demo-text">We fixed that.</div></div>
-              <div class="apple-demo-scene" id="scene5"><div class="apple-demo-text">Focus on the <span class="highlight">red</span> letter.</div></div>
-              <div class="apple-demo-scene" id="scene6"><div class="apple-demo-text" style="font-size: 64px;">3</div></div>
-              <div class="apple-demo-scene" id="scene7"><div class="apple-demo-text" style="font-size: 64px;">2</div></div>
-              <div class="apple-demo-scene" id="scene8"><div class="apple-demo-text" style="font-size: 64px;">1</div></div>
+        <div class="demo-video-wrapper" style="background: transparent; box-shadow: none; display: flex; justify-content: center; padding: 40px 0;">
+          <div id="demoIphoneFrame" class="iphone-mockup">
+            <div id="demoScenesContainer" class="demo-scenes-container">
               
-              <!-- RSVP Display Scene -->
-              <div class="apple-demo-scene" id="sceneRsvp" style="padding: 0;">
-                <div class="rsvp-display glow-text" id="demoRsvpDisplay" style="font-size: clamp(24px, 8vw, 40px); display: grid;">
-                  <span class="word-start" id="demoWordStart"></span><span class="focal-point" id="demoFocalPoint">Tachyon</span><span class="word-end" id="demoWordEnd"></span>
+              <div class="demo-scene" id="scene1Lib">
+                <div class="demo-header">Library</div>
+                <div class="demo-list">
+                  <div class="demo-list-item" id="demoBook1">
+                    <div class="demo-book-info">
+                      <div class="demo-book-title">The Art of War</div>
+                      <div class="demo-book-prog">68%</div>
+                    </div>
+                    <div class="demo-delete-btn">Delete</div>
+                  </div>
                 </div>
+                <div class="demo-bottom-sheet" id="demoResumeSheet">
+                  <div class="sheet-btn">Resume from 68%</div>
+                  <div class="sheet-btn">Reset to Beginning</div>
+                </div>
+                <div class="demo-cursor" id="demoCursor1"></div>
+                <div class="demo-callout" id="callout1">Fluid Gestures.</div>
               </div>
-              
-              <!-- Outro Scene -->
-              <div class="apple-demo-scene" id="sceneOutro"><div class="apple-demo-text">That was <span class="highlight">500 WPM</span>.</div></div>
-              
-              <!-- Initial Overlay -->
+
+              <div class="demo-scene" id="scene2Themes">
+                <div class="demo-header">Appearance</div>
+                <div class="demo-theme-options">
+                  <div class="theme-opt" id="optObsidian">Obsidian</div>
+                  <div class="theme-opt" id="optVellum">Warm Vellum</div>
+                  <div class="theme-opt" id="optGraphite">Graphite</div>
+                </div>
+                <div class="demo-text-preview" id="themePreviewText">Watch the contrast adjust perfectly.</div>
+                <div class="demo-cursor" id="demoCursor2"></div>
+                <div class="demo-callout" id="callout2">Pixel-Perfect Themes.</div>
+              </div>
+
+              <div class="demo-scene" id="scene3Reader">
+                <div id="demoCountdown" class="demo-countdown-ring">
+                  <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45"></circle><circle id="dRingProg" class="d-ring-prog" cx="50" cy="50" r="45"></circle></svg>
+                  <span id="demoCountText">3</span>
+                </div>
+                <div class="rsvp-display glow-text" id="demoRsvpDisplay2" style="font-size: 24px; display: grid;">
+                  <span class="word-start" id="dWordStart"></span><span class="focal-point" id="dFocalPoint">Ready</span><span class="word-end" id="dWordEnd"></span>
+                </div>
+                <div id="demoPauseGlyph" class="demo-pause-glyph">||</div>
+                <div class="demo-cursor" id="demoCursor3"></div>
+                <div class="demo-callout" id="callout3">Intelligent Context Retention.</div>
+              </div>
+
+              <div class="demo-scene" id="scene4Scratch">
+                <div id="demoQuote" class="demo-placeholder-quote">"Read at the speed of thought."</div>
+                <div id="demoPastedText" class="demo-pasted-text">Information processing is no longer limited by eye movement.</div>
+                <div class="demo-cursor" id="demoCursor4"></div>
+                <div class="demo-callout" id="callout4">Frictionless Capture.</div>
+              </div>
+
+              <div class="demo-scene" id="scene5Outro">
+                <div class="demo-outro-logo glow-text">TACHYON</div>
+                <div class="demo-outro-tagline">Read at the speed of thought.</div>
+                <div class="demo-outro-badge">App Store</div>
+              </div>
+
               <div id="demoOverlay" class="play-demo-overlay">
                 <div class="play-btn-circle">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="var(--text-primary)" style="margin-left: 4px;">
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                   </svg>
                 </div>
-                <div style="font-size: 14px; font-weight: 700; color: white; letter-spacing: 2px;">WATCH VIDEO</div>
+                <div style="font-size: 14px; font-weight: 700; color: white; letter-spacing: 2px;">PLAY DEMO</div>
               </div>
-            </div>
-            
-            <div style="height: 4px; background: rgba(255, 255, 255, 0.1); z-index: 20;">
-              <div id="demoProgress" style="height: 100%; width: 0%; background: var(--accent); transition: width 0.1s linear;"></div>
             </div>
           </div>
         </div>
