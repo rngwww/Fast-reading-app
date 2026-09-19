@@ -448,16 +448,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     isCountingDown = true;
     countdownHud.classList.remove('hidden');
     
-    ringProgress.style.transition = 'none';
-    ringProgress.style.strokeDasharray = '283';
-    ringProgress.style.strokeDashoffset = '283';
-    
-    // Force reflow to guarantee the transition starts from 283
-    void ringProgress.offsetWidth;
-    
-    ringProgress.style.transition = 'stroke-dashoffset 3s linear';
-    ringProgress.style.strokeDashoffset = '0';
-    
     countdownAffirmation.textContent = getRandomQuote(Quotes.countdown);
     
     let count = 3;
@@ -526,6 +516,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  let scratchpadSaveTimeout;
   textInput.addEventListener('input', async () => {
     if (isPlaying) await stop();
     
@@ -541,18 +532,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       quoteOverlay.style.opacity = '0';
     }
     
-    let rawText = textInput.value;
-    let newWords = RSVP.parseText(rawText, "");
-    
-    if (!state.isPro && newWords.length > 500) {
-      newWords = newWords.slice(0, 500);
-      rawText = newWords.join(' ') + '... (Free Tier Limit Reached)';
-      textInput.value = rawText;
-      alert('With free you can only have 500 words max');
-    }
-    
-    await Storage.saveBook('scratchpad', 'Scratchpad', 'User', newWords, 'red');
-    await loadBook('scratchpad');
+    clearTimeout(scratchpadSaveTimeout);
+    scratchpadSaveTimeout = setTimeout(async () => {
+      let rawText = textInput.value;
+      let newWords = RSVP.parseText(rawText, "");
+      
+      if (!state.isPro && newWords.length > 500) {
+        newWords = newWords.slice(0, 500);
+        rawText = newWords.join(' ') + '... (Free Tier Limit Reached)';
+        textInput.value = rawText;
+        alert('With free you can only have 500 words max');
+      }
+      
+      await Storage.saveBook('scratchpad', 'Scratchpad', 'User', newWords, 'red');
+      await loadBook('scratchpad');
+    }, 300);
   });
 
   wpmSlider.addEventListener('input', (e) => {
@@ -590,9 +584,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       AudioSystem.isMuted = true;
       updateMuteIcon();
     }
-    if (!AudioSystem.isUnlocked) AudioSystem.init();
-    AudioSystem.playTick();
     Storage.saveSettings(state);
+  });
+
+  let lastVolTick = 0;
+  volSlider.addEventListener('change', (e) => {
+    const now = Date.now();
+    if (now - lastVolTick > 250) { // 250ms cooldown
+      if (!AudioSystem.isUnlocked) AudioSystem.init();
+      AudioSystem.playTick();
+      lastVolTick = now;
+    }
   });
 
   tierToggleBtn.addEventListener('click', () => {
@@ -645,6 +647,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     volSliderSettings.addEventListener('input', (e) => {
       volSlider.value = e.target.value; // Sync the main slider
       volSlider.dispatchEvent(new Event('input'));
+    });
+    volSliderSettings.addEventListener('change', (e) => {
+      volSlider.dispatchEvent(new Event('change'));
     });
   }
 
@@ -909,7 +914,9 @@ document.addEventListener('DOMContentLoaded', async () => {
          const chunk = await Storage.getBookChunk('scratchpad', i);
          fullText.push(chunk.join(' '));
       }
-      textInput.value = fullText.join(' ');
+      if (document.activeElement !== textInput) {
+        textInput.value = fullText.join(' ');
+      }
     }
 
     updateProgress();

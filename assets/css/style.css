@@ -1126,3 +1126,28 @@ body[data-theme="graphite"] {
   font-size: 14px;
   line-height: 1.5;
 }
+
+@keyframes spin-circle {
+  0% { transform: rotate(-90deg); }
+  100% { transform: rotate(270deg); }
+}
+
+@keyframes loading-dash {
+  0% { stroke-dasharray: 1, 283; stroke-dashoffset: 0; }
+  50% { stroke-dasharray: 200, 283; stroke-dashoffset: -40; }
+  100% { stroke-dasharray: 200, 283; stroke-dashoffset: -283; }
+}
+
+.resume-loading-svg {
+  animation: spin-circle 2s linear infinite;
+  transform-origin: center;
+}
+
+.resume-loading-circle {
+  animation: loading-dash 1.5s ease-in-out infinite;
+  stroke: var(--accent);
+  stroke-dasharray: 1, 283;
+  stroke-linecap: round;
+  fill: none;
+  stroke-width: 6;
+}
