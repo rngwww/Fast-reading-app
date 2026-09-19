@@ -85,25 +85,44 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Quote Engine
   let emptyQuoteInterval;
-  function rotateQuote() {
-    if(textInput.value.trim() === '' && state.activeDocId === 'scratchpad') {
-      quoteOverlay.style.opacity = '0';
-      quoteOverlay.style.transform = 'translateY(10px)';
-      
-      setTimeout(() => {
+  let isTyping = false;
+  
+  function rotateQuote(immediate = false) {
+    if(textInput.value === '' && state.activeDocId === 'scratchpad' && !isTyping) {
+      quoteOverlay.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      if (immediate) {
         quoteOverlay.textContent = getRandomQuote(Quotes.emptyState);
         quoteOverlay.style.opacity = '0.8';
         quoteOverlay.style.transform = 'translateY(0px)';
-      }, 500);
+      } else {
+        quoteOverlay.style.opacity = '0';
+        quoteOverlay.style.transform = 'translateY(10px)';
+        
+        setTimeout(() => {
+          if (textInput.value === '' && !isTyping && state.activeDocId === 'scratchpad') {
+            quoteOverlay.textContent = getRandomQuote(Quotes.emptyState);
+            quoteOverlay.style.opacity = '0.8';
+            quoteOverlay.style.transform = 'translateY(0px)';
+          }
+        }, 500);
+      }
     } else {
+      quoteOverlay.style.transition = 'none';
       quoteOverlay.style.opacity = '0';
     }
   }
 
   function startEmptyQuoteRotate() {
-    rotateQuote(); // Initial call
+    if (emptyQuoteInterval) clearInterval(emptyQuoteInterval);
+    rotateQuote(true); // Initial call
     emptyQuoteInterval = setInterval(rotateQuote, 6000);
   }
+
+  function stopEmptyQuoteRotate() {
+    if (emptyQuoteInterval) clearInterval(emptyQuoteInterval);
+    emptyQuoteInterval = null;
+  }
+  
   startEmptyQuoteRotate();
 
   function enforceTierLimits() {
@@ -420,12 +439,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  textInput.addEventListener('focus', () => {
+    isTyping = true;
+    stopEmptyQuoteRotate();
+    if (textInput.value !== '') {
+      quoteOverlay.style.transition = 'none';
+      quoteOverlay.style.opacity = '0';
+    }
+  });
+
+  textInput.addEventListener('blur', () => {
+    isTyping = false;
+    if (textInput.value === '' && state.activeDocId === 'scratchpad') {
+      startEmptyQuoteRotate();
+    }
+  });
+
   textInput.addEventListener('input', async () => {
     if (isPlaying) await stop();
-    quoteOverlay.style.opacity = '0';
+    
+    if (textInput.value === '') {
+      quoteOverlay.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      if (!quoteOverlay.textContent) {
+         quoteOverlay.textContent = getRandomQuote(Quotes.emptyState);
+      }
+      quoteOverlay.style.opacity = '0.8';
+      quoteOverlay.style.transform = 'translateY(0px)';
+    } else {
+      quoteOverlay.style.transition = 'none';
+      quoteOverlay.style.opacity = '0';
+    }
     
     let rawText = textInput.value;
-    let newWords = RSVP.parseText(rawText, defaultText);
+    let newWords = RSVP.parseText(rawText, "");
     
     if (!state.isPro && newWords.length > 500) {
       newWords = newWords.slice(0, 500);
@@ -834,8 +880,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Init Scratchpad
     let scratch = await Storage.getBookMeta('scratchpad');
     if (!scratch) {
-      const words = RSVP.parseText(defaultText, "");
+      const words = [];
       await Storage.saveBook('scratchpad', 'Scratchpad', 'User', words, 'red');
+    } else if (scratch.totalWords > 0) {
+      const chunk0 = await Storage.getBookChunk('scratchpad', 0);
+      const scratchText = chunk0.join(' ');
+      const defaultWords = RSVP.parseText(defaultText, "");
+      if (scratchText === defaultWords.join(' ')) {
+        await Storage.saveBook('scratchpad', 'Scratchpad', 'User', [], 'red');
+      }
     }
     
     await renderLibrary();
