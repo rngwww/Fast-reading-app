@@ -24,6 +24,7 @@ export const AudioSystem = {
 
   playTick(wpm = 350) {
     if (this.isMuted || !this.isUnlocked || !this.ctx) return;
+    if (this.ctx.state === 'suspended') this.ctx.resume();
     
     // Compensation for higher WPMs so it doesn't get overwhelming
     const wpmScale = Math.max(0.4, 1 - (wpm - 200) / 2000);

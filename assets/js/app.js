@@ -143,6 +143,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     tierStatusText.textContent = state.isPro ? 'Current: Tachyon Prime' : 'Current: Free Starter';
     applyTheme();
     AudioSystem.profile = state.soundProfile;
+    AudioSystem.volume = state.masterVolume !== undefined ? state.masterVolume : 0.3;
+    AudioSystem.isMuted = state.isMuted || false;
+    
+    if (state.masterVolume !== undefined) volSlider.value = state.masterVolume;
+    if (volSliderSettings) volSliderSettings.value = volSlider.value;
+    updateMuteIcon();
 
     if (state.isPro) {
       if (upgradeBtn) {
@@ -585,6 +591,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateMuteIcon();
     }
     if (!AudioSystem.isUnlocked) AudioSystem.init();
+    AudioSystem.playTick();
     Storage.saveSettings(state);
   });
 
@@ -608,6 +615,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       segment.classList.add('active');
       state.soundProfile = segment.dataset.val;
       AudioSystem.profile = state.soundProfile;
+      if (!AudioSystem.isUnlocked) AudioSystem.init();
+      AudioSystem.playTick();
       Storage.saveSettings(state);
     });
   });
@@ -850,7 +859,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       if (!AudioSystem.isUnlocked) AudioSystem.init();
-      AudioSystem.playUiTick();
       
       navTabs.forEach(t => t.classList.remove('active'));
       tabContents.forEach(c => c.classList.remove('active'));
