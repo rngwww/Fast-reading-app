@@ -282,23 +282,21 @@ document.addEventListener('DOMContentLoaded', () => {
     let count = 3;
     countdownText.textContent = count;
     ringProgress.style.transition = 'none';
-    ringProgress.style.strokeDashoffset = 100;
+    ringProgress.style.strokeDashoffset = 282.74;
     countdownAffirmation.textContent = getRandomQuote(Quotes.countdown);
     
-    void ringProgress.offsetWidth;
-    ringProgress.style.transition = 'stroke-dashoffset 1s linear';
+    void ringProgress.offsetWidth; // Force reflow
+    ringProgress.style.transition = 'stroke-dashoffset 3s linear';
+    ringProgress.style.strokeDashoffset = 0; // Starts 3 second animation to full
 
     function tickCountdown() {
       if (count > 0) {
         countdownText.textContent = count;
-        const targetOffset = ((count - 1) / 3) * 100;
-        ringProgress.style.strokeDashoffset = targetOffset;
         AudioSystem.playCountdownBeep(false);
         count--;
         setTimeout(tickCountdown, 1000);
       } else {
         countdownText.textContent = "";
-        ringProgress.style.strokeDashoffset = 0; 
         AudioSystem.playCountdownBeep(true);
         setTimeout(() => {
           countdownHud.classList.add('hidden');

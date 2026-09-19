@@ -403,9 +403,8 @@ img, svg, video {
 }
 .ring-progress {
   stroke: var(--accent-color);
-  stroke-dasharray: 100;
+  stroke-dasharray: 282.74;
   stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1s linear;
 }
 #countdownText {
   font-size: 48px;
