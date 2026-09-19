@@ -281,13 +281,12 @@ document.addEventListener('DOMContentLoaded', () => {
     countdownHud.classList.remove('hidden');
     let count = 3;
     countdownText.textContent = count;
-    ringProgress.style.transition = 'none';
-    ringProgress.style.strokeDashoffset = 282.74;
+    ringProgress.classList.remove('ring-animating');
+    ringProgress.style.strokeDashoffset = '283';
     countdownAffirmation.textContent = getRandomQuote(Quotes.countdown);
     
     void ringProgress.offsetWidth; // Force reflow
-    ringProgress.style.transition = 'stroke-dashoffset 3s linear';
-    ringProgress.style.strokeDashoffset = 0; // Starts 3 second animation to full
+    ringProgress.classList.add('ring-animating');
 
     function tickCountdown() {
       if (count > 0) {
