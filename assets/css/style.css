@@ -403,7 +403,7 @@ img, svg, video {
 }
 .ring-progress {
   stroke: var(--accent-color);
-  stroke-dasharray: 283;
+  stroke-dasharray: 100;
   stroke-dashoffset: 0;
   transition: stroke-dashoffset 1s linear;
 }
@@ -569,3 +569,87 @@ img, svg, video {
 }
 .color-swatch:hover { transform: scale(1.1); }
 .color-swatch.active { border-color: white; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+
+/* Apple-style Demo Video Animations */
+.demo-video-wrapper {
+  margin: 30px 0;
+  width: 100%;
+  border-radius: 20px;
+  padding: 8px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.demo-screen {
+  background: #000;
+  border-radius: 14px;
+  height: 300px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.apple-demo-scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.95);
+  transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  padding: 20px;
+  z-index: 5;
+}
+.apple-demo-scene.active {
+  opacity: 1;
+  transform: scale(1);
+}
+.apple-demo-scene.exit {
+  opacity: 0;
+  transform: scale(1.05);
+}
+.apple-demo-text {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.2;
+  color: #fff;
+  text-shadow: 0 0 30px rgba(255,255,255,0.3);
+}
+.apple-demo-text .highlight {
+  color: var(--accent-color);
+}
+.play-demo-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255,42,84,0.15) 0%, rgba(0,0,0,0.8) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  transition: opacity 0.5s;
+  cursor: pointer;
+}
+.play-btn-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+  transition: transform 0.3s, background 0.3s;
+}
+.play-demo-overlay:hover .play-btn-circle {
+  transform: scale(1.05);
+  background: rgba(255,255,255,0.2);
+}

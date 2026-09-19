@@ -91,6 +91,26 @@ document.addEventListener('DOMContentLoaded', () => {
     tierStatusText.textContent = state.isPro ? 'Current: Tachyon Prime' : 'Current: Free Starter';
     applyTheme();
     AudioSystem.profile = state.soundProfile;
+
+    if (state.isPro) {
+      if (upgradeBtn) {
+        upgradeBtn.textContent = 'Already Member';
+        upgradeBtn.disabled = true;
+        upgradeBtn.style.opacity = '0.5';
+        upgradeBtn.style.pointerEvents = 'none';
+      }
+      const planSelector = document.querySelector('.plan-selector');
+      if (planSelector) planSelector.style.display = 'none';
+    } else {
+      if (upgradeBtn) {
+        upgradeBtn.textContent = 'Start 7-Day Free Trial';
+        upgradeBtn.disabled = false;
+        upgradeBtn.style.opacity = '1';
+        upgradeBtn.style.pointerEvents = 'auto';
+      }
+      const planSelector = document.querySelector('.plan-selector');
+      if (planSelector) planSelector.style.display = 'flex';
+    }
   }
 
   function applyTheme() {
@@ -254,12 +274,15 @@ document.addEventListener('DOMContentLoaded', () => {
     startCountdown();
   });
 
+  let isCountingDown = false;
   function startCountdown() {
+    if (isCountingDown) return;
+    isCountingDown = true;
     countdownHud.classList.remove('hidden');
     let count = 3;
     countdownText.textContent = count;
     ringProgress.style.transition = 'none';
-    ringProgress.style.strokeDashoffset = 283;
+    ringProgress.style.strokeDashoffset = 100;
     countdownAffirmation.textContent = getRandomQuote(Quotes.countdown);
     
     void ringProgress.offsetWidth;
@@ -268,18 +291,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function tickCountdown() {
       if (count > 0) {
         countdownText.textContent = count;
-        const targetOffset = ((count - 1) / 3) * 283;
+        const targetOffset = ((count - 1) / 3) * 100;
         ringProgress.style.strokeDashoffset = targetOffset;
         AudioSystem.playCountdownBeep(false);
         count--;
         setTimeout(tickCountdown, 1000);
       } else {
-        countdownText.textContent = "FOCUS";
+        countdownText.textContent = "";
         ringProgress.style.strokeDashoffset = 0; 
         AudioSystem.playCountdownBeep(true);
         setTimeout(() => {
           countdownHud.classList.add('hidden');
-          setTimeout(() => countdownText.textContent = "", 300);
+          isCountingDown = false;
           play();
         }, 800);
       }
@@ -313,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
       newWords = newWords.slice(0, 500);
       rawText = newWords.join(' ') + '... (Free Tier Limit Reached)';
       textInput.value = rawText;
-      showPaywall();
+      alert('With free you can only have 500 words max');
     }
     
     state.text = rawText;
@@ -433,7 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   addDocBtn.addEventListener('click', () => {
     if (!state.isPro && state.library.length >= 1) {
-      showPaywall();
+      alert('With free you can only have 1 book in your library');
       return;
     }
     openEditModal(null); // null means new book
@@ -479,7 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Tier Lock: 500 word limit on library save
     if (!state.isPro && wordCount > 500) {
-      showPaywall();
+      alert('With free you can only have 500 words max');
       rawText = RSVP.parseText(rawText, "").slice(0, 500).join(' ') + '... (Free Tier Limit Reached)';
       editBookContent.value = rawText; // update in modal so they see it
       return;
@@ -561,33 +584,101 @@ document.addEventListener('DOMContentLoaded', () => {
   
   init();
 
-  // Demo Ad Logic
-  const demoPlayBtn = document.getElementById('demoPlayBtn');
+  // Demo Video Logic
+  const demoAdContainer = document.getElementById('demoAdContainer');
   const demoOverlay = document.getElementById('demoOverlay');
   const demoProgress = document.getElementById('demoProgress');
   const demoWordStart = document.getElementById('demoWordStart');
   const demoFocalPoint = document.getElementById('demoFocalPoint');
   const demoWordEnd = document.getElementById('demoWordEnd');
   
-  if (demoPlayBtn) {
-    let demoWords = RSVP.parseText("Read faster than thought. Unlock your brain's potential. Try Tachyon today! Expand your cognitive bandwidth. With RSVP, you eliminate subvocalization and saccades, reaching speeds of 500 WPM instantly. Focus on the red letter. Feel the speed. Tachyon Prime.", "");
+  if (demoAdContainer) {
+    let demoWords = RSVP.parseText("You are now reading at five hundred words per minute. Without moving your eyes, your brain can process information at the speed of thought. This is the power of Rapid Serial Visual Presentation. Welcome to the future of reading.", "");
     let demoIndex = 0;
     let demoTimerId = null;
     let demoWpm = 500;
+    let isPlayingDemo = false;
     
-    function playDemo() {
+    const scenes = [
+      document.getElementById('scene1'),
+      document.getElementById('scene2'),
+      document.getElementById('scene3'),
+      document.getElementById('scene4'),
+      document.getElementById('scene5'),
+      document.getElementById('scene6'),
+      document.getElementById('scene7'),
+      document.getElementById('scene8'),
+      document.getElementById('sceneRsvp'),
+      document.getElementById('sceneOutro')
+    ];
+    
+    function resetDemoScenes() {
+      scenes.forEach(s => {
+        if(s) {
+          s.classList.remove('active', 'exit');
+        }
+      });
+      demoProgress.style.width = '0%';
+    }
+
+    async function wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function playScene(sceneIndex, holdTime) {
+      const scene = scenes[sceneIndex];
+      if(!scene) return;
+      scene.classList.add('active');
+      await wait(holdTime);
+      scene.classList.remove('active');
+      scene.classList.add('exit');
+      await wait(800); // Wait for exit animation
+    }
+
+    async function runDemoSequence() {
+      isPlayingDemo = true;
+      demoOverlay.style.opacity = '0';
+      await wait(500);
       demoOverlay.style.display = 'none';
+      resetDemoScenes();
+      
+      if(!AudioSystem.isUnlocked) AudioSystem.init();
+
+      // Kinetic Typography Sequence
+      await playScene(0, 1500); // Meet Tachyon
+      await playScene(1, 1500); // Traditional reading is slow
+      await playScene(2, 1800); // Eyes waste time
+      await playScene(3, 1200); // We fixed that
+      await playScene(4, 2000); // Focus on red letter
+      
+      // Countdown
+      AudioSystem.playCountdownBeep(false);
+      await playScene(5, 500); // 3
+      AudioSystem.playCountdownBeep(false);
+      await playScene(6, 500); // 2
+      AudioSystem.playCountdownBeep(false);
+      await playScene(7, 500); // 1
+      AudioSystem.playCountdownBeep(true);
+      
+      // Start RSVP
+      scenes[8].classList.add('active');
       demoIndex = 0;
       runDemoWord();
     }
     
     function runDemoWord() {
       if (demoIndex >= demoWords.length) {
-        demoOverlay.style.display = 'flex';
-        demoWordStart.textContent = '';
-        demoFocalPoint.textContent = 'Tachyon';
-        demoWordEnd.textContent = '';
-        demoProgress.style.width = '0%';
+        // Finish RSVP
+        scenes[8].classList.remove('active');
+        scenes[8].classList.add('exit');
+        setTimeout(() => {
+          playScene(9, 2500).then(() => {
+            // Reset to beginning
+            demoOverlay.style.display = 'flex';
+            setTimeout(() => demoOverlay.style.opacity = '1', 50);
+            isPlayingDemo = false;
+          });
+        }, 800);
         return;
       }
       
@@ -604,7 +695,11 @@ document.addEventListener('DOMContentLoaded', () => {
       demoTimerId = setTimeout(runDemoWord, delay);
     }
     
-    demoPlayBtn.addEventListener('click', playDemo);
+    demoAdContainer.addEventListener('click', () => {
+      if(!isPlayingDemo) {
+        runDemoSequence();
+      }
+    });
   }
 
   // PWA SW

@@ -59,7 +59,7 @@
             <div style="position: relative; width: 140px; height: 140px; display: flex; justify-content: center; align-items: center;">
               <svg viewBox="0 0 100 100" style="position: absolute; width: 100%; height: 100%; transform: rotate(-90deg);">
                 <circle class="ring-bg" cx="50" cy="50" r="45"></circle>
-                <circle id="ringProgress" class="ring-progress" cx="50" cy="50" r="45"></circle>
+                <circle id="ringProgress" class="ring-progress" cx="50" cy="50" r="45" pathLength="100"></circle>
               </svg>
               <span id="countdownText" style="font-size: 56px; font-weight: 700; color: var(--text-primary); z-index: 10;">3</span>
             </div>
@@ -183,24 +183,51 @@
         <h3 class="glow-text">How It Works</h3>
         <p style="color: var(--text-secondary); text-align: center; margin-top: 10px; font-size: 14px; line-height: 1.5;">RSVP (Rapid Serial Visual Presentation) eliminates eye saccades and reduces subvocalization.<br>By fixing your eyes on a central focal point, your brain processes words at the speed of thought.</p>
         
-        <div id="demoAdContainer" style="margin-top: 20px; width: 100%; height: 250px; border-radius: 12px; overflow: hidden; background: #08080A; position: relative; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column;">
-          <div style="height: 30px; background: rgba(255, 255, 255, 0.05); display: flex; align-items: center; padding: 0 10px;">
-            <div style="width: 10px; height: 10px; border-radius: 50%; background: #FF5F56; margin-right: 6px;"></div>
-            <div style="width: 10px; height: 10px; border-radius: 50%; background: #FFBD2E; margin-right: 6px;"></div>
-            <div style="width: 10px; height: 10px; border-radius: 50%; background: #27C93F;"></div>
-          </div>
-          <div style="flex: 1; display: flex; justify-content: center; align-items: center; position: relative;">
-            <div class="rsvp-display glow-text" id="demoRsvpDisplay" style="font-size: 32px; display: flex; justify-content: center;">
-              <span class="word-start" id="demoWordStart" style="text-align: right; flex: 1;"></span><span class="focal-point" id="demoFocalPoint" style="flex: none;">Tachyon</span><span class="word-end" id="demoWordEnd" style="text-align: left; flex: 1;"></span>
+        <div class="demo-video-wrapper">
+          <div id="demoAdContainer" class="demo-screen">
+            <div style="height: 30px; background: rgba(255, 255, 255, 0.05); display: flex; align-items: center; padding: 0 10px; z-index: 20;">
+              <div style="width: 10px; height: 10px; border-radius: 50%; background: #FF5F56; margin-right: 6px;"></div>
+              <div style="width: 10px; height: 10px; border-radius: 50%; background: #FFBD2E; margin-right: 6px;"></div>
+              <div style="width: 10px; height: 10px; border-radius: 50%; background: #27C93F;"></div>
+              <div style="flex: 1; text-align: center; color: rgba(255,255,255,0.3); font-size: 11px; letter-spacing: 1px; font-weight: 500;">TACHYON_KINETIC_DEMO.MP4</div>
+              <div style="width: 34px;"></div> <!-- balance spacer -->
             </div>
             
-            <div id="demoOverlay" style="position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(2px); z-index: 10;">
-              <div style="font-size: 18px; font-weight: bold; margin-bottom: 15px; color: white; text-align: center; padding: 0 20px;">Experience reading at 500 WPM.</div>
-              <button id="demoPlayBtn" class="btn primary" style="padding: 8px 24px;">Watch Demo</button>
+            <div id="demoVideoCanvas" style="flex: 1; position: relative; overflow: hidden; background: #000;">
+              <!-- Apple-style Kinetic Text Scenes -->
+              <div class="apple-demo-scene" id="scene1"><div class="apple-demo-text">Meet <span class="highlight">Tachyon.</span></div></div>
+              <div class="apple-demo-scene" id="scene2"><div class="apple-demo-text">Traditional reading<br>is slow.</div></div>
+              <div class="apple-demo-scene" id="scene3"><div class="apple-demo-text">Because your eyes<br>waste time moving.</div></div>
+              <div class="apple-demo-scene" id="scene4"><div class="apple-demo-text">We fixed that.</div></div>
+              <div class="apple-demo-scene" id="scene5"><div class="apple-demo-text">Focus on the <span class="highlight">red</span> letter.</div></div>
+              <div class="apple-demo-scene" id="scene6"><div class="apple-demo-text" style="font-size: 64px;">3</div></div>
+              <div class="apple-demo-scene" id="scene7"><div class="apple-demo-text" style="font-size: 64px;">2</div></div>
+              <div class="apple-demo-scene" id="scene8"><div class="apple-demo-text" style="font-size: 64px;">1</div></div>
+              
+              <!-- RSVP Display Scene -->
+              <div class="apple-demo-scene" id="sceneRsvp" style="padding: 0;">
+                <div class="rsvp-display glow-text" id="demoRsvpDisplay" style="font-size: clamp(24px, 8vw, 40px); display: grid;">
+                  <span class="word-start" id="demoWordStart"></span><span class="focal-point" id="demoFocalPoint">Tachyon</span><span class="word-end" id="demoWordEnd"></span>
+                </div>
+              </div>
+              
+              <!-- Outro Scene -->
+              <div class="apple-demo-scene" id="sceneOutro"><div class="apple-demo-text">That was <span class="highlight">500 WPM</span>.</div></div>
+              
+              <!-- Initial Overlay -->
+              <div id="demoOverlay" class="play-demo-overlay">
+                <div class="play-btn-circle">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="var(--text-primary)" style="margin-left: 4px;">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                </div>
+                <div style="font-size: 14px; font-weight: 700; color: white; letter-spacing: 2px;">WATCH VIDEO</div>
+              </div>
             </div>
-          </div>
-          <div style="height: 4px; background: rgba(255, 255, 255, 0.1);">
-            <div id="demoProgress" style="height: 100%; width: 0%; background: var(--accent-color); transition: width 0.1s linear;"></div>
+            
+            <div style="height: 4px; background: rgba(255, 255, 255, 0.1); z-index: 20;">
+              <div id="demoProgress" style="height: 100%; width: 0%; background: var(--accent-color); transition: width 0.1s linear;"></div>
+            </div>
           </div>
         </div>
       </div>
