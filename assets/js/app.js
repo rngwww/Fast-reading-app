@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let count = 3;
     countdownText.textContent = count;
     ringProgress.classList.remove('ring-animating');
-    ringProgress.style.strokeDashoffset = '283';
+    ringProgress.style.strokeDashoffset = '';
     countdownAffirmation.textContent = getRandomQuote(Quotes.countdown);
     
     void ringProgress.offsetWidth; // Force reflow
