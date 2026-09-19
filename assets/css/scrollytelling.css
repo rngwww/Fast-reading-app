@@ -1,0 +1,56 @@
+﻿/* Scrollytelling Guide */
+.scrollytelling-container {
+  position: relative;
+}
+.sticky-visual {
+  position: sticky;
+  top: 15vh;
+  height: 65vh;
+  min-height: 580px;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.scroll-track {
+  position: relative;
+  z-index: 20;
+  margin-top: -65vh;
+  padding-top: 15vh;
+}
+.scroll-step {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding-bottom: 10vh;
+}
+.step-card {
+  background: rgba(18, 18, 22, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  opacity: 0.3;
+  transform: scale(0.95) translateY(20px);
+}
+.step-card.active {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+.step-card h3 {
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+.step-card p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
