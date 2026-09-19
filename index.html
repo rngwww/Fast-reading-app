@@ -347,6 +347,38 @@
       </div>
     </div>
 
+    <div id="bookLaunchModal" class="completion-modal hidden">
+      <div class="modal-card" style="text-align: left; position: relative;">
+        <button id="closeLaunchModalBtn" class="icon-btn" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: var(--text-secondary); font-size: 24px; cursor: pointer; line-height: 1;">&times;</button>
+        <h2 id="launchBookTitle" class="glow-text" style="margin-bottom: 4px; font-size: 24px;">Book Title</h2>
+        <div id="launchBookAuthor" style="color: var(--accent); font-size: 14px; margin-bottom: 20px;">Author</div>
+        
+        <div class="hud-stats" style="margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: var(--bg-primary); padding: 12px; border-radius: 12px; border: 1px solid var(--border-subtle);">
+          <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Total Words</span>
+            <span id="launchTotalWords" style="font-weight: 600; font-size: 16px; color: var(--text-primary);">0</span>
+          </div>
+          <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Progress</span>
+            <span id="launchProgressText" style="font-weight: 600; font-size: 16px; color: var(--text-primary);">0%</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <label style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+            <span>Start Position</span>
+            <span id="launchPositionLabel" style="color: var(--text-primary); font-weight: 500;">Word 0 (0%)</span>
+          </label>
+          <input type="range" id="launchPositionSlider" min="0" max="100" step="0.1" value="0">
+        </div>
+
+        <div style="display: flex; gap: 12px; flex-direction: column;">
+          <button id="launchReadBtn" class="btn primary" style="width: 100%; font-size: 16px; padding: 14px;">Load & Read</button>
+          <button id="launchResetBtn" class="btn secondary" style="width: 100%; border: none; color: var(--text-secondary);">Reset Progress</button>
+        </div>
+      </div>
+    </div>
+
   </main>
   <script type="module" src="assets/js/app.js?v=14"></script>
 </body>

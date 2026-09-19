@@ -25,6 +25,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const countdownAffirmation = document.getElementById('countdownAffirmation');
   
   const completionModal = document.getElementById('completionModal');
+  const bookLaunchModal = document.getElementById('bookLaunchModal');
+  const launchBookTitle = document.getElementById('launchBookTitle');
+  const launchBookAuthor = document.getElementById('launchBookAuthor');
+  const launchTotalWords = document.getElementById('launchTotalWords');
+  const launchProgressText = document.getElementById('launchProgressText');
+  const launchPositionLabel = document.getElementById('launchPositionLabel');
+  const launchPositionSlider = document.getElementById('launchPositionSlider');
+  const launchReadBtn = document.getElementById('launchReadBtn');
+  const launchResetBtn = document.getElementById('launchResetBtn');
+  const closeLaunchModalBtn = document.getElementById('closeLaunchModalBtn');
   const closeCompletionBtn = document.getElementById('closeCompletionBtn');
   const completionQuote = document.getElementById('completionQuote');
   
@@ -61,6 +71,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   let libraryMeta = [];
   let currentBookMeta = null;
   let currentChunkWords = [];
+  let pendingLaunchDoc = null;
+  let pendingLaunchIndex = 0;
   let currentChunkIndex = 0;
   
   let isPlaying = false;
@@ -729,9 +741,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentX = 0;
       });
       
-      el.querySelector('.lib-click-area').addEventListener('click', async () => {
-        await loadBook(doc.id);
-        document.querySelector('[data-target="tab-reader"]').click();
+      el.querySelector('.lib-click-area').addEventListener('click', () => {
+        openLaunchModal(doc);
       });
       
       el.querySelector('.edit-btn').addEventListener('click', () => {
@@ -903,6 +914,64 @@ document.addEventListener('DOMContentLoaded', async () => {
       displayWord('');
     }
   }
+
+  function openLaunchModal(doc) {
+    pendingLaunchDoc = doc;
+    pendingLaunchIndex = doc.currentIndex;
+    
+    launchBookTitle.textContent = doc.title;
+    launchBookAuthor.textContent = doc.author || 'Unknown Author';
+    launchTotalWords.textContent = doc.totalWords.toLocaleString();
+    
+    const pct = doc.totalWords > 0 ? ((doc.currentIndex / doc.totalWords) * 100).toFixed(1) : 0;
+    launchProgressText.textContent = `${pct}%`;
+    
+    launchPositionSlider.value = pct;
+    launchPositionLabel.textContent = `Word ${doc.currentIndex.toLocaleString()} (${pct}%)`;
+    
+    bookLaunchModal.classList.remove('hidden');
+  }
+  
+  function closeLaunchModal() {
+    bookLaunchModal.classList.add('hidden');
+    pendingLaunchDoc = null;
+  }
+  
+  closeLaunchModalBtn.addEventListener('click', closeLaunchModal);
+  
+  launchPositionSlider.addEventListener('input', (e) => {
+    if (!pendingLaunchDoc) return;
+    const pct = parseFloat(e.target.value);
+    let newIndex = Math.floor((pct / 100) * pendingLaunchDoc.totalWords);
+    // Boundary check
+    newIndex = Math.min(Math.max(0, newIndex), pendingLaunchDoc.totalWords - 1);
+    // If book is empty
+    if (pendingLaunchDoc.totalWords === 0) newIndex = 0;
+    
+    pendingLaunchIndex = newIndex;
+    launchPositionLabel.textContent = `Word ${pendingLaunchIndex.toLocaleString()} (${pct.toFixed(1)}%)`;
+  });
+  
+  launchResetBtn.addEventListener('click', () => {
+    if (!pendingLaunchDoc) return;
+    pendingLaunchIndex = 0;
+    launchPositionSlider.value = 0;
+    launchPositionLabel.textContent = `Word 0 (0.0%)`;
+  });
+  
+  launchReadBtn.addEventListener('click', async () => {
+    if (!pendingLaunchDoc) return;
+    
+    if (pendingLaunchIndex !== pendingLaunchDoc.currentIndex) {
+      pendingLaunchDoc.currentIndex = pendingLaunchIndex;
+      await Storage.updateBookProgress(pendingLaunchDoc.id, pendingLaunchIndex);
+    }
+    
+    const targetId = pendingLaunchDoc.id;
+    closeLaunchModal();
+    await loadBook(targetId);
+    document.querySelector('[data-target="tab-reader"]').click();
+  });
 
   async function init() {
     wpmSlider.value = state.wpm;
