@@ -190,15 +190,15 @@
 
         <!-- Appearance Settings -->
         <div class="ios-inset-group">
-          <div class="ios-list-item" style="flex-direction: column; align-items: flex-start; gap: 16px;">
+          <div class="ios-list-item" style="flex-direction: column; align-items: flex-start; gap: 24px;">
             <div style="display: flex; align-items: center; gap: 12px;">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20"></path></svg>
               <h4>Appearance</h4>
             </div>
             
-            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+            <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
               <span style="font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Theme</span>
-              <div style="display: flex; gap: 16px; overflow-x: auto; width: 100%; padding-bottom: 8px;" id="themeCapsules">
+              <div class="hide-scrollbar" style="display: flex; gap: 20px; overflow-x: auto; width: 100%; max-width: 100%; box-sizing: border-box; padding: 4px 16px 12px 16px;" id="themeCapsules">
                 <div class="theme-capsule active" data-theme="obsidian">
                   <div class="theme-swatch" style="background: #000;">
                     <div class="swatch-text" style="color: #F5F5F7;">Aa</div>
@@ -233,9 +233,9 @@
               </div>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 8px;">
+            <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; margin-top: 0;">
               <span style="font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Accent Color</span>
-              <div style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px;" id="accentSwatches">
+              <div class="hide-scrollbar" style="display: flex; gap: 24px; overflow-x: auto; width: 100%; max-width: 100%; box-sizing: border-box; padding: 12px 16px;" id="accentSwatches">
                 <div class="color-swatch active" data-color="red" style="background: var(--palette-red);"></div>
                 <div class="color-swatch" data-color="purple" style="background: var(--palette-purple);"></div>
                 <div class="color-swatch" data-color="pink" style="background: var(--palette-pink);"></div>
@@ -252,16 +252,50 @@
       </div>
     </div>
     
-    <div class="tab-content" id="tab-guide">
-      <div class="reader-card">
-        <h3 class="glow-text">How It Works</h3>
-        <p style="color: var(--text-secondary); text-align: center; margin-top: 10px; font-size: 14px; line-height: 1.5;">RSVP (Rapid Serial Visual Presentation) eliminates eye saccades and reduces subvocalization.<br>By fixing your eyes on a central focal point, your brain processes words at the speed of thought.</p>
+    <div class="tab-content" id="tab-guide" style="padding-bottom: 20vh; position: relative;">
+      <div class="scrollytelling-container">
         
-        <div class="demo-video-wrapper" style="background: transparent; box-shadow: none; display: flex; justify-content: center; padding: 40px 0;">
+        <!-- Sticky Mockup -->
+        <div class="sticky-visual">
           <div id="demoIphoneFrame" class="iphone-mockup">
             <div id="demoScenesContainer" class="demo-scenes-container">
               
-              <div class="demo-scene" id="scene1Lib">
+              <!-- Scene 1: RSVP Reader -->
+              <div class="demo-scene" id="sceneReader">
+                <div class="rsvp-display glow-text" id="demoRsvpDisplay2" style="font-size: 24px; display: grid;">
+                  <span class="word-start" id="dWordStart"></span><span class="focal-point" id="dFocalPoint">Ready</span><span class="word-end" id="dWordEnd"></span>
+                </div>
+              </div>
+
+              <!-- Scene 2: Pause HUD -->
+              <div class="demo-scene" id="scenePause">
+                <div class="rsvp-display glow-text" style="font-size: 24px; display: grid; opacity: 0.3;">
+                  <span class="word-start">the </span><span class="focal-point">speed</span><span class="word-end"> of</span>
+                </div>
+                <div id="demoPauseHud" class="hud-overlay" style="border-radius: 32px; background: rgba(8, 8, 10, 0.85);">
+                  <div class="hud-content">
+                    <h2 class="glow-text" style="font-size: 20px; letter-spacing: 2px;">PAUSED</h2>
+                    <div class="hud-stats" style="font-size: 11px;">
+                      <span>Speed: 500 WPM</span>
+                      <span>Progress: 42%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Scene 3: Themes -->
+              <div class="demo-scene" id="sceneThemes">
+                <div class="demo-header">Appearance</div>
+                <div class="demo-theme-options">
+                  <div class="theme-opt active" id="optObsidian">Obsidian</div>
+                  <div class="theme-opt" id="optVellum">Warm Vellum</div>
+                  <div class="theme-opt" id="optGraphite">Graphite</div>
+                </div>
+                <div class="demo-text-preview" id="themePreviewText">Watch the contrast adjust perfectly.</div>
+              </div>
+
+              <!-- Scene 4: Library -->
+              <div class="demo-scene" id="sceneLibrary">
                 <div class="demo-header">Library</div>
                 <div class="demo-list">
                   <div class="demo-list-item" id="demoBook1">
@@ -272,63 +306,49 @@
                     <div class="demo-delete-btn">Delete</div>
                   </div>
                 </div>
-                <div class="demo-bottom-sheet" id="demoResumeSheet">
+                <div class="demo-bottom-sheet open" id="demoResumeSheet">
                   <div class="sheet-btn">Resume from 68%</div>
                   <div class="sheet-btn">Reset to Beginning</div>
                 </div>
-                <div class="demo-cursor" id="demoCursor1"></div>
-                <div class="demo-callout" id="callout1">Fluid Gestures.</div>
               </div>
 
-              <div class="demo-scene" id="scene2Themes">
-                <div class="demo-header">Appearance</div>
-                <div class="demo-theme-options">
-                  <div class="theme-opt" id="optObsidian">Obsidian</div>
-                  <div class="theme-opt" id="optVellum">Warm Vellum</div>
-                  <div class="theme-opt" id="optGraphite">Graphite</div>
-                </div>
-                <div class="demo-text-preview" id="themePreviewText">Watch the contrast adjust perfectly.</div>
-                <div class="demo-cursor" id="demoCursor2"></div>
-                <div class="demo-callout" id="callout2">Pixel-Perfect Themes.</div>
-              </div>
-
-              <div class="demo-scene" id="scene3Reader">
-                <div id="demoCountdown" class="demo-countdown-ring">
-                  <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45"></circle><circle id="dRingProg" class="d-ring-prog" cx="50" cy="50" r="45"></circle></svg>
-                  <span id="demoCountText">3</span>
-                </div>
-                <div class="rsvp-display glow-text" id="demoRsvpDisplay2" style="font-size: 24px; display: grid;">
-                  <span class="word-start" id="dWordStart"></span><span class="focal-point" id="dFocalPoint">Ready</span><span class="word-end" id="dWordEnd"></span>
-                </div>
-                <div id="demoPauseGlyph" class="demo-pause-glyph">||</div>
-                <div class="demo-cursor" id="demoCursor3"></div>
-                <div class="demo-callout" id="callout3">Intelligent Context Retention.</div>
-              </div>
-
-              <div class="demo-scene" id="scene4Scratch">
-                <div id="demoQuote" class="demo-placeholder-quote">"Read at the speed of thought."</div>
-                <div id="demoPastedText" class="demo-pasted-text">Information processing is no longer limited by eye movement.</div>
-                <div class="demo-cursor" id="demoCursor4"></div>
-                <div class="demo-callout" id="callout4">Frictionless Capture.</div>
-              </div>
-
-              <div class="demo-scene" id="scene5Outro">
-                <div class="demo-outro-logo glow-text">TACHYON</div>
-                <div class="demo-outro-tagline">Read at the speed of thought.</div>
-                <div class="demo-outro-badge">App Store</div>
-              </div>
-
-              <div id="demoOverlay" class="play-demo-overlay">
-                <div class="play-btn-circle">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="var(--text-primary)" style="margin-left: 4px;">
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                  </svg>
-                </div>
-                <div style="font-size: 14px; font-weight: 700; color: white; letter-spacing: 2px;">PLAY DEMO</div>
-              </div>
             </div>
           </div>
         </div>
+
+        <!-- Scroll Track -->
+        <div class="scroll-track" id="guideScrollTrack">
+          
+          <section class="scroll-step" data-scene="sceneReader" id="step1-rsvp">
+            <div class="step-card">
+              <h3 class="glow-text">How It Works</h3>
+              <p>RSVP (Rapid Serial Visual Presentation) eliminates eye saccades and reduces subvocalization. By fixing your eyes on a central focal point, your brain processes words at the speed of thought.</p>
+            </div>
+          </section>
+
+          <section class="scroll-step" data-scene="scenePause" id="step2-pause">
+            <div class="step-card">
+              <h3 class="glow-text">Context Retention</h3>
+              <p>Pause instantly to digest complex information. The HUD gives you immediate feedback on your reading progress.</p>
+            </div>
+          </section>
+
+          <section class="scroll-step" data-scene="sceneThemes" id="step3-themes">
+            <div class="step-card">
+              <h3 class="glow-text">Pixel-Perfect Themes</h3>
+              <p>Beautiful contrast designed for any lighting environment. Watch the interface adapt perfectly to your preferences.</p>
+            </div>
+          </section>
+
+          <section class="scroll-step" data-scene="sceneLibrary" id="step4-library">
+            <div class="step-card">
+              <h3 class="glow-text">Fluid Management</h3>
+              <p>Your library is just a swipe away. Manage your reading list effortlessly with intuitive gestures.</p>
+            </div>
+          </section>
+          
+        </div>
+
       </div>
     </div>
 
@@ -354,7 +374,7 @@
         <textarea id="editBookContent" style="height: 150px; padding: 12px; font-size: 14px;" placeholder="Paste text here..."></textarea>
         
         <label style="display: block; margin-top: 16px; font-size: 12px; color: var(--text-secondary);">Label Color:</label>
-        <div style="display: flex; gap: 8px; margin-top: 8px; margin-bottom: 24px;" id="colorPickerContainer">
+        <div class="hide-scrollbar" style="display: flex; gap: 24px; margin-top: 0; margin-bottom: 12px; padding: 12px 16px; overflow-x: auto; width: 100%; max-width: 100%; box-sizing: border-box;" id="colorPickerContainer">
           <div class="color-swatch active" data-color="red" style="background: var(--palette-red);"></div>
           <div class="color-swatch" data-color="purple" style="background: var(--palette-purple);"></div>
           <div class="color-swatch" data-color="pink" style="background: var(--palette-pink);"></div>
