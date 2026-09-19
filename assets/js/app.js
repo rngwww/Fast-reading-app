@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Modals & HUDs
   const readerCard = document.getElementById('readerCard');
   const pauseHud = document.getElementById('pauseHud');
+  const pauseAnimIcon = document.getElementById('pauseAnimIcon');
   const jumpBackBtn = document.getElementById('jumpBackBtn');
   const resumeBtn = document.getElementById('resumeBtn');
   const countdownHud = document.getElementById('countdownHud');
@@ -342,14 +343,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     if (currentBookMeta) {
+      currentBookMeta.currentIndex = Math.max(0, currentBookMeta.currentIndex - 5);
+      const targetChunkIndex = Math.floor(currentBookMeta.currentIndex / 1000);
+      
+      if (targetChunkIndex !== currentChunkIndex) {
+        currentChunkIndex = targetChunkIndex;
+        currentChunkWords = await Storage.getBookChunk(currentBookMeta.id, targetChunkIndex);
+      }
+      
+      const indexInChunk = currentBookMeta.currentIndex % 1000;
+      displayWord(currentChunkWords[indexInChunk] || '');
+      updateProgress();
+
       await Storage.updateBookProgress(currentBookMeta.id, currentBookMeta.currentIndex);
       await renderLibrary(); // refresh UI just in case
     }
   }
 
+  function triggerPauseAnimation() {
+    if (pauseAnimIcon) {
+      pauseAnimIcon.classList.remove('animate');
+      void pauseAnimIcon.offsetWidth; // Force reflow
+      pauseAnimIcon.classList.add('animate');
+    }
+  }
+
+  document.addEventListener('keydown', async (e) => {
+    const activeEl = document.activeElement;
+    const isTextInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+    if (e.code === 'Space' && !isTextInput) {
+      e.preventDefault();
+      if (isPlaying) {
+        triggerPauseAnimation();
+        await stop();
+        renderHUD();
+        pauseHud.classList.remove('hidden');
+      } else if (!pauseHud.classList.contains('hidden')) {
+        pauseHud.classList.add('hidden');
+        startCountdown();
+      } else if (currentBookMeta && currentBookMeta.currentIndex > 0 && currentBookMeta.currentIndex < currentBookMeta.totalWords) {
+        startCountdown();
+      } else {
+        play();
+      }
+    }
+  });
+
   readerCard.addEventListener('click', async (e) => {
     if (e.target.closest('.hud-controls')) return;
     if (isPlaying) {
+      triggerPauseAnimation();
       await stop();
       renderHUD();
       pauseHud.classList.remove('hidden');
@@ -420,10 +463,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 1000);
   }
 
-  playPauseBtn.addEventListener('click', () => {
-    if (isPlaying) stop();
-    else if (currentBookMeta && currentBookMeta.currentIndex > 0 && currentBookMeta.currentIndex < currentBookMeta.totalWords) startCountdown();
-    else play();
+  playPauseBtn.addEventListener('click', async () => {
+    if (isPlaying) {
+      triggerPauseAnimation();
+      await stop();
+      renderHUD();
+      pauseHud.classList.remove('hidden');
+    } else if (!pauseHud.classList.contains('hidden')) {
+      pauseHud.classList.add('hidden');
+      startCountdown();
+    } else if (currentBookMeta && currentBookMeta.currentIndex > 0 && currentBookMeta.currentIndex < currentBookMeta.totalWords) {
+      startCountdown();
+    } else {
+      play();
+    }
   });
 
   resetBtn.addEventListener('click', async () => {
