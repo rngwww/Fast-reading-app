@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function applyTheme() {
     const root = document.documentElement;
-    root.style.setProperty('--accent-color', `var(--palette-${state.colorPalette})`);
+    root.style.setProperty('--accent', `var(--palette-${state.colorPalette})`);
     if (state.appTheme) {
       document.body.setAttribute('data-theme', state.appTheme);
     } else {
@@ -530,7 +530,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderLibrary();
     const originalText = tierStatusText.textContent;
     tierStatusText.textContent = state.isPro ? "Simulating Prime" : "Simulating Free";
-    tierStatusText.style.color = "var(--accent-color)";
+    tierStatusText.style.color = "var(--accent)";
     setTimeout(() => {
       tierStatusText.textContent = originalText;
       tierStatusText.style.color = "var(--text-secondary)";
