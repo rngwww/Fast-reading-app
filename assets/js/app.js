@@ -282,11 +282,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let count = 3;
     countdownText.textContent = count;
     ringProgress.classList.remove('ring-animating');
-    ringProgress.style.strokeDashoffset = '';
+    ringProgress.style.strokeDashoffset = '283';
     countdownAffirmation.textContent = getRandomQuote(Quotes.countdown);
     
-    void ringProgress.offsetWidth; // Force reflow
-    ringProgress.classList.add('ring-animating');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        ringProgress.style.strokeDashoffset = '';
+        ringProgress.classList.add('ring-animating');
+      });
+    });
 
     function tickCountdown() {
       if (count > 0) {
