@@ -1,9 +1,9 @@
 import { Storage } from './storage.js';
 import { AudioSystem } from './audio.js';
 import { RSVP } from './rsvp.js';
-import { Quotes } from './data.js';
+import { Quotes, PreloadedLibrary } from './data.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const textInput = document.getElementById('textInput');
   const playPauseBtn = document.getElementById('playPauseBtn');
   const resetBtn = document.getElementById('resetBtn');
@@ -42,8 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Settings & Library & Premium
   const tierToggleBtn = document.getElementById('tierToggleBtn');
   const tierStatusText = document.getElementById('tierStatusText');
-  const audioProfileSelect = document.getElementById('audioProfileSelect');
-  const colorPaletteSelect = document.getElementById('colorPaletteSelect');
+  const audioProfileSegments = document.querySelectorAll('#audioProfileSegments .segment');
+  const themeCapsules = document.querySelectorAll('.theme-capsule');
+  const accentSwatches = document.querySelectorAll('#accentSwatches .color-swatch');
+  const volSliderSettings = document.getElementById('volSliderSettings');
   const libraryList = document.getElementById('libraryList');
   const addDocBtn = document.getElementById('addDocBtn');
   const upgradeBtn = document.getElementById('upgradeBtn');
@@ -54,38 +56,56 @@ document.addEventListener('DOMContentLoaded', () => {
   const navIndicator = document.getElementById('navIndicator');
 
   // State
-  let state = Storage.load();
-  let words = [];
+  let state = {};
+  let libraryMeta = [];
+  let currentBookMeta = null;
+  let currentChunkWords = [];
+  let currentChunkIndex = 0;
+  
   let isPlaying = false;
   let timerId = null;
   let editingBookId = null;
   let selectedColor = 'red';
+  let isRamping = false;
+  let rampStartTime = 0;
+  let countdownIntervalId = null;
   
   const defaultText = "Think in paragraphs, absorb in words, unlock in seconds.";
+
+  // Init DB and Settings
+  await Storage.initDB();
+  state = await Storage.loadSettings();
 
   // Utilities
   function getRandomQuote(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
+  const quoteOverlay = document.getElementById('quoteOverlay');
+
   // Quote Engine
   let emptyQuoteInterval;
+  function rotateQuote() {
+    if(textInput.value.trim() === '' && state.activeDocId === 'scratchpad') {
+      quoteOverlay.style.opacity = '0';
+      quoteOverlay.style.transform = 'translateY(10px)';
+      
+      setTimeout(() => {
+        quoteOverlay.textContent = getRandomQuote(Quotes.emptyState);
+        quoteOverlay.style.opacity = '0.8';
+        quoteOverlay.style.transform = 'translateY(0px)';
+      }, 500);
+    } else {
+      quoteOverlay.style.opacity = '0';
+    }
+  }
+
   function startEmptyQuoteRotate() {
-    emptyQuoteInterval = setInterval(() => {
-      if(textInput.value.trim() === '') {
-        textInput.placeholder = getRandomQuote(Quotes.emptyState);
-      }
-    }, 6000);
+    rotateQuote(); // Initial call
+    emptyQuoteInterval = setInterval(rotateQuote, 6000);
   }
   startEmptyQuoteRotate();
 
-  // Initialize placeholder
-  if (!textInput.value.trim()) {
-    textInput.placeholder = getRandomQuote(Quotes.emptyState);
-  }
-
-
-  // Enforce Tier Visuals
   function enforceTierLimits() {
     wpmValue.textContent = wpmSlider.value;
     tierStatusText.textContent = state.isPro ? 'Current: Tachyon Prime' : 'Current: Free Starter';
@@ -116,11 +136,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function applyTheme() {
     const root = document.documentElement;
     root.style.setProperty('--accent-color', `var(--palette-${state.colorPalette})`);
-  }
-
-  function showPaywall() {
-    const targetTabBtn = document.querySelector('[data-target="tab-premium"]');
-    if (targetTabBtn) targetTabBtn.click();
+    if (state.appTheme) {
+      document.body.setAttribute('data-theme', state.appTheme);
+    } else {
+      document.body.setAttribute('data-theme', 'oled');
+    }
   }
 
   if (upgradeBtn) {
@@ -131,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         AudioSystem.playSuccessChime();
         state.isPro = true;
-        Storage.save(state);
+        Storage.saveSettings(state);
         enforceTierLimits();
         renderLibrary();
         upgradeBtn.textContent = originalText;
@@ -141,12 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 1200);
     });
   }
-  
+
   function showCompletion() {
-    const wordsRead = words.length;
+    const wordsRead = currentBookMeta ? currentBookMeta.totalWords : 0;
     const avgWpm = parseInt(wpmSlider.value, 10);
     
-    // Average reading baseline is ~250 WPM
     const baselineSeconds = (wordsRead / 250) * 60;
     const tachyonSeconds = (wordsRead / avgWpm) * 60;
     const savedSeconds = Math.max(0, baselineSeconds - tachyonSeconds);
@@ -168,20 +187,18 @@ document.addEventListener('DOMContentLoaded', () => {
     
     completionModal.classList.remove('hidden');
   }
-  
+
   closeCompletionBtn.addEventListener('click', () => {
     completionModal.classList.add('hidden');
     resetBtn.click();
   });
 
-  // Audio Init
   function initAudioOnTouch() {
     AudioSystem.init();
   }
   document.body.addEventListener('touchstart', initAudioOnTouch, { once: true, passive: true });
   document.body.addEventListener('click', initAudioOnTouch, { once: true });
 
-  // RSVP Core
   function displayWord(word) {
     if (!word) {
       wordStartEl.textContent = '';
@@ -196,38 +213,93 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateProgress() {
-    if (words.length === 0) {
+    if (!currentBookMeta || currentBookMeta.totalWords === 0) {
       progressBar.style.width = '0%';
       return;
     }
-    const progress = (state.currentIndex / words.length) * 100;
+    const progress = (currentBookMeta.currentIndex / currentBookMeta.totalWords) * 100;
     progressBar.style.width = `${progress}%`;
   }
 
-  function tick() {
-    if (state.currentIndex < words.length) {
-      const currentWord = words[state.currentIndex];
-      displayWord(currentWord);
-      const wpm = parseInt(wpmSlider.value, 10);
-      AudioSystem.playTick(wpm);
-      
-      state.currentIndex++;
-      updateProgress();
-      
-      const delay = RSVP.calculateDelay(currentWord, wpm);
-      timerId = setTimeout(tick, delay);
-    } else {
-      stop();
-      showCompletion();
-    }
+  function renderHUD() {
+    if (!currentBookMeta) return;
+    document.getElementById('hudWordPos').textContent = currentBookMeta.currentIndex;
+    document.getElementById('hudWordTotal').textContent = currentBookMeta.totalWords;
+    document.getElementById('hudWpm').textContent = state.wpm;
+    document.getElementById('hudProgress').textContent = currentBookMeta.totalWords ? Math.floor((currentBookMeta.currentIndex / currentBookMeta.totalWords) * 100) : 0;
   }
 
-  function play() {
-    if (words.length === 0 || state.currentIndex >= words.length) {
-      words = RSVP.parseText(state.text, defaultText);
-      state.currentIndex = 0;
+  async function tick() {
+    if (!isPlaying) return;
+    if (!currentBookMeta) {
+      await stop();
+      return;
     }
-    if (words.length === 0) return;
+    
+    if (currentBookMeta.currentIndex >= currentBookMeta.totalWords) {
+      await stop();
+      showCompletion();
+      return;
+    }
+
+    const chunkSize = 1000;
+    const targetChunkIndex = Math.floor(currentBookMeta.currentIndex / chunkSize);
+    const indexInChunk = currentBookMeta.currentIndex % chunkSize;
+
+    if (targetChunkIndex !== currentChunkIndex || currentChunkWords.length === 0) {
+      currentChunkIndex = targetChunkIndex;
+      currentChunkWords = await Storage.getBookChunk(currentBookMeta.id, targetChunkIndex);
+    }
+
+    const currentWord = currentChunkWords[indexInChunk];
+    if (!currentWord) {
+      await stop();
+      return;
+    }
+
+    displayWord(currentWord);
+    
+    // Ramp logic
+    let targetWpm = parseInt(wpmSlider.value, 10);
+    let currentWpm = targetWpm;
+    if (isRamping) {
+      const elapsed = Date.now() - rampStartTime;
+      const rampDuration = 2000;
+      if (elapsed < rampDuration) {
+        const startWpm = targetWpm * 0.6;
+        currentWpm = startWpm + ((targetWpm - startWpm) * (elapsed / rampDuration));
+      } else {
+        isRamping = false;
+      }
+    }
+    
+    AudioSystem.playTick(currentWpm);
+    
+    currentBookMeta.currentIndex++;
+    updateProgress();
+    
+    const delay = RSVP.calculateDelay(currentWord, currentWpm);
+    timerId = setTimeout(tick, delay);
+  }
+
+  async function play(isResume = false) {
+    if (!currentBookMeta) return;
+    
+    if (currentBookMeta.currentIndex >= currentBookMeta.totalWords) {
+      currentBookMeta.currentIndex = 0;
+      currentChunkIndex = 0;
+      currentChunkWords = await Storage.getBookChunk(currentBookMeta.id, 0);
+      updateProgress();
+      await Storage.updateBookProgress(currentBookMeta.id, 0);
+      isResume = false;
+    }
+    
+    if (isResume) {
+      isRamping = true;
+      rampStartTime = Date.now();
+    } else {
+      isRamping = false;
+    }
     
     isPlaying = true;
     playPauseBtn.textContent = 'Pause';
@@ -236,36 +308,52 @@ document.addEventListener('DOMContentLoaded', () => {
     tick();
   }
 
-  function stop() {
+  async function stop() {
     isPlaying = false;
     playPauseBtn.textContent = 'Play';
     playPauseBtn.classList.add('primary');
     playPauseBtn.classList.remove('secondary');
     clearTimeout(timerId);
-    Storage.save(state);
+    
+    if (isCountingDown) {
+      clearInterval(countdownIntervalId);
+      countdownIntervalId = null;
+      isCountingDown = false;
+      countdownHud.classList.add('hidden');
+    }
+    
+    if (currentBookMeta) {
+      await Storage.updateBookProgress(currentBookMeta.id, currentBookMeta.currentIndex);
+      await renderLibrary(); // refresh UI just in case
+    }
   }
 
-  // HUD Logic
-  readerCard.addEventListener('click', (e) => {
+  readerCard.addEventListener('click', async (e) => {
     if (e.target.closest('.hud-controls')) return;
     if (isPlaying) {
-      stop();
-      document.getElementById('hudWordPos').textContent = state.currentIndex;
-      document.getElementById('hudWordTotal').textContent = words.length;
-      document.getElementById('hudWpm').textContent = state.wpm;
-      document.getElementById('hudProgress').textContent = words.length ? Math.floor((state.currentIndex / words.length) * 100) : 0;
+      await stop();
+      renderHUD();
       pauseHud.classList.remove('hidden');
     }
   });
 
-  jumpBackBtn.addEventListener('click', (e) => {
+  jumpBackBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
-    state.currentIndex = Math.max(0, state.currentIndex - 5);
-    document.getElementById('hudWordPos').textContent = state.currentIndex;
-    document.getElementById('hudProgress').textContent = words.length ? Math.floor((state.currentIndex / words.length) * 100) : 0;
-    displayWord(words[state.currentIndex]);
+    if (!currentBookMeta) return;
+    
+    currentBookMeta.currentIndex = Math.max(0, currentBookMeta.currentIndex - 5);
+    const targetChunkIndex = Math.floor(currentBookMeta.currentIndex / 1000);
+    
+    if (targetChunkIndex !== currentChunkIndex) {
+      currentChunkIndex = targetChunkIndex;
+      currentChunkWords = await Storage.getBookChunk(currentBookMeta.id, targetChunkIndex);
+    }
+    
+    renderHUD();
+    const indexInChunk = currentBookMeta.currentIndex % 1000;
+    displayWord(currentChunkWords[indexInChunk] || '');
     updateProgress();
-    Storage.save(state);
+    await Storage.updateBookProgress(currentBookMeta.id, currentBookMeta.currentIndex);
   });
 
   resumeBtn.addEventListener('click', (e) => {
@@ -279,60 +367,66 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isCountingDown) return;
     isCountingDown = true;
     countdownHud.classList.remove('hidden');
-    let count = 3;
-    countdownText.textContent = count;
-    ringProgress.classList.remove('ring-animating');
+    
+    ringProgress.style.transition = 'none';
+    ringProgress.style.strokeDasharray = '283';
     ringProgress.style.strokeDashoffset = '283';
+    
+    // Force reflow to guarantee the transition starts from 283
+    void ringProgress.offsetWidth;
+    
+    ringProgress.style.transition = 'stroke-dashoffset 3s linear';
+    ringProgress.style.strokeDashoffset = '0';
+    
     countdownAffirmation.textContent = getRandomQuote(Quotes.countdown);
     
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        ringProgress.style.strokeDashoffset = '';
-        ringProgress.classList.add('ring-animating');
-      });
-    });
+    let count = 3;
+    countdownText.textContent = count;
+    AudioSystem.playCountdownBeep(false);
 
-    function tickCountdown() {
+    countdownIntervalId = setInterval(() => {
+      count--;
       if (count > 0) {
         countdownText.textContent = count;
         AudioSystem.playCountdownBeep(false);
-        count--;
-        setTimeout(tickCountdown, 1000);
       } else {
+        clearInterval(countdownIntervalId);
+        countdownIntervalId = null;
         countdownText.textContent = "";
         AudioSystem.playCountdownBeep(true);
-        setTimeout(() => {
-          countdownHud.classList.add('hidden');
-          isCountingDown = false;
-          play();
-        }, 800);
+        countdownHud.classList.add('hidden');
+        isCountingDown = false;
+        play(true); // Launch RSVP stream seamlessly with ramp
       }
-    }
-    tickCountdown();
+    }, 1000);
   }
 
   playPauseBtn.addEventListener('click', () => {
     if (isPlaying) stop();
-    else if (state.currentIndex > 0 && state.currentIndex < words.length) startCountdown();
+    else if (currentBookMeta && currentBookMeta.currentIndex > 0 && currentBookMeta.currentIndex < currentBookMeta.totalWords) startCountdown();
     else play();
   });
 
-  resetBtn.addEventListener('click', () => {
-    stop();
-    state.currentIndex = 0;
-    words = RSVP.parseText(state.text, defaultText);
-    updateProgress();
-    if(words.length > 0) displayWord(words[0]);
-    Storage.save(state);
+  resetBtn.addEventListener('click', async () => {
+    await stop();
+    if (currentBookMeta) {
+      currentBookMeta.currentIndex = 0;
+      currentChunkIndex = 0;
+      currentChunkWords = await Storage.getBookChunk(currentBookMeta.id, 0);
+      updateProgress();
+      renderHUD();
+      displayWord(currentChunkWords[0] || '');
+      await Storage.updateBookProgress(currentBookMeta.id, 0);
+    }
   });
 
-  textInput.addEventListener('input', () => {
-    if (isPlaying) stop();
+  textInput.addEventListener('input', async () => {
+    if (isPlaying) await stop();
+    quoteOverlay.style.opacity = '0';
     
     let rawText = textInput.value;
     let newWords = RSVP.parseText(rawText, defaultText);
     
-    // Tier Lock: 500 word limit on paste
     if (!state.isPro && newWords.length > 500) {
       newWords = newWords.slice(0, 500);
       rawText = newWords.join(' ') + '... (Free Tier Limit Reached)';
@@ -340,24 +434,14 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('With free you can only have 500 words max');
     }
     
-    state.text = rawText;
-    state.currentIndex = 0;
-    words = newWords;
-    updateProgress();
-    
-    if(words.length > 0) {
-      displayWord(words[0]);
-    } else {
-      displayWord('');
-      textInput.placeholder = getRandomQuote(Quotes.emptyState);
-    }
-    Storage.save(state);
+    await Storage.saveBook('scratchpad', 'Scratchpad', 'User', newWords, 'red');
+    await loadBook('scratchpad');
   });
 
   wpmSlider.addEventListener('input', (e) => {
     state.wpm = e.target.value;
     enforceTierLimits();
-    Storage.save(state);
+    Storage.saveSettings(state);
   });
 
   function updateMuteIcon() {
@@ -373,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.isMuted = AudioSystem.isMuted;
     updateMuteIcon();
     if (!AudioSystem.isUnlocked) AudioSystem.init();
-    Storage.save(state);
+    Storage.saveSettings(state);
   });
 
   volSlider.addEventListener('input', (e) => {
@@ -390,15 +474,14 @@ document.addEventListener('DOMContentLoaded', () => {
       updateMuteIcon();
     }
     if (!AudioSystem.isUnlocked) AudioSystem.init();
-    Storage.save(state);
+    Storage.saveSettings(state);
   });
 
   tierToggleBtn.addEventListener('click', () => {
     state.isPro = !state.isPro;
-    Storage.save(state);
+    Storage.saveSettings(state);
     enforceTierLimits();
     renderLibrary();
-    // Simulate toast
     const originalText = tierStatusText.textContent;
     tierStatusText.textContent = state.isPro ? "Simulating Prime" : "Simulating Free";
     tierStatusText.style.color = "var(--accent-color)";
@@ -408,42 +491,147 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1500);
   });
 
-  audioProfileSelect.addEventListener('change', (e) => {
-    state.soundProfile = e.target.value;
-    AudioSystem.profile = state.soundProfile;
-    Storage.save(state);
+  audioProfileSegments.forEach(segment => {
+    segment.addEventListener('click', () => {
+      audioProfileSegments.forEach(s => s.classList.remove('active'));
+      segment.classList.add('active');
+      state.soundProfile = segment.dataset.val;
+      AudioSystem.profile = state.soundProfile;
+      Storage.saveSettings(state);
+    });
   });
 
-  colorPaletteSelect.addEventListener('change', (e) => {
-    state.colorPalette = e.target.value;
-    applyTheme();
-    Storage.save(state);
+  themeCapsules.forEach(capsule => {
+    capsule.addEventListener('click', () => {
+      themeCapsules.forEach(c => c.classList.remove('active'));
+      capsule.classList.add('active');
+      state.appTheme = capsule.dataset.theme;
+      applyTheme();
+      Storage.saveSettings(state);
+    });
   });
 
-  // Library Book Logic
-  function renderLibrary() {
+  accentSwatches.forEach(swatch => {
+    swatch.addEventListener('click', () => {
+      accentSwatches.forEach(s => s.classList.remove('active'));
+      swatch.classList.add('active');
+      state.colorPalette = swatch.dataset.color;
+      applyTheme();
+      Storage.saveSettings(state);
+    });
+  });
+  
+  if (volSliderSettings) {
+    volSliderSettings.addEventListener('input', (e) => {
+      volSlider.value = e.target.value; // Sync the main slider
+      volSlider.dispatchEvent(new Event('input'));
+    });
+  }
+
+  async function renderLibrary() {
+    libraryMeta = await Storage.getLibraryMeta();
     libraryList.innerHTML = '';
     
-    if (state.library.length === 0) {
+    const displayDocs = libraryMeta.filter(m => m.id !== 'scratchpad');
+    
+    if (displayDocs.length === 0) {
       libraryList.innerHTML = '<div style="color: var(--text-secondary); font-size: 14px; text-align: center; padding: 20px;">Your library is empty.</div>';
     }
     
-    state.library.forEach((doc) => {
+    const wpm = parseInt(state.wpm, 10) || 350;
+
+    displayDocs.forEach((doc) => {
       const el = document.createElement('div');
-      el.className = 'lib-item';
-      el.style.borderLeft = `4px solid var(--palette-${doc.color || 'red'})`;
+      el.className = 'lib-item-container';
+      el.style.position = 'relative';
+      el.style.borderRadius = '12px';
+      el.style.marginBottom = '12px';
+      
+      const percent = doc.totalWords > 0 ? Math.floor((doc.currentIndex / doc.totalWords) * 100) : 0;
+      const remainingWords = Math.max(0, doc.totalWords - doc.currentIndex);
+      const remainingMins = Math.ceil(remainingWords / wpm);
+      const remainingText = percent === 100 ? 'Completed' : `${remainingMins} min left (${percent}%)`;
+      
       el.innerHTML = `
-        <div style="flex: 1; padding-right: 12px; overflow: hidden; cursor: pointer;" class="lib-click-area">
-          <h4 class="glow-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">${doc.title}</h4>
-          <span style="font-size: 12px; color: var(--text-secondary);">${doc.content.split(' ').length} words</span>
+        <div class="swipe-actions" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background-color: #FF3B30; border-radius: 12px; display: flex; justify-content: flex-end; align-items: center; padding-right: 20px; color: white; z-index: 1;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         </div>
-        <button class="btn secondary edit-btn" style="padding: 6px 12px; font-size: 12px; flex-shrink: 0; background: rgba(255,255,255,0.05); margin-right: 8px;">Edit</button>
+        <div class="lib-item swipe-content" style="position: relative; z-index: 2; background: #08080A; border-left: 4px solid var(--palette-${doc.color || 'red'}); border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; touch-action: pan-y;">
+          <div style="display: flex; align-items: center; width: 100%;">
+            <div style="flex: 1; padding-right: 12px; overflow: hidden; cursor: pointer;" class="lib-click-area">
+              <h4 class="glow-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;">${doc.title}</h4>
+              <div style="font-size: 12px; color: var(--text-secondary); display: flex; justify-content: space-between;">
+                <span>${doc.author} • ${doc.totalWords} words</span>
+                <span>${remainingText}</span>
+              </div>
+            </div>
+            <button class="btn secondary edit-btn" style="padding: 6px 12px; font-size: 12px; flex-shrink: 0; background: rgba(255,255,255,0.05); margin-left: 8px;">Edit</button>
+          </div>
+          <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-top: 4px;">
+            <div style="height: 100%; width: ${percent}%; background: var(--palette-${doc.color || 'red'});"></div>
+          </div>
+        </div>
       `;
       
-      el.querySelector('.lib-click-area').addEventListener('click', () => {
-        state.text = doc.content;
-        textInput.value = state.text;
-        textInput.dispatchEvent(new Event('input'));
+      const swipeContent = el.querySelector('.swipe-content');
+      let startX = 0;
+      let currentX = 0;
+      let isDragging = false;
+      let hasVibrated = false;
+      
+      swipeContent.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        isDragging = true;
+        swipeContent.style.transition = 'none';
+      }, { passive: true });
+      
+      swipeContent.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        currentX = e.touches[0].clientX - startX;
+        if (currentX > 0) currentX = 0; // only swipe left
+        swipeContent.style.transform = `translateX(${currentX}px)`;
+        
+        const threshold = -window.innerWidth * 0.75;
+        if (currentX < threshold && !hasVibrated) {
+          if (navigator.vibrate) navigator.vibrate(50);
+          hasVibrated = true;
+        } else if (currentX >= threshold) {
+          hasVibrated = false;
+        }
+      }, { passive: true });
+      
+      swipeContent.addEventListener('touchend', async (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        const threshold = -window.innerWidth * 0.75;
+        
+        if (currentX < threshold) {
+          swipeContent.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+          swipeContent.style.transform = `translateX(-100vw)`;
+          
+          el.style.transition = 'all 0.3s ease';
+          el.style.height = el.offsetHeight + 'px';
+          el.style.overflow = 'hidden';
+          
+          requestAnimationFrame(() => {
+            el.style.height = '0px';
+            el.style.margin = '0px';
+            el.style.opacity = '0';
+          });
+          
+          setTimeout(async () => {
+            await Storage.deleteBook(doc.id);
+            renderLibrary();
+          }, 300);
+        } else {
+          swipeContent.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+          swipeContent.style.transform = `translateX(0px)`;
+        }
+        currentX = 0;
+      });
+      
+      el.querySelector('.lib-click-area').addEventListener('click', async () => {
+        await loadBook(doc.id);
         document.querySelector('[data-target="tab-reader"]').click();
       });
       
@@ -456,14 +644,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   addDocBtn.addEventListener('click', () => {
-    if (!state.isPro && state.library.length >= 1) {
+    const displayDocs = libraryMeta.filter(m => m.id !== 'scratchpad');
+    if (!state.isPro && displayDocs.length >= 1) {
       alert('With free you can only have 1 book in your library');
       return;
     }
-    openEditModal(null); // null means new book
+    openEditModal(null);
   });
 
-  // Edit Book Modal Logic
   colorSwatches.forEach(swatch => {
     swatch.addEventListener('click', () => {
       colorSwatches.forEach(s => s.classList.remove('active'));
@@ -472,12 +660,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  function openEditModal(id) {
+  async function openEditModal(id) {
     if (id) {
       editingBookId = id;
-      const book = state.library.find(b => b.id === id);
+      const book = libraryMeta.find(b => b.id === id);
       editBookTitle.value = book.title;
-      editBookContent.value = book.content;
+      
+      // Fetch full text for editing
+      let fullText = [];
+      const totalChunks = Math.ceil(book.totalWords / 1000);
+      for(let i=0; i<totalChunks; i++) {
+         const chunk = await Storage.getBookChunk(id, i);
+         fullText.push(chunk.join(' '));
+      }
+      editBookContent.value = fullText.join(' ');
       selectedColor = book.color || 'red';
     } else {
       editingBookId = null;
@@ -497,36 +693,25 @@ document.addEventListener('DOMContentLoaded', () => {
     editBookModal.classList.add('hidden');
   });
 
-  saveBookBtn.addEventListener('click', () => {
+  saveBookBtn.addEventListener('click', async () => {
     let rawText = editBookContent.value;
-    let wordCount = RSVP.parseText(rawText, "").length;
+    let newWords = RSVP.parseText(rawText, "");
     
-    // Tier Lock: 500 word limit on library save
-    if (!state.isPro && wordCount > 500) {
+    if (!state.isPro && newWords.length > 500) {
       alert('With free you can only have 500 words max');
-      rawText = RSVP.parseText(rawText, "").slice(0, 500).join(' ') + '... (Free Tier Limit Reached)';
-      editBookContent.value = rawText; // update in modal so they see it
+      newWords = newWords.slice(0, 500);
+      rawText = newWords.join(' ') + '... (Free Tier Limit Reached)';
+      editBookContent.value = rawText;
       return;
     }
 
     if (editingBookId) {
-      const book = state.library.find(b => b.id === editingBookId);
-      if (book) {
-        book.title = editBookTitle.value;
-        book.content = rawText;
-        book.color = selectedColor;
-      }
+      await Storage.saveBook(editingBookId, editBookTitle.value, 'User', newWords, selectedColor);
     } else {
-      state.library.push({
-        id: 'book_' + Date.now(),
-        title: editBookTitle.value || 'Untitled',
-        content: rawText,
-        color: selectedColor
-      });
+      await Storage.saveBook('book_' + Date.now(), editBookTitle.value || 'Untitled', 'User', newWords, selectedColor);
     }
     
-    Storage.save(state);
-    renderLibrary();
+    await renderLibrary();
     editBookModal.classList.add('hidden');
   });
 
@@ -545,8 +730,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   navTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
+    tab.addEventListener('click', async () => {
       if (tab.classList.contains('active')) return;
+      
+      if (isPlaying) await stop();
+      else if (currentBookMeta) {
+        await Storage.updateBookProgress(currentBookMeta.id, currentBookMeta.currentIndex);
+        await renderLibrary();
+      }
+
       if (!AudioSystem.isUnlocked) AudioSystem.init();
       AudioSystem.playUiTick();
       
@@ -561,29 +753,106 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Initialization Boot
-  function init() {
-    textInput.value = state.text;
+  async function loadBook(bookId) {
+    state.activeDocId = bookId;
+    await Storage.saveSettings(state);
+    
+    currentBookMeta = await Storage.getBookMeta(bookId);
+    if (!currentBookMeta) return;
+
+    currentChunkIndex = Math.floor(currentBookMeta.currentIndex / 1000);
+    currentChunkWords = await Storage.getBookChunk(bookId, currentChunkIndex);
+    
+    if (bookId !== 'scratchpad') {
+      textInput.style.display = 'none';
+      const inputCard = document.querySelector('.input-card');
+      let returnBtn = document.getElementById('returnScratchBtn');
+      if (!returnBtn) {
+        returnBtn = document.createElement('button');
+        returnBtn.id = 'returnScratchBtn';
+        returnBtn.className = 'btn secondary';
+        returnBtn.style.width = '100%';
+        returnBtn.textContent = 'Return to Scratchpad';
+        returnBtn.onclick = async () => {
+          await loadBook('scratchpad');
+        };
+        inputCard.appendChild(returnBtn);
+      }
+      returnBtn.style.display = 'block';
+    } else {
+      textInput.style.display = 'block';
+      let returnBtn = document.getElementById('returnScratchBtn');
+      if (returnBtn) returnBtn.style.display = 'none';
+      
+      // Load scratchpad text into textarea
+      let fullText = [];
+      const totalChunks = Math.ceil(currentBookMeta.totalWords / 1000);
+      for(let i=0; i<totalChunks; i++) {
+         const chunk = await Storage.getBookChunk('scratchpad', i);
+         fullText.push(chunk.join(' '));
+      }
+      textInput.value = fullText.join(' ');
+    }
+
+    updateProgress();
+    renderHUD();
+    
+    if (currentChunkWords.length > 0) {
+      const indexInChunk = currentBookMeta.currentIndex % 1000;
+      displayWord(currentChunkWords[indexInChunk] || '');
+    } else {
+      displayWord('');
+    }
+  }
+
+  async function init() {
     wpmSlider.value = state.wpm;
     volSlider.value = state.masterVolume;
-    audioProfileSelect.value = state.soundProfile;
-    colorPaletteSelect.value = state.colorPalette;
+    if (volSliderSettings) volSliderSettings.value = state.masterVolume;
+    
+    audioProfileSegments.forEach(s => s.classList.toggle('active', s.dataset.val === state.soundProfile));
+    accentSwatches.forEach(s => s.classList.toggle('active', s.dataset.color === state.colorPalette));
+    themeCapsules.forEach(c => c.classList.toggle('active', c.dataset.theme === (state.appTheme || 'oled')));
     
     AudioSystem.volume = state.masterVolume;
     AudioSystem.profile = state.soundProfile;
     AudioSystem.isMuted = state.isMuted;
     
     updateMuteIcon();
-    
-
-    words = RSVP.parseText(state.text, defaultText);
     enforceTierLimits();
-    renderLibrary();
-    updateProgress();
-    if (words.length > 0) displayWord(words[state.currentIndex || 0]);
+
+    // Init Preloaded
+    libraryMeta = await Storage.getLibraryMeta();
+    if (libraryMeta.length === 0) {
+      for (const doc of PreloadedLibrary) {
+         const words = RSVP.parseText(doc.content, "");
+         await Storage.saveBook(doc.id, doc.title, doc.author, words, 'red');
+      }
+      libraryMeta = await Storage.getLibraryMeta();
+    }
+
+    // Init Scratchpad
+    let scratch = await Storage.getBookMeta('scratchpad');
+    if (!scratch) {
+      const words = RSVP.parseText(defaultText, "");
+      await Storage.saveBook('scratchpad', 'Scratchpad', 'User', words, 'red');
+    }
+    
+    await renderLibrary();
+
+    if (state.activeDocId) {
+      const exists = await Storage.getBookMeta(state.activeDocId);
+      if (exists) {
+        await loadBook(state.activeDocId);
+      } else {
+        await loadBook('scratchpad');
+      }
+    } else {
+      await loadBook('scratchpad');
+    }
   }
   
-  init();
+  await init();
 
   // Demo Video Logic
   const demoAdContainer = document.getElementById('demoAdContainer');

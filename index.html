@@ -10,7 +10,7 @@
   <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
   <title>TACHYON | RSVP Reader</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=13">
+  <link rel="stylesheet" href="assets/css/style.css?v=14">
 </head>
 <body>
   <div class="ps3-waves">
@@ -93,6 +93,7 @@
       </div>
 
       <div class="input-card" style="position: relative;">
+        <div id="quoteOverlay" style="position: absolute; top: 16px; left: 16px; right: 16px; padding: 16px; pointer-events: none; color: var(--text-secondary); opacity: 0.8; font-style: italic; font-size: 16px; transition: opacity 0.5s ease, transform 0.5s ease;"></div>
         <textarea id="textInput"></textarea>
         <div style="width: 100%; text-align: right; font-size: 12px; color: var(--text-secondary); margin-top: -8px;">Max 500 words with free</div>
       </div>
@@ -131,48 +132,116 @@
         </div>
         
         <button id="upgradeBtn" class="btn primary" style="width: 100%; max-width: 300px; background: linear-gradient(45deg, #FFD700, #FF2A54); color: #000; border: none; box-shadow: 0 0 20px rgba(255, 42, 84, 0.4);">Start 7-Day Free Trial</button>
+          
+        <div style="margin-top: 32px;">
+          <button id="restorePurchaseBtn" class="shimmer-text" style="background: transparent; border: none; font-size: 13px; font-weight: 500; cursor: pointer; padding: 8px 16px; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;">
+            Already a member? <span style="text-decoration: underline; text-underline-offset: 2px;">Restore Purchase</span>
+          </button>
+        </div>
       </div>
     </div>
     
     <div class="tab-content" id="tab-settings">
-      <div class="reader-card" style="justify-content: flex-start; align-items: flex-start;">
-        <h3 class="glow-text">Settings</h3>
+      <div style="padding: 10px 0; width: 100%;">
+        <h3 class="glow-text" style="margin-bottom: 24px; padding-left: 8px;">Settings</h3>
         
-        <div class="settings-list">
-          <div class="setting-item" id="tierToggleBtn">
+        <!-- Dev Tier Toggle -->
+        <div class="ios-inset-group">
+          <div class="ios-list-item" id="tierToggleBtn">
             <div>
               <h4>Tier Mode (Dev)</h4>
-              <span style="font-size: 12px; color: var(--text-secondary);" id="tierStatusText">Current: Free Starter</span>
+              <div class="subtitle" id="tierStatusText">Current: Free Starter</div>
             </div>
-            <div style="color: var(--accent-color);">Switch</div>
+            <div style="color: var(--accent-color); font-weight: 500;">Switch</div>
           </div>
-          
-          <div class="setting-item">
-            <div style="width: 100%;">
-              <h4>Audio Profile</h4>
-              <select id="audioProfileSelect" class="clean-select">
-                <option value="organic_pop">Organic Pop (Default)</option>
-                <option value="soft_marimba">Soft Marimba (Pro)</option>
-                <option value="crystal_drop">Crystal Drop (Pro)</option>
-                <option value="deep_focus">Deep Focus (Pro)</option>
-              </select>
+        </div>
+
+        <!-- Audio Settings -->
+        <div class="ios-inset-group">
+          <div class="ios-list-item" style="flex-direction: column; align-items: stretch; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--accent-color)" opacity="0.2" style="position: absolute;"></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path></svg>
+              <h4>Audio Feedback</h4>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 12px; margin-top: -4px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path></svg>
+              <input type="range" id="volSliderSettings" min="0" max="1" step="0.01" value="0.3" style="flex: 1;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2"><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M11 5L6 9H2v6h4l5 4V5z"></path></svg>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+              <span style="font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Sound Profile</span>
+              <div class="segmented-control" id="audioProfileSegments">
+                <button class="segment active" data-val="organic_pop">Pop</button>
+                <button class="segment" data-val="soft_marimba">Marimba</button>
+                <button class="segment" data-val="crystal_drop">Crystal</button>
+                <button class="segment" data-val="deep_focus">Focus</button>
+              </div>
             </div>
           </div>
-          
-          <div class="setting-item">
-            <div style="width: 100%;">
-              <h4>Color Palette</h4>
-              <select id="colorPaletteSelect" class="clean-select">
-                <option value="red">Red (Default)</option>
-                <option value="purple">Purple (Pro)</option>
-                <option value="pink">Pink (Pro)</option>
-                <option value="orange">Orange (Pro)</option>
-                <option value="yellow">Yellow (Pro)</option>
-                <option value="green">Green (Pro)</option>
-                <option value="blue">Blue (Pro)</option>
-                <option value="white">Gray (Pro)</option>
-              </select>
+        </div>
+
+        <!-- Appearance Settings -->
+        <div class="ios-inset-group">
+          <div class="ios-list-item" style="flex-direction: column; align-items: flex-start; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20"></path></svg>
+              <h4>Appearance</h4>
             </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+              <span style="font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Theme</span>
+              <div style="display: flex; gap: 16px; overflow-x: auto; width: 100%; padding-bottom: 8px;" id="themeCapsules">
+                <div class="theme-capsule active" data-theme="oled">
+                  <div class="theme-swatch" style="background: #000; border-color: var(--accent-color);">
+                    <div class="swatch-text" style="color: #F5F5F7;">Aa</div>
+                    <svg class="checkmark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </div>
+                  <span>OLED Black</span>
+                </div>
+                
+                <div class="theme-capsule" data-theme="charcoal">
+                  <div class="theme-swatch" style="background: #1C1C1E; border-color: transparent;">
+                    <div class="swatch-text" style="color: #FFFFFF;">Aa</div>
+                    <svg class="checkmark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </div>
+                  <span>Charcoal</span>
+                </div>
+                
+                <div class="theme-capsule" data-theme="sepia">
+                  <div class="theme-swatch" style="background: #F4ECD8; border-color: transparent;">
+                    <div class="swatch-text" style="color: #433422;">Aa</div>
+                    <svg class="checkmark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </div>
+                  <span>Warm Sepia</span>
+                </div>
+                
+                <div class="theme-capsule" data-theme="paper">
+                  <div class="theme-swatch" style="background: #F9F9F9; border-color: transparent;">
+                    <div class="swatch-text" style="color: #1D1D1F;">Aa</div>
+                    <svg class="checkmark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </div>
+                  <span>Soft Paper</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 8px;">
+              <span style="font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Accent Color</span>
+              <div style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px;" id="accentSwatches">
+                <div class="color-swatch active" data-color="red" style="background: var(--palette-red);"></div>
+                <div class="color-swatch" data-color="purple" style="background: var(--palette-purple);"></div>
+                <div class="color-swatch" data-color="pink" style="background: var(--palette-pink);"></div>
+                <div class="color-swatch" data-color="orange" style="background: var(--palette-orange);"></div>
+                <div class="color-swatch" data-color="yellow" style="background: var(--palette-yellow);"></div>
+                <div class="color-swatch" data-color="green" style="background: var(--palette-green);"></div>
+                <div class="color-swatch" data-color="blue" style="background: var(--palette-blue);"></div>
+                <div class="color-swatch" data-color="white" style="background: var(--palette-white);"></div>
+              </div>
+            </div>
+            
           </div>
         </div>
       </div>
@@ -274,6 +343,6 @@
     </div>
 
   </main>
-  <script type="module" src="assets/js/app.js?v=13"></script>
+  <script type="module" src="assets/js/app.js?v=14"></script>
 </body>
 </html>
