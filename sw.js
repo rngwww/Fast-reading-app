@@ -1,9 +1,13 @@
-const CACHE_NAME = 'tachyon-v19';
+const CACHE_NAME = 'tachyon-v22';
 const ASSETS = [
   './',
   './index.html',
+  './modern.html',
+  './preview.html',
   './assets/css/style.css',
+  './assets/css/modern.css',
   './assets/js/app.js',
+  './assets/js/modern-app.js',
   './assets/js/rsvp.js',
   './assets/js/audio.js',
   './assets/js/storage.js',
@@ -12,10 +16,10 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(ASSETS))
-      .then(() => self.skipWaiting())
   );
 });
 
@@ -33,8 +37,20 @@ self.addEventListener('activate', event => {
   );
 });
 
+// Network-first strategy for freshness, falling back to cache if offline
 self.addEventListener('fetch', event => {
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    fetch(event.request)
+      .then(response => {
+        // If successful network response, clone and update cache
+        if (response && response.status === 200 && response.type === 'basic') {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseClone);
+          });
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

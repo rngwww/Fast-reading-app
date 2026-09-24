@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#08080A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <title>TACHYON Modern | Precision Speed Reader</title>
+  <script>
+    // Force update service worker and clean stale caches immediately
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        for (const r of regs) r.update();
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        for (const name of names) {
+          if (name !== 'tachyon-v22') caches.delete(name);
+        }
+      });
+    }
+  </script>
+  <link rel="stylesheet" href="assets/css/modern.css?v=22">
+</head>
+<body data-theme="obsidian">
+
+  <!-- Atmospheric Glow Background -->
+  <div class="ambient-glow">
+    <div class="ambient-circle-1"></div>
+    <div class="ambient-circle-2"></div>
+  </div>
+
+  <main class="modern-app" id="modernApp">
+    <!-- Top Header Bar -->
+    <header class="top-bar">
+      <div class="brand-lockup">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
+        <div class="brand-title">
+          TACHYON
+          <span class="badge-v2">Modern v2</span>
+        </div>
+      </div>
+
+      <div class="top-bar-actions">
+        <!-- Keyboard Shortcuts Button -->
+        <button class="btn-top-action" id="btnOpenShortcuts" title="View Keyboard Shortcuts">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M6 16h12"></path></svg>
+          <span>Shortcuts</span>
+        </button>
+
+        <!-- Quick Switcher to Classic Version -->
+        <a href="index.html" class="btn-top-action" title="Switch back to Classic UI">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          <span>Classic UI</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Floating Glass Navigation Pill -->
+    <nav class="floating-nav">
+      <div class="nav-pill-container">
+        <div class="nav-sliding-pill" id="navSlidingPill"></div>
+        <button class="nav-tab-btn active" data-target="tabReader">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <span>Reader</span>
+        </button>
+        <button class="nav-tab-btn" data-target="tabLibrary">
+          <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <span>Library</span>
+        </button>
+        <button class="nav-tab-btn" data-target="tabPrime">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span>Prime</span>
+        </button>
+        <button class="nav-tab-btn" data-target="tabSettings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Settings</span>
+        </button>
+        <button class="nav-tab-btn" data-target="tabGuide">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <span>Guide</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- TAB 1: READER (MAIN STAGE) -->
+    <div class="tab-panel active" id="tabReader">
+      <!-- Optical Reticle RSVP Stage -->
+      <section class="reader-stage" id="readerStage" title="Tap to Play/Pause • Double-tap sides to skip 10 words">
+        <!-- Precision Corner Brackets -->
+        <div class="reticle-corner tl"></div>
+        <div class="reticle-corner tr"></div>
+        <div class="reticle-corner bl"></div>
+        <div class="reticle-corner br"></div>
+
+        <!-- Stage Toolbar: Book Title Badge & Zen Mode Toggle -->
+        <div class="stage-top-toolbar">
+          <div class="stage-book-badge" id="stageBookBadge">
+            <span>📖 Scratchpad</span>
+          </div>
+          <button class="btn-zen-toggle" id="btnZenToggle" title="Toggle Zen Focus Mode (Z)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path></svg>
+            <span>Zen Mode</span>
+          </button>
+        </div>
+
+        <!-- Optical Reticle Guides -->
+        <div class="optical-reticle">
+          <div class="reticle-mark-top"></div>
+          <div class="reticle-hairline"></div>
+          <div class="reticle-mark-bottom"></div>
+        </div>
+
+        <!-- RSVP Word Frame -->
+        <div class="rsvp-word-frame" id="rsvpWordFrame">
+          <span class="word-pre" id="wordPre"></span>
+          <span class="word-focal" id="wordFocal">—</span>
+          <span class="word-post" id="wordPost"></span>
+        </div>
+
+        <!-- Gesture Feedback Floating Pills -->
+        <div class="gesture-feedback left" id="gestureFeedbackLeft">↺ -10 Words</div>
+        <div class="gesture-feedback right" id="gestureFeedbackRight">↻ +10 Words</div>
+
+        <!-- Stage Hint -->
+        <div class="stage-hint">
+          <span>Tap to Pause/Play</span>
+          <span>•</span>
+          <span><kbd>Space</kbd></span>
+          <span><kbd>←</kbd> <kbd>→</kbd> Skip words</span>
+        </div>
+
+        <!-- Pause HUD Overlay -->
+        <div class="overlay-hud" id="pauseHud">
+          <div class="hud-title">Reading Paused</div>
+          <div class="hud-stats-grid">
+            <div class="hud-stat-cell">
+              <span class="hud-stat-label">Position</span>
+              <span class="hud-stat-val"><span id="hudWordPos">0</span> / <span id="hudWordTotal">0</span></span>
+            </div>
+            <div class="hud-stat-cell">
+              <span class="hud-stat-label">Velocity</span>
+              <span class="hud-stat-val"><span id="hudWpm">350</span> WPM</span>
+            </div>
+            <div class="hud-stat-cell">
+              <span class="hud-stat-label">Progress</span>
+              <span class="hud-stat-val" id="hudProgress">0%</span>
+            </div>
+          </div>
+          <div class="hud-actions">
+            <button class="btn-media btn-media-step" id="hudJumpBackBtn" style="width: auto; padding: 0 16px; height: 42px; border-radius: 999px; flex-direction: row; gap: 6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg>
+              <span>-10 Words</span>
+            </button>
+            <button class="btn-play-hero" id="hudResumeBtn" style="min-width: 120px; height: 42px;">
+              <span>Resume</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Countdown 3-2-1 Overlay -->
+        <div class="overlay-hud" id="countdownHud">
+          <div class="countdown-box">
+            <div class="countdown-dial">
+              <svg viewBox="0 0 100 100">
+                <circle class="ring-track" cx="50" cy="50" r="45"></circle>
+                <circle class="ring-active" id="ringActive" cx="50" cy="50" r="45"></circle>
+              </svg>
+              <span class="countdown-number" id="countdownNumber">3</span>
+            </div>
+            <div class="countdown-affirmation" id="countdownAffirmation">Lock In</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Progress Scrubber -->
+      <section class="scrubber-card">
+        <div class="scrubber-meta">
+          <span>Word <strong id="scrubberWordPos" style="color: var(--text-primary);">0</strong> of <span id="scrubberWordTotal">0</span></span>
+          <span id="scrubberPct" style="color: var(--accent); font-weight: 700;">0%</span>
+        </div>
+        <div class="scrubber-track-wrap">
+          <input type="range" class="scrubber-slider" id="progressScrubber" min="0" max="100" step="0.1" value="0" aria-label="Reading progress scrubber">
+        </div>
+      </section>
+
+      <!-- Intuitive Controls Deck -->
+      <section class="controls-deck">
+        <!-- Media Controls Row -->
+        <div class="primary-media-row">
+          <!-- Rewind -10 -->
+          <button class="btn-media btn-media-step" id="btnRewind10" title="Rewind 10 words (Left Arrow)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg>
+            <span>-10</span>
+          </button>
+
+          <!-- Main Play Hero Button -->
+          <button class="btn-media btn-play-hero" id="btnPlayHero" title="Play / Pause (Spacebar)">
+            <svg id="btnPlayHeroIcon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span id="btnPlayHeroText">Play</span>
+          </button>
+
+          <!-- Skip +10 -->
+          <button class="btn-media btn-media-step" id="btnSkip10" title="Skip forward 10 words (Right Arrow)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg>
+            <span>+10</span>
+          </button>
+
+          <!-- Reset Button -->
+          <button class="btn-media btn-reset-ghost" id="btnReset" title="Reset to start (R)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          </button>
+        </div>
+
+        <!-- Speed Presets & Steppers -->
+        <div class="speed-control-section">
+          <div class="speed-header-row">
+            <div class="speed-title-wrap">
+              <span class="tempo-led" id="tempoLed"></span>
+              <span>Reading Speed</span>
+            </div>
+            <div class="speed-stepper-wrap">
+              <button class="btn-stepper" id="btnSpeedMinus" title="Decrease speed by 25 WPM">-</button>
+              <div class="speed-badge"><span id="speedBadgeVal">350</span><small>WPM</small></div>
+              <button class="btn-stepper" id="btnSpeedPlus" title="Increase speed by 25 WPM">+</button>
+            </div>
+          </div>
+
+          <!-- One-Tap Speed Presets -->
+          <div class="speed-presets-row">
+            <button class="speed-preset-btn" data-wpm="250">
+              <span>250</span>
+              <small>Calm</small>
+            </button>
+            <button class="speed-preset-btn active" data-wpm="350">
+              <span>350</span>
+              <small>Focus</small>
+            </button>
+            <button class="speed-preset-btn" data-wpm="500">
+              <span>500</span>
+              <small>Brisk</small>
+            </button>
+            <button class="speed-preset-btn" data-wpm="700">
+              <span>700</span>
+              <small>Hyper</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- Volume & Audio Toggle Strip -->
+        <div class="audio-strip">
+          <button class="btn-icon-mute" id="btnMute" title="Toggle audio mute (M)">
+            <svg id="volIconSvg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          </button>
+          <div class="vol-slider-wrap">
+            <input type="range" class="vol-slider" id="volSlider" min="0" max="1" step="0.01" value="0.3" aria-label="Tick volume">
+          </div>
+        </div>
+      </section>
+
+      <!-- Smart Text Input & Scratchpad Panel -->
+      <section class="input-panel">
+        <div class="input-header">
+          <span class="input-label">Quick Reader Scratchpad</span>
+          <div class="input-actions">
+            <button class="btn-mini-action" id="btnPasteClipboard" title="Paste text directly from clipboard">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+              <span>Paste Clipboard</span>
+            </button>
+            <button class="btn-mini-action" id="btnClearText" title="Clear scratchpad">
+              <span>Clear</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 1-Click Sample Texts Bar -->
+        <div class="sample-texts-row">
+          <span class="sample-label">Try Samples:</span>
+          <button class="sample-chip" data-sample="lore">⚡ Speed Lore</button>
+          <button class="sample-chip" data-sample="aurelius">🏛️ Marcus Aurelius</button>
+          <button class="sample-chip" data-sample="einstein">🔬 Einstein Relativity</button>
+          <button class="sample-chip" data-sample="holmes">🕵️ Sherlock Holmes</button>
+        </div>
+
+        <div id="returnScratchBtnWrap" style="display: none;">
+          <button class="btn-save" id="returnScratchBtn" style="width: 100%; padding: 12px; font-size: 14px; background: var(--bg-surface-elevated); border: 1px solid var(--border-strong); color: var(--text-primary);">
+            ← Return to Scratchpad
+          </button>
+        </div>
+
+        <div class="text-box-wrap">
+          <div class="textarea-quote-hint" id="textareaQuoteHint">Think in paragraphs, absorb in words, unlock in seconds.</div>
+          <textarea class="modern-textarea" id="textInput" placeholder="" aria-label="Input text for RSVP reading"></textarea>
+        </div>
+
+        <div class="input-footer">
+          <div class="reading-estimate">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span id="readingEstimate">0 words</span>
+          </div>
+          <span id="tierWordLimitLabel" style="color: var(--text-tertiary);">Max 500 words on Free</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB 2: LIBRARY -->
+    <div class="tab-panel" id="tabLibrary">
+      <div class="library-header">
+        <div class="library-title-group">
+          <h2>Reading Library</h2>
+          <p>Organize books, articles, and stored passages</p>
+        </div>
+        <button class="btn-primary-pill" id="btnAddBook">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>Add Book</span>
+        </button>
+      </div>
+
+      <div class="library-grid" id="libraryGrid">
+        <!-- Populated dynamically via modern-app.js -->
+      </div>
+    </div>
+
+    <!-- TAB 3: PRIME / PREMIUM -->
+    <div class="tab-panel" id="tabPrime">
+      <div class="prime-card-hero">
+        <span class="prime-badge">Tachyon Prime</span>
+        <h2>Infinite Velocity Reading</h2>
+        <p>Unlock books beyond 500 words, unlimited storage in your library, premium audio synthesis profiles, and advanced focal pacing.</p>
+
+        <div class="plan-cards-row">
+          <div class="plan-card">
+            <strong>$4.99</strong>
+            <span>Monthly Billing</span>
+          </div>
+          <div class="plan-card selected">
+            <strong style="color: #ffd700;">$39.99</strong>
+            <span>Annual (Save 33%)</span>
+          </div>
+        </div>
+
+        <button class="btn-save" id="btnStartTrial" style="width: 100%; max-width: 320px; padding: 14px; font-size: 15px; background: linear-gradient(135deg, #ffd700, #ff2a54); color: #000; font-weight: 700; box-shadow: 0 8px 24px rgba(255, 42, 84, 0.4);">
+          Start 7-Day Free Trial
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 4: SETTINGS -->
+    <div class="tab-panel" id="tabSettings">
+      <!-- Reading Font Selector -->
+      <section class="settings-section">
+        <div class="settings-group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+          <span>Reading Font Style</span>
+        </div>
+        <div class="font-selector-row">
+          <button class="font-choice-btn active" data-font="sans" style="font-family: var(--font-main);">
+            <strong>Modern Sans</strong>
+            <small>SF Pro / Inter</small>
+          </button>
+          <button class="font-choice-btn" data-font="serif" style="font-family: var(--font-serif);">
+            <strong>Editorial Serif</strong>
+            <small>Newsreader</small>
+          </button>
+          <button class="font-choice-btn" data-font="mono" style="font-family: var(--font-mono);">
+            <strong>Code Mono</strong>
+            <small>JetBrains</small>
+          </button>
+        </div>
+      </section>
+
+      <!-- Audio Feedback Settings -->
+      <section class="settings-section">
+        <div class="settings-group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          <span>Sound Synthesis Profile</span>
+        </div>
+        <div class="sound-chips-grid">
+          <div class="sound-chip active" data-profile="organic_pop" title="iPhone Taptic Engine keyboard click">
+            <span>📱 iOS Taptic</span>
+            <small>Haptic Click</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+          <div class="sound-chip" data-profile="crystal_drop" title="PlayStation 5 acoustic ceramic menu droplet">
+            <span>🎮 PS5 Ceramic</span>
+            <small>Menu Tap</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+          <div class="sound-chip" data-profile="mechanical_click" title="Xbox One & Series X controller tactile microswitch">
+            <span>🎮 Xbox Switch</span>
+            <small>Tactile Snap</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+          <div class="sound-chip" data-profile="soft_marimba" title="Dry studio acoustic wood percussion">
+            <span>🪵 Studio Wood</span>
+            <small>Muted Block</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+          <div class="sound-chip" data-profile="deep_focus" title="Low-frequency sub-bass haptic pulse">
+            <span>📳 Sub-Haptic</span>
+            <small>Deep Pulse</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- UI Audio Feedback Toggle -->
+      <section class="settings-section">
+        <div class="tier-toggle-row">
+          <div>
+            <div style="font-size: 14px; font-weight: 700;">Tactile UI Sounds</div>
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Audio feedback on tabs, buttons, gestures & dialogs</div>
+          </div>
+          <button class="btn-tier-switch" id="btnToggleUiSounds">Enabled</button>
+        </div>
+      </section>
+
+      <!-- Appearance: Themes -->
+      <section class="settings-section">
+        <div class="settings-group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20"></path></svg>
+          <span>Appearance & Themes</span>
+        </div>
+        <div class="themes-grid">
+          <div class="theme-picker-card active" data-theme="obsidian">
+            <div class="theme-swatch-box" style="background: #040507; color: #fff;">Aa</div>
+            <div class="theme-title">Obsidian OLED</div>
+          </div>
+          <div class="theme-picker-card" data-theme="graphite">
+            <div class="theme-swatch-box" style="background: #121317; color: #fff;">Aa</div>
+            <div class="theme-title">Graphite Dark</div>
+          </div>
+          <div class="theme-picker-card" data-theme="parchment">
+            <div class="theme-swatch-box" style="background: #F5EEDB; color: #342718;">Aa</div>
+            <div class="theme-title">Vintage Parchment</div>
+          </div>
+          <div class="theme-picker-card" data-theme="vellum">
+            <div class="theme-swatch-box" style="background: #F8F9FA; color: #111827;">Aa</div>
+            <div class="theme-title">Warm Vellum</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Appearance: Accent Color -->
+      <section class="settings-section">
+        <div class="settings-group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+          <span>Focal Accent Color</span>
+        </div>
+        <div class="accent-swatches-wrap" id="accentDots">
+          <div class="accent-dot active" data-color="red" style="background: var(--palette-red); --swatch-color: var(--palette-red);"></div>
+          <div class="accent-dot" data-color="pink" style="background: var(--palette-pink); --swatch-color: var(--palette-pink);"></div>
+          <div class="accent-dot" data-color="purple" style="background: var(--palette-purple); --swatch-color: var(--palette-purple);"></div>
+          <div class="accent-dot" data-color="blue" style="background: var(--palette-blue); --swatch-color: var(--palette-blue);"></div>
+          <div class="accent-dot" data-color="green" style="background: var(--palette-green); --swatch-color: var(--palette-green);"></div>
+          <div class="accent-dot" data-color="yellow" style="background: var(--palette-yellow); --swatch-color: var(--palette-yellow);"></div>
+          <div class="accent-dot" data-color="orange" style="background: var(--palette-orange); --swatch-color: var(--palette-orange);"></div>
+          <div class="accent-dot" data-color="white" style="background: var(--palette-white); --swatch-color: var(--palette-white);"></div>
+        </div>
+      </section>
+
+      <!-- Developer Tier Mode Switcher -->
+      <section class="settings-section">
+        <div class="tier-toggle-row">
+          <div>
+            <div style="font-size: 14px; font-weight: 700;">Membership Status</div>
+            <div class="tier-badge" id="tierStatusBadge" style="color: var(--text-secondary); margin-top: 2px;">Free Starter</div>
+          </div>
+          <button class="btn-tier-switch" id="btnSwitchTier">Toggle Prime</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB 5: GUIDE / WALKTHROUGH -->
+    <div class="tab-panel" id="tabGuide">
+      <div class="guide-card">
+        <h2 style="font-size: 20px; font-weight: 800; letter-spacing: -0.5px;">How TACHYON RSVP Works</h2>
+        <div class="guide-step">
+          <div class="step-number">1</div>
+          <div class="step-text">
+            <h3>Fixate on the Optimal Recognition Point (ORP)</h3>
+            <p>Every word features a colored focal letter centered mathematically between the optical reticle guides. By locking your eyes on this point, your eyes never move across a page (no saccades).</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="step-number">2</div>
+          <div class="step-text">
+            <h3>Silence Subvocalization</h3>
+            <p>At speeds above 350–450 WPM, your inner voice cannot pronounce words quickly enough. Your brain begins absorbing meaning directly from visual word forms.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="step-number">3</div>
+          <div class="step-text">
+            <h3>Intuitive Gestures & Media Controls</h3>
+            <p>Tap anywhere on the word display to pause. Double-tap the left side to rewind 10 words if you missed an idea. Use the scrubber bar to jump to any paragraph instantly.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================================
+       MODALS
+       ======================================================================== -->
+
+  <!-- Keyboard Shortcuts Modal -->
+  <div class="modern-modal-backdrop" id="shortcutsModal">
+    <div class="modern-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Keyboard Shortcuts</h3>
+        <button class="btn-close-modal" id="btnCloseShortcutsModal">&times;</button>
+      </div>
+      <div class="shortcuts-grid">
+        <div class="shortcut-row">
+          <span>Play / Pause</span>
+          <kbd>Space</kbd>
+        </div>
+        <div class="shortcut-row">
+          <span>Rewind / Skip 5 words</span>
+          <div><kbd>←</kbd> <kbd>→</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span>Speed +/- 25 WPM</span>
+          <div><kbd>↑</kbd> <kbd>↓</kbd></div>
+        </div>
+        <div class="shortcut-row">
+          <span>Toggle Zen Focus Mode</span>
+          <kbd>Z</kbd>
+        </div>
+        <div class="shortcut-row">
+          <span>Mute / Unmute audio</span>
+          <kbd>M</kbd>
+        </div>
+        <div class="shortcut-row">
+          <span>Reset to Beginning</span>
+          <kbd>R</kbd>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-save" id="btnCloseShortcutsBtn" style="width: 100%;">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Book Modal -->
+  <div class="modern-modal-backdrop" id="addBookModal">
+    <div class="modern-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="bookModalTitle">Add Book to Library</h3>
+        <button class="btn-close-modal" id="btnCloseAddModal">&times;</button>
+      </div>
+      <input type="text" class="modern-textarea" id="editBookTitleInput" placeholder="Book / Article Title" style="height: 44px; padding: 10px 14px;">
+      <input type="text" class="modern-textarea" id="editBookAuthorInput" placeholder="Author (optional)" style="height: 44px; padding: 10px 14px;">
+      <textarea class="modern-textarea" id="editBookContentInput" placeholder="Paste full content here..." style="height: 140px;"></textarea>
+
+      <div>
+        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 8px;">Spine Tag Color:</label>
+        <div class="accent-swatches-wrap" id="modalColorDots">
+          <div class="accent-dot active" data-color="red" style="background: var(--palette-red);"></div>
+          <div class="accent-dot" data-color="pink" style="background: var(--palette-pink);"></div>
+          <div class="accent-dot" data-color="purple" style="background: var(--palette-purple);"></div>
+          <div class="accent-dot" data-color="blue" style="background: var(--palette-blue);"></div>
+          <div class="accent-dot" data-color="green" style="background: var(--palette-green);"></div>
+          <div class="accent-dot" data-color="yellow" style="background: var(--palette-yellow);"></div>
+          <div class="accent-dot" data-color="orange" style="background: var(--palette-orange);"></div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" id="btnCancelAddModal">Cancel</button>
+        <button class="btn-save" id="btnSaveAddModal">Save Book</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Book Launch & Resume Modal -->
+  <div class="modern-modal-backdrop" id="launchModal">
+    <div class="modern-dialog">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="launchTitle">Book Title</h3>
+          <p id="launchAuthor" style="font-size: 13px; color: var(--accent); margin-top: 2px;">Author</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseLaunchModal">&times;</button>
+      </div>
+
+      <div class="hud-stats-grid" style="max-width: 100%;">
+        <div class="hud-stat-cell">
+          <span class="hud-stat-label">Total Words</span>
+          <span class="hud-stat-val" id="launchTotalWords">0</span>
+        </div>
+        <div class="hud-stat-cell">
+          <span class="hud-stat-label">Progress</span>
+          <span class="hud-stat-val" id="launchProgressPct">0%</span>
+        </div>
+      </div>
+
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; color: var(--text-secondary);">
+          <span>Start Position:</span>
+          <strong id="launchSliderLabel" style="color: var(--text-primary);">Word 0 (0%)</strong>
+        </div>
+        <input type="range" class="scrubber-slider" id="launchStartSlider" min="0" max="100" step="0.1" value="0">
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+        <button class="btn-save" id="btnLaunchRead" style="width: 100%; padding: 12px; font-size: 15px;">Load & Read</button>
+        <button class="btn-cancel" id="btnLaunchResetProg" style="width: 100%; border: none;">Reset Progress to Beginning</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session Completion Modal -->
+  <div class="modern-modal-backdrop" id="completionModal">
+    <div class="modern-dialog" style="text-align: center; align-items: center;">
+      <div style="width: 54px; height: 54px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; margin-bottom: 4px;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <h2 style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">Session Complete</h2>
+      <p id="completionQuote" style="font-style: italic; color: var(--text-secondary); font-size: 14px;">Knowledge absorbed into long-term memory.</p>
+
+      <div class="hud-stats-grid" style="max-width: 100%; margin: 12px 0;">
+        <div class="hud-stat-cell">
+          <span class="hud-stat-label">Words Absorbed</span>
+          <span class="hud-stat-val" id="statWordsRead">0</span>
+        </div>
+        <div class="hud-stat-cell">
+          <span class="hud-stat-label">Time Saved</span>
+          <span class="hud-stat-val" id="statTimeSaved">0s</span>
+        </div>
+      </div>
+
+      <button class="btn-save" id="btnCloseCompletion" style="width: 100%; padding: 12px; font-size: 14px;">Continue</button>
+    </div>
+  </div>
+
+  <!-- Main Modular Modern Application Script -->
+  <script type="module" src="assets/js/modern-app.js?v=22"></script>
+</body>
+</html>
