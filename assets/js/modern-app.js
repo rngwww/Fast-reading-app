@@ -1,7 +1,7 @@
-import { Storage } from './storage.js?v=22';
-import { AudioSystem } from './audio.js?v=22';
-import { RSVP } from './rsvp.js?v=22';
-import { Quotes, PreloadedLibrary } from './data.js?v=22';
+import { Storage } from './storage.js?v=23';
+import { AudioSystem } from './audio.js?v=23';
+import { RSVP } from './rsvp.js?v=23';
+import { PreloadedLibrary } from './data.js?v=23';
 
 async function initApp() {
   // Main Container & Stage
@@ -13,7 +13,7 @@ async function initApp() {
   const gestureFeedbackLeft = document.getElementById('gestureFeedbackLeft');
   const gestureFeedbackRight = document.getElementById('gestureFeedbackRight');
   const stageBookBadge = document.getElementById('stageBookBadge');
-  const btnZenToggle = document.getElementById('btnZenToggle');
+  const stageBookTitle = document.getElementById('stageBookTitle');
   const tempoLed = document.getElementById('tempoLed');
 
   // Overlays
@@ -28,7 +28,6 @@ async function initApp() {
   const countdownHud = document.getElementById('countdownHud');
   const countdownNumber = document.getElementById('countdownNumber');
   const ringActive = document.getElementById('ringActive');
-  const countdownAffirmation = document.getElementById('countdownAffirmation');
 
   // Scrubber
   const progressScrubber = document.getElementById('progressScrubber');
@@ -36,10 +35,9 @@ async function initApp() {
   const scrubberWordTotal = document.getElementById('scrubberWordTotal');
   const scrubberPct = document.getElementById('scrubberPct');
 
-  // Primary Controls
+  // Primary Controls (YouTube Style Icon Only)
   const btnRewind10 = document.getElementById('btnRewind10');
   const btnPlayHero = document.getElementById('btnPlayHero');
-  const btnPlayHeroText = document.getElementById('btnPlayHeroText');
   const btnPlayHeroIcon = document.getElementById('btnPlayHeroIcon');
   const btnSkip10 = document.getElementById('btnSkip10');
   const btnReset = document.getElementById('btnReset');
@@ -55,16 +53,14 @@ async function initApp() {
   const volIconSvg = document.getElementById('volIconSvg');
   const volSlider = document.getElementById('volSlider');
 
-  // Text Input Panel & Sample Chips
+  // Text Input Panel
   const textInput = document.getElementById('textInput');
-  const textareaQuoteHint = document.getElementById('textareaQuoteHint');
   const btnPasteClipboard = document.getElementById('btnPasteClipboard');
   const btnClearText = document.getElementById('btnClearText');
   const readingEstimate = document.getElementById('readingEstimate');
   const tierWordLimitLabel = document.getElementById('tierWordLimitLabel');
   const returnScratchBtnWrap = document.getElementById('returnScratchBtnWrap');
   const returnScratchBtn = document.getElementById('returnScratchBtn');
-  const sampleChips = document.querySelectorAll('.sample-chip');
 
   // Navigation
   const navTabBtns = document.querySelectorAll('.nav-tab-btn');
@@ -76,11 +72,6 @@ async function initApp() {
   const btnAddBook = document.getElementById('btnAddBook');
 
   // Modals
-  const shortcutsModal = document.getElementById('shortcutsModal');
-  const btnOpenShortcuts = document.getElementById('btnOpenShortcuts');
-  const btnCloseShortcutsModal = document.getElementById('btnCloseShortcutsModal');
-  const btnCloseShortcutsBtn = document.getElementById('btnCloseShortcutsBtn');
-
   const addBookModal = document.getElementById('addBookModal');
   const bookModalTitle = document.getElementById('bookModalTitle');
   const editBookTitleInput = document.getElementById('editBookTitleInput');
@@ -105,7 +96,6 @@ async function initApp() {
   const completionModal = document.getElementById('completionModal');
   const statWordsRead = document.getElementById('statWordsRead');
   const statTimeSaved = document.getElementById('statTimeSaved');
-  const completionQuote = document.getElementById('completionQuote');
   const btnCloseCompletion = document.getElementById('btnCloseCompletion');
 
   // Settings
@@ -130,7 +120,7 @@ async function initApp() {
     isMuted: false,
     isPro: false,
     soundProfile: 'organic_pop',
-    colorPalette: 'red',
+    colorPalette: 'white',
     activeDocId: null,
     rsvpFont: 'sans',
     uiSoundsEnabled: true,
@@ -144,21 +134,12 @@ async function initApp() {
   let isCountingDown = false;
   let countdownIntervalId = null;
   let editingBookId = null;
-  let selectedModalColor = 'red';
+  let selectedModalColor = 'white';
   let pendingLaunchDoc = null;
   let lastTapTime = 0;
   let lastTapSide = null;
-  let isZenMode = false;
 
-  const defaultWelcomeText = "Welcome to TACHYON modern focus edition. Keep your gaze centered on the colored focal point. Let the concepts form naturally in your mind. Read faster than thought.";
-
-  // Sample texts database
-  const sampleTexts = {
-    lore: "TACHYON eliminates eye saccades and reduces subvocalization. At speeds above 400 words per minute, your inner auditory voice dissolves into pure, direct comprehension. The mind absorbs thought at optical velocity.",
-    aurelius: "Men seek retreats for themselves, houses in the country, sea-shores, and mountains; and thou too art wont to desire such things very much. But this is altogether a mark of the most common sort of men, for it is in thy power whenever thou shalt choose to retire into thyself. For nowhere either with more quiet or more freedom from trouble does a man retire than into his own soul, particularly when he has within him such thoughts that by looking into them he is immediately in perfect tranquility.",
-    einstein: "Geometry sets out from certain conceptions such as plane, point, and straight line, with which we are able to associate more or less definite ideas, and from certain simple propositions which we are inclined to accept as true. Then, on the basis of a logical process, all remaining propositions are shown to follow from those axioms. Geometrical ideas correspond to more or less exact objects in nature.",
-    holmes: "To Sherlock Holmes she is always the woman. I have seldom heard him mention her under any other name. In his eyes she eclipses and predominates the whole of her sex. It was not that he felt any emotion akin to love for Irene Adler. All emotions were abhorrent to his cold, precise but admirably balanced mind."
-  };
+  const defaultWelcomeText = "Welcome to TACHYON. Keep your gaze centered on the colored focal point. Let the words flow naturally.";
 
   // Unlock Web Audio immediately on first user interaction anywhere
   document.body.addEventListener('pointerdown', () => AudioSystem.init(), { once: true });
@@ -176,7 +157,7 @@ async function initApp() {
   function applyTheme() {
     const root = document.documentElement;
     const theme = state.appTheme || 'obsidian';
-    const accent = state.colorPalette || 'red';
+    const accent = state.colorPalette || 'white';
 
     document.body.setAttribute('data-theme', theme);
     root.style.setProperty('--accent', `var(--palette-${accent})`);
@@ -210,8 +191,8 @@ async function initApp() {
   function applyTierMode() {
     if (state.isPro) {
       tierStatusBadge.textContent = 'TACHYON PRIME';
-      tierStatusBadge.style.color = '#ffd700';
-      if (tierWordLimitLabel) tierWordLimitLabel.textContent = 'Unlimited (Prime Active)';
+      tierStatusBadge.style.color = '#FFFFFF';
+      if (tierWordLimitLabel) tierWordLimitLabel.textContent = 'Unlimited (Prime)';
       if (btnStartTrial) {
         btnStartTrial.textContent = 'Prime Member Active';
         btnStartTrial.style.opacity = '0.6';
@@ -220,9 +201,9 @@ async function initApp() {
     } else {
       tierStatusBadge.textContent = 'Free Starter';
       tierStatusBadge.style.color = 'var(--text-secondary)';
-      if (tierWordLimitLabel) tierWordLimitLabel.textContent = 'Max 500 words on Free';
+      if (tierWordLimitLabel) tierWordLimitLabel.textContent = 'Free Starter';
       if (btnStartTrial) {
-        btnStartTrial.textContent = 'Start 7-Day Free Trial';
+        btnStartTrial.textContent = 'Start Free Trial';
         btnStartTrial.style.opacity = '1';
         btnStartTrial.style.pointerEvents = 'auto';
       }
@@ -234,7 +215,7 @@ async function initApp() {
     const enabled = state.uiSoundsEnabled !== false;
     AudioSystem.uiSoundsEnabled = enabled;
     btnToggleUiSounds.textContent = enabled ? 'Enabled' : 'Muted';
-    btnToggleUiSounds.style.color = enabled ? 'var(--accent)' : 'var(--text-secondary)';
+    btnToggleUiSounds.style.color = enabled ? 'var(--text-primary)' : 'var(--text-secondary)';
   }
 
   if (btnToggleUiSounds) {
@@ -321,8 +302,16 @@ async function initApp() {
 
   function updateStageBookBadge() {
     if (stageBookBadge) {
-      const title = currentBookMeta ? currentBookMeta.title : 'Scratchpad';
-      stageBookBadge.innerHTML = `<span>📖 ${escapeHtml(title)}</span>`;
+      if (currentBookMeta && currentBookMeta.id !== 'scratchpad' && currentBookMeta.title) {
+        stageBookBadge.style.display = 'inline-flex';
+        if (stageBookTitle) {
+          stageBookTitle.textContent = currentBookMeta.title;
+        } else {
+          stageBookBadge.innerHTML = `<span>${escapeHtml(currentBookMeta.title)}</span>`;
+        }
+      } else {
+        stageBookBadge.style.display = 'none';
+      }
     }
   }
 
@@ -364,21 +353,17 @@ async function initApp() {
 
   function setPlayButtonVisual(playing) {
     if (playing) {
-      btnPlayHeroText.textContent = 'Pause';
-      btnPlayHeroIcon.innerHTML = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
-      btnPlayHero.style.background = 'var(--bg-surface-elevated)';
-      btnPlayHero.style.border = '1px solid var(--border-strong)';
-      btnPlayHero.style.color = 'var(--text-primary)';
+      // Pause icon (two vertical bars)
+      btnPlayHeroIcon.innerHTML = '<rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"></rect>';
+      btnPlayHero.style.background = '#FFFFFF';
+      btnPlayHero.style.color = '#000000';
       if (tempoLed) tempoLed.classList.add('active');
-      if (isZenMode) modernApp.classList.add('zen-mode');
     } else {
-      btnPlayHeroText.textContent = 'Play';
-      btnPlayHeroIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"></polygon>';
-      btnPlayHero.style.background = 'var(--accent)';
-      btnPlayHero.style.border = 'none';
-      btnPlayHero.style.color = '#fff';
+      // Play icon (triangle)
+      btnPlayHeroIcon.innerHTML = '<polygon points="7 5 19 12 7 19 7 5" fill="currentColor"></polygon>';
+      btnPlayHero.style.background = '#FFFFFF';
+      btnPlayHero.style.color = '#000000';
       if (tempoLed) tempoLed.classList.remove('active');
-      modernApp.classList.remove('zen-mode');
     }
   }
 
@@ -387,12 +372,6 @@ async function initApp() {
       await prepareScratchpad();
     }
     if (!currentBookMeta || currentBookMeta.totalWords === 0) return;
-
-    // Free tier limitation check
-    if (!state.isPro && currentBookMeta.totalWords > 500) {
-      alert("This text exceeds the 500-word limit for the Free tier. Switch to Tachyon Prime in Settings or upgrade in the Prime tab to read full books!");
-      return;
-    }
 
     if (currentBookMeta.currentIndex >= currentBookMeta.totalWords) {
       currentBookMeta.currentIndex = 0;
@@ -422,7 +401,7 @@ async function initApp() {
   }
 
   // --------------------------------------------------------------------------
-  // Countdown Ring (3, 2, 1, Lock In)
+  // Countdown Ring (3, 2, 1)
   // --------------------------------------------------------------------------
   function startCountdown(onComplete) {
     if (isCountingDown) return;
@@ -432,7 +411,6 @@ async function initApp() {
     let count = 3;
     countdownNumber.textContent = count;
     ringActive.style.strokeDashoffset = 0;
-    countdownAffirmation.textContent = Quotes.countdown[Math.floor(Math.random() * Quotes.countdown.length)] || 'Lock In';
     AudioSystem.playCountdownBeep(false);
 
     const circumference = 283;
@@ -452,7 +430,7 @@ async function initApp() {
         AudioSystem.playCountdownBeep(true);
         if (onComplete) onComplete();
       }
-    }, 900);
+    }, 850);
   }
 
   // --------------------------------------------------------------------------
@@ -487,7 +465,7 @@ async function initApp() {
   // Reader Stage Tap & Double-Tap Gestures
   // --------------------------------------------------------------------------
   readerStage.addEventListener('click', async (e) => {
-    if (e.target.closest('.hud-actions') || e.target.closest('button') || e.target.closest('.stage-top-toolbar')) return;
+    if (e.target.closest('.hud-actions') || e.target.closest('button')) return;
 
     const rect = readerStage.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
@@ -498,10 +476,10 @@ async function initApp() {
     if (now - lastTapTime < 320 && lastTapSide === isLeftSide) {
       if (isLeftSide) {
         await jumpWords(-10);
-        triggerGestureFeedback('left', '↺ -10 Words');
+        triggerGestureFeedback('left', '↺ -10');
       } else {
         await jumpWords(10);
-        triggerGestureFeedback('right', '↻ +10 Words');
+        triggerGestureFeedback('right', '↻ +10');
       }
       lastTapTime = 0;
       return;
@@ -541,17 +519,6 @@ async function initApp() {
     startCountdown(() => play());
   });
 
-  // Zen Mode Toggle
-  btnZenToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    isZenMode = !isZenMode;
-    btnZenToggle.classList.toggle('active', isZenMode);
-    if (isPlaying) {
-      modernApp.classList.toggle('zen-mode', isZenMode);
-    }
-    AudioSystem.playZenToggle(isZenMode);
-  });
-
   // --------------------------------------------------------------------------
   // Interactive Progress Scrubber
   // --------------------------------------------------------------------------
@@ -580,7 +547,7 @@ async function initApp() {
   });
 
   // --------------------------------------------------------------------------
-  // Media Controls (Rewind, Play, Skip, Reset)
+  // Media Controls (YouTube Style Icon Only)
   // --------------------------------------------------------------------------
   btnPlayHero.addEventListener('click', async () => {
     AudioSystem.playButtonPress();
@@ -597,12 +564,12 @@ async function initApp() {
 
   btnRewind10.addEventListener('click', async () => {
     await jumpWords(-10);
-    triggerGestureFeedback('left', '↺ -10 Words');
+    triggerGestureFeedback('left', '↺ -10');
   });
 
   btnSkip10.addEventListener('click', async () => {
     await jumpWords(10);
-    triggerGestureFeedback('right', '↻ +10 Words');
+    triggerGestureFeedback('right', '↻ +10');
   });
 
   btnReset.addEventListener('click', async () => {
@@ -694,7 +661,7 @@ async function initApp() {
   });
 
   // --------------------------------------------------------------------------
-  // Text Input, Clipboard & Sample Chips
+  // Text Input & Clipboard
   // --------------------------------------------------------------------------
   function updateReadingEstimate() {
     const text = textInput.value.trim();
@@ -713,13 +680,13 @@ async function initApp() {
       timeStr = `${mins}m ${secs}s`;
     }
 
-    readingEstimate.textContent = `${wordsCount.toLocaleString()} words • ~${timeStr} at ${wpm} WPM`;
+    readingEstimate.textContent = `${wordsCount.toLocaleString()} words • ~${timeStr}`;
   }
 
   async function prepareScratchpad() {
     const text = textInput.value.trim() || defaultWelcomeText;
     const words = RSVP.parseText(text, defaultWelcomeText);
-    await Storage.saveBook('scratchpad', 'Scratchpad', 'User Input', words, state.colorPalette || 'red');
+    await Storage.saveBook('scratchpad', 'Scratchpad', 'User Input', words, state.colorPalette || 'white');
     currentBookMeta = await Storage.getBookMeta('scratchpad');
     currentChunkIndex = 0;
     currentChunkWords = await Storage.getBookChunk('scratchpad', 0);
@@ -729,7 +696,6 @@ async function initApp() {
   }
 
   textInput.addEventListener('input', async () => {
-    textareaQuoteHint.style.opacity = textInput.value.length > 0 ? '0' : '0.7';
     updateReadingEstimate();
     if (!isPlaying) {
       await prepareScratchpad();
@@ -741,7 +707,6 @@ async function initApp() {
       const clipText = await navigator.clipboard.readText();
       if (clipText && clipText.trim()) {
         textInput.value = clipText.trim();
-        textareaQuoteHint.style.opacity = '0';
         updateReadingEstimate();
         await prepareScratchpad();
         AudioSystem.playButtonPress();
@@ -755,24 +720,8 @@ async function initApp() {
   btnClearText.addEventListener('click', async () => {
     AudioSystem.playButtonPress();
     textInput.value = '';
-    textareaQuoteHint.style.opacity = '0.7';
     updateReadingEstimate();
     await prepareScratchpad();
-  });
-
-  // Sample Text Chips
-  sampleChips.forEach(chip => {
-    chip.addEventListener('click', async () => {
-      const sampleKey = chip.dataset.sample;
-      const sampleContent = sampleTexts[sampleKey];
-      if (sampleContent) {
-        AudioSystem.playSampleSelect();
-        textInput.value = sampleContent;
-        textareaQuoteHint.style.opacity = '0';
-        updateReadingEstimate();
-        await prepareScratchpad();
-      }
-    });
   });
 
   returnScratchBtn.addEventListener('click', async () => {
@@ -784,89 +733,16 @@ async function initApp() {
     await prepareScratchpad();
   });
 
-  // Quote rotation
-  let quoteIndex = 0;
-  setInterval(() => {
-    if (!textInput.value.trim()) {
-      quoteIndex = (quoteIndex + 1) % Quotes.emptyState.length;
-      textareaQuoteHint.style.opacity = '0';
-      setTimeout(() => {
-        if (!textInput.value.trim()) {
-          textareaQuoteHint.textContent = Quotes.emptyState[quoteIndex];
-          textareaQuoteHint.style.opacity = '0.7';
-        }
-      }, 400);
-    }
-  }, 7000);
-
   // --------------------------------------------------------------------------
-  // Keyboard Shortcuts (Space, Arrows, Z, M, R)
-  // --------------------------------------------------------------------------
-  document.addEventListener('keydown', async (e) => {
-    const activeEl = document.activeElement;
-    const isEditing = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
-    if (isEditing) return;
-
-    if (e.code === 'Space') {
-      e.preventDefault();
-      AudioSystem.playButtonPress();
-      if (isPlaying) {
-        await stop();
-        pauseHud.classList.add('active');
-      } else if (pauseHud.classList.contains('active')) {
-        pauseHud.classList.remove('active');
-        startCountdown(() => play());
-      } else {
-        startCountdown(() => play());
-      }
-    } else if (e.code === 'ArrowLeft') {
-      e.preventDefault();
-      await jumpWords(-5);
-      triggerGestureFeedback('left', '↺ -5 Words');
-    } else if (e.code === 'ArrowRight') {
-      e.preventDefault();
-      await jumpWords(5);
-      triggerGestureFeedback('right', '↻ +5 Words');
-    } else if (e.code === 'ArrowUp') {
-      e.preventDefault();
-      AudioSystem.playPresetSelect();
-      setWpm(state.wpm + 25);
-    } else if (e.code === 'ArrowDown') {
-      e.preventDefault();
-      AudioSystem.playPresetSelect();
-      setWpm(state.wpm - 25);
-    } else if (e.code === 'KeyZ') {
-      btnZenToggle.click();
-    } else if (e.code === 'KeyM') {
-      btnMute.click();
-    } else if (e.code === 'KeyR') {
-      btnReset.click();
-    }
-  });
-
-  // Shortcuts Modal
-  btnOpenShortcuts.addEventListener('click', () => {
-    AudioSystem.playModalOpen();
-    shortcutsModal.classList.add('active');
-  });
-  btnCloseShortcutsModal.addEventListener('click', () => {
-    AudioSystem.playModalClose();
-    shortcutsModal.classList.remove('active');
-  });
-  btnCloseShortcutsBtn.addEventListener('click', () => {
-    AudioSystem.playModalClose();
-    shortcutsModal.classList.remove('active');
-  });
-
-  // --------------------------------------------------------------------------
-  // Library Management with SVG Circular Progress Rings
+  // Library Management with iOS Swipe-to-Delete
   // --------------------------------------------------------------------------
   async function ensurePreloadedBooks() {
     const existing = await Storage.getLibraryMeta();
-    if (existing.length === 0) {
+    const nonScratch = existing.filter(b => b.id !== 'scratchpad');
+    if (nonScratch.length === 0) {
       for (const item of PreloadedLibrary) {
         const words = RSVP.parseText(item.content, '');
-        await Storage.saveBook(item.id, item.title, item.author, words, 'red');
+        await Storage.saveBook(item.id, item.title, item.author, words, 'white');
       }
     }
   }
@@ -875,81 +751,149 @@ async function initApp() {
     await ensurePreloadedBooks();
     const metaList = await Storage.getLibraryMeta();
     libraryGrid.innerHTML = '';
+    const books = metaList.filter(b => b.id !== 'scratchpad');
 
-    metaList.forEach(book => {
-      const card = document.createElement('div');
-      card.className = 'book-card';
-      card.style.setProperty('--card-color', `var(--palette-${book.color || 'red'})`);
+    books.forEach(book => {
+      const item = document.createElement('div');
+      item.className = 'book-card-item';
+      item.dataset.id = book.id;
 
-      const pct = book.totalWords > 0 ? ((book.currentIndex / book.totalWords) * 100).toFixed(0) : 0;
+      const pct = book.totalWords > 0 ? Math.min(100, Math.round((book.currentIndex / book.totalWords) * 100)) : 0;
       const isComplete = pct >= 100;
       const ringOffset = 88 - (88 * (pct / 100));
 
-      card.innerHTML = `
-        <div class="book-info">
-          <div class="book-title">${escapeHtml(book.title)}</div>
-          <div class="book-meta">
-            <span>${escapeHtml(book.author || 'Unknown')}</span>
-            <span>•</span>
-            <span>${book.totalWords.toLocaleString()} words</span>
-            <span>•</span>
-            <span style="color: var(--accent); font-weight: 700;">${isComplete ? 'Finished' : `${pct}% completed`}</span>
-          </div>
-        </div>
-        <div class="book-actions-group">
-          <!-- Circular Progress Ring -->
-          <div class="book-ring-wrap" title="${pct}% read">
-            <svg viewBox="0 0 36 36">
-              <circle class="book-ring-bg" cx="18" cy="18" r="14"></circle>
-              <circle class="book-ring-prog" cx="18" cy="18" r="14" stroke-dasharray="88" stroke-dashoffset="${ringOffset}"></circle>
+      item.innerHTML = `
+        <div class="book-swipe-delete-bg">
+          <button class="btn-swipe-delete" data-id="${book.id}" aria-label="Delete ${escapeHtml(book.title)}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
             </svg>
-            <span class="book-ring-val">${pct}%</span>
-          </div>
-          <button class="btn-read-launch" data-id="${book.id}">Read</button>
-          <button class="btn-icon-book edit" data-id="${book.id}" title="Edit Book">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <span>Delete</span>
           </button>
-          ${book.id !== 'scratchpad' ? `
-            <button class="btn-icon-book delete" data-id="${book.id}" title="Delete Book">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            </button>
-          ` : ''}
+        </div>
+        <div class="book-card" style="--card-color: var(--palette-${book.color || 'white'})">
+          <div class="book-info">
+            <div class="book-title">${escapeHtml(book.title)}</div>
+            <div class="book-meta">
+              <span>${escapeHtml(book.author || 'Unknown')}</span>
+              <span>•</span>
+              <span>${book.totalWords.toLocaleString()} words</span>
+              <span>•</span>
+              <span style="color: var(--text-primary); font-weight: 700;">${isComplete ? 'Finished' : `${pct}%`}</span>
+            </div>
+          </div>
+          <div class="book-actions-group">
+            <div class="book-ring-wrap" title="${pct}% read">
+              <svg viewBox="0 0 36 36">
+                <circle class="book-ring-bg" cx="18" cy="18" r="14"></circle>
+                <circle class="book-ring-prog" cx="18" cy="18" r="14" stroke-dasharray="88" stroke-dashoffset="${ringOffset}"></circle>
+              </svg>
+              <span class="book-ring-val">${pct}%</span>
+            </div>
+            <button class="btn-read-launch" data-id="${book.id}">Read</button>
+          </div>
         </div>
       `;
 
-      // Read Launch Click
-      card.querySelector('.btn-read-launch').addEventListener('click', (e) => {
-        e.stopPropagation();
-        openLaunchModal(book);
-      });
+      const cardEl = item.querySelector('.book-card');
+      const deleteBtn = item.querySelector('.btn-swipe-delete');
 
-      card.querySelector('.book-info').addEventListener('click', () => {
-        openLaunchModal(book);
-      });
+      // Swipe gesture logic (touch & pointer for cross-device support)
+      let startX = 0;
+      let currentDiff = 0;
+      let isSwiping = false;
 
-      // Edit Click
-      card.querySelector('.btn-icon-book.edit').addEventListener('click', async (e) => {
-        e.stopPropagation();
-        await openEditModal(book.id);
-      });
-
-      // Delete Click
-      const delBtn = card.querySelector('.btn-icon-book.delete');
-      if (delBtn) {
-        delBtn.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          AudioSystem.playButtonPress();
-          if (confirm(`Remove "${book.title}" from your library?`)) {
-            await Storage.deleteBook(book.id);
-            if (state.activeDocId === book.id) {
-              await loadBook('scratchpad');
-            }
-            renderLibrary();
-          }
-        });
+      function handleSwipeStart(clientX) {
+        startX = clientX;
+        currentDiff = 0;
+        isSwiping = true;
+        cardEl.style.transition = 'none';
       }
 
-      libraryGrid.appendChild(card);
+      function handleSwipeMove(clientX) {
+        if (!isSwiping) return;
+        const diff = clientX - startX;
+        if (diff < 0) {
+          // Swiping left to reveal delete button
+          currentDiff = Math.max(-90, diff);
+          cardEl.style.transform = `translateX(${currentDiff}px)`;
+        } else if (cardEl.classList.contains('swiped')) {
+          currentDiff = Math.min(0, -88 + diff);
+          cardEl.style.transform = `translateX(${currentDiff}px)`;
+        }
+      }
+
+      function handleSwipeEnd() {
+        if (!isSwiping) return;
+        isSwiping = false;
+        cardEl.style.transition = 'transform 0.25s var(--spring-bouncy)';
+        if (currentDiff < -45) {
+          cardEl.style.transform = 'translateX(-88px)';
+          cardEl.classList.add('swiped');
+        } else {
+          cardEl.style.transform = 'translateX(0px)';
+          cardEl.classList.remove('swiped');
+        }
+      }
+
+      // Touch events (Mobile Safari / iOS)
+      cardEl.addEventListener('touchstart', (e) => handleSwipeStart(e.touches[0].clientX), { passive: true });
+      cardEl.addEventListener('touchmove', (e) => handleSwipeMove(e.touches[0].clientX), { passive: true });
+      cardEl.addEventListener('touchend', handleSwipeEnd);
+
+      // Pointer events (PC & mouse dragging)
+      cardEl.addEventListener('pointerdown', (e) => {
+        if (e.target.closest('.btn-read-launch') || e.target.closest('button')) return;
+        handleSwipeStart(e.clientX);
+        const onPointerMove = (pe) => handleSwipeMove(pe.clientX);
+        const onPointerUp = () => {
+          handleSwipeEnd();
+          window.removeEventListener('pointermove', onPointerMove);
+          window.removeEventListener('pointerup', onPointerUp);
+        };
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+      });
+
+      // Tap on delete button smoothly collapses and removes book
+      deleteBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        AudioSystem.playButtonPress();
+        item.style.transition = 'max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease';
+        item.style.opacity = '0';
+        item.style.maxHeight = '0px';
+        item.style.marginBottom = '0px';
+        setTimeout(async () => {
+          await Storage.deleteBook(book.id);
+          if (state.activeDocId === book.id) {
+            await loadBook('scratchpad');
+          }
+          renderLibrary();
+        }, 280);
+      });
+
+      // Tap on card launches book
+      cardEl.querySelector('.btn-read-launch').addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (cardEl.classList.contains('swiped')) {
+          cardEl.style.transform = 'translateX(0px)';
+          cardEl.classList.remove('swiped');
+          return;
+        }
+        openLaunchModal(book);
+      });
+
+      cardEl.querySelector('.book-info').addEventListener('click', () => {
+        if (cardEl.classList.contains('swiped')) {
+          cardEl.style.transform = 'translateX(0px)';
+          cardEl.classList.remove('swiped');
+          return;
+        }
+        openLaunchModal(book);
+      });
+
+      libraryGrid.appendChild(item);
     });
   }
 
@@ -1044,37 +988,14 @@ async function initApp() {
   btnAddBook.addEventListener('click', () => {
     AudioSystem.playModalOpen();
     editingBookId = null;
-    bookModalTitle.textContent = 'Add Book to Library';
+    bookModalTitle.textContent = 'Add Book';
     editBookTitleInput.value = '';
     editBookAuthorInput.value = '';
     editBookContentInput.value = '';
-    selectedModalColor = 'red';
-    modalColorDots.forEach(d => d.classList.toggle('active', d.dataset.color === 'red'));
+    selectedModalColor = 'white';
+    modalColorDots.forEach(d => d.classList.toggle('active', d.dataset.color === 'white'));
     addBookModal.classList.add('active');
   });
-
-  async function openEditModal(bookId) {
-    AudioSystem.playModalOpen();
-    editingBookId = bookId;
-    const book = await Storage.getBookMeta(bookId);
-    if (!book) return;
-
-    bookModalTitle.textContent = 'Edit Book';
-    editBookTitleInput.value = book.title || '';
-    editBookAuthorInput.value = book.author || '';
-
-    let fullWords = [];
-    const totalChunks = Math.ceil(book.totalWords / 1000);
-    for (let i = 0; i < totalChunks; i++) {
-      const chunk = await Storage.getBookChunk(bookId, i);
-      fullWords.push(...chunk);
-    }
-    editBookContentInput.value = fullWords.join(' ');
-
-    selectedModalColor = book.color || 'red';
-    modalColorDots.forEach(d => d.classList.toggle('active', d.dataset.color === selectedModalColor));
-    addBookModal.classList.add('active');
-  }
 
   modalColorDots.forEach(dot => {
     dot.addEventListener('click', () => {
@@ -1086,12 +1007,12 @@ async function initApp() {
   });
 
   btnSaveAddModal.addEventListener('click', async () => {
-    const title = editBookTitleInput.value.trim() || 'Untitled Book';
+    const title = editBookTitleInput.value.trim() || 'Untitled';
     const author = editBookAuthorInput.value.trim() || 'Unknown';
     const content = editBookContentInput.value.trim();
 
     if (!content) {
-      alert("Please enter or paste book text.");
+      alert("Please enter text.");
       return;
     }
 
@@ -1177,18 +1098,18 @@ async function initApp() {
 
   if (btnStartTrial) {
     btnStartTrial.addEventListener('click', () => {
-      btnStartTrial.textContent = 'Unlocking Prime...';
+      btnStartTrial.textContent = 'Unlocking...';
       AudioSystem.init();
       setTimeout(() => {
         state.isPro = true;
         Storage.saveSettings(state);
         applyTierMode();
         AudioSystem.playSuccessChime();
-        btnStartTrial.textContent = 'Prime Member Active';
+        btnStartTrial.textContent = 'Prime Active';
 
         const readerTab = document.querySelector('[data-target="tabReader"]');
         if (readerTab) readerTab.click();
-      }, 1000);
+      }, 800);
     });
   }
 
@@ -1201,8 +1122,7 @@ async function initApp() {
     const timeSavedSeconds = Math.round(wordsAbsorbed / 3);
 
     statWordsRead.textContent = wordsAbsorbed.toLocaleString();
-    statTimeSaved.textContent = `${timeSavedSeconds} seconds`;
-    completionQuote.textContent = Quotes.completion[Math.floor(Math.random() * Quotes.completion.length)] || "Knowledge absorbed.";
+    statTimeSaved.textContent = `${timeSavedSeconds}s`;
 
     completionModal.classList.add('active');
   }
@@ -1217,6 +1137,7 @@ async function initApp() {
   // --------------------------------------------------------------------------
   try {
     await Storage.initDB();
+    await ensurePreloadedBooks();
     const saved = await Storage.loadSettings();
     if (saved) {
       state = { ...state, ...saved };
@@ -1264,9 +1185,11 @@ async function initApp() {
   }
 
   updateReadingEstimate();
+  window.__appInitialized = true;
+  console.log("TACHYON Modern v23 Initialized Successfully!");
 }
 
-// Reliable boot trigger (handles deferred modules where DOMContentLoaded already fired)
+// Reliable boot trigger
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initApp);
 } else {
