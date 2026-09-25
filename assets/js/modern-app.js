@@ -1,7 +1,7 @@
-import { Storage } from './storage.js?v=26';
-import { AudioSystem } from './audio.js?v=26';
-import { RSVP } from './rsvp.js?v=26';
-import { PreloadedLibrary, Quotes } from './data.js?v=26';
+import { Storage } from './storage.js?v=27';
+import { AudioSystem } from './audio.js?v=27';
+import { RSVP } from './rsvp.js?v=27';
+import { PreloadedLibrary, Quotes } from './data.js?v=27';
 
 async function initApp() {
   // Main Container & Stage
@@ -26,6 +26,9 @@ async function initApp() {
   const hudResumeBtn = document.getElementById('hudResumeBtn');
 
   const countdownHud = document.getElementById('countdownHud');
+  const countdownCircleProg = document.getElementById('countdownCircleProg');
+  const countdownNumber = document.getElementById('countdownNumber');
+  const countdownAffirmation = document.getElementById('countdownAffirmation');
 
   // Scrubber
   const progressScrubber = document.getElementById('progressScrubber');
@@ -93,6 +96,7 @@ async function initApp() {
   const needlePosLabel = document.getElementById('needlePosLabel');
   const needlePreviewBox = document.getElementById('needlePreviewBox');
   const btnLaunchRead = document.getElementById('btnLaunchRead');
+  const btnLaunchEditBook = document.getElementById('btnLaunchEditBook');
   const btnLaunchResetProg = document.getElementById('btnLaunchResetProg');
   const btnCloseLaunchModal = document.getElementById('btnCloseLaunchModal');
 
@@ -435,7 +439,10 @@ async function initApp() {
     setPlayButtonVisual(false);
 
     if (isCountingDown) {
-      clearTimeout(countdownIntervalId);
+      if (countdownIntervalId) {
+        clearInterval(countdownIntervalId);
+        countdownIntervalId = null;
+      }
       isCountingDown = false;
       countdownHud.classList.remove('active');
     }
@@ -446,20 +453,52 @@ async function initApp() {
   }
 
   // --------------------------------------------------------------------------
-  // Resume Loading Circle Animation
+  // 3-Second Resume Countdown Sequence (3, 2, 1, Read!)
   // --------------------------------------------------------------------------
   function startCountdown(onComplete) {
     if (isCountingDown) return;
     isCountingDown = true;
     countdownHud.classList.add('active');
-    AudioSystem.playButtonPress();
 
-    countdownIntervalId = setTimeout(() => {
-      isCountingDown = false;
-      countdownHud.classList.remove('active');
-      AudioSystem.playCountdownBeep(true);
-      if (onComplete) onComplete();
-    }, 600);
+    let count = 3;
+    const updateCountdownView = (step) => {
+      if (countdownNumber) {
+        countdownNumber.textContent = step;
+        countdownNumber.classList.remove('pulse');
+        void countdownNumber.offsetWidth;
+        countdownNumber.classList.add('pulse');
+      }
+      if (countdownCircleProg) {
+        const offset = (3 - step) * 88;
+        countdownCircleProg.style.strokeDashoffset = `${offset}`;
+      }
+      if (countdownAffirmation) {
+        if (step === 3) countdownAffirmation.textContent = 'Ready...';
+        else if (step === 2) countdownAffirmation.textContent = 'Focus...';
+        else if (step === 1) countdownAffirmation.textContent = 'Read!';
+      }
+      AudioSystem.playCountdownBeep(step === 1);
+    };
+
+    updateCountdownView(3);
+
+    countdownIntervalId = setInterval(() => {
+      count--;
+      if (count > 0) {
+        updateCountdownView(count);
+      } else {
+        clearInterval(countdownIntervalId);
+        countdownIntervalId = null;
+        if (countdownCircleProg) {
+          countdownCircleProg.style.strokeDashoffset = '264';
+        }
+        setTimeout(() => {
+          isCountingDown = false;
+          countdownHud.classList.remove('active');
+          if (onComplete) onComplete();
+        }, 150);
+      }
+    }, 1000);
   }
 
   // --------------------------------------------------------------------------
@@ -916,6 +955,13 @@ async function initApp() {
               </svg>
               <span class="book-ring-val">${pct}%</span>
             </div>
+            <button class="btn-book-edit" data-id="${book.id}" title="Edit book details" aria-label="Edit ${escapeHtml(book.title)}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+              <span>Edit</span>
+            </button>
             <button class="btn-read-launch" data-id="${book.id}">Read</button>
           </div>
         </div>
@@ -933,18 +979,19 @@ async function initApp() {
         startX = clientX;
         currentDiff = 0;
         isSwiping = true;
-        item.classList.add('is-swiping');
         cardEl.style.transition = 'none';
       }
 
       function handleSwipeMove(clientX) {
         if (!isSwiping) return;
         const diff = clientX - startX;
-        if (diff < 0) {
-          // Swiping left to reveal delete button
+        if (diff < -12) {
+          // Swiping left to reveal delete button - only show red background when swiped past threshold
+          item.classList.add('is-swiping');
           currentDiff = Math.max(-90, diff);
           cardEl.style.transform = `translateX(${currentDiff}px)`;
         } else if (cardEl.classList.contains('swiped')) {
+          item.classList.add('is-swiping');
           currentDiff = Math.min(0, -88 + diff);
           cardEl.style.transform = `translateX(${currentDiff}px)`;
         }
@@ -972,7 +1019,7 @@ async function initApp() {
 
       // Pointer events (PC & mouse dragging)
       cardEl.addEventListener('pointerdown', (e) => {
-        if (e.target.closest('.btn-read-launch') || e.target.closest('button')) return;
+        if (e.target.closest('.btn-read-launch') || e.target.closest('.btn-book-edit') || e.target.closest('button')) return;
         handleSwipeStart(e.clientX);
         const onPointerMove = (pe) => handleSwipeMove(pe.clientX);
         const onPointerUp = () => {
@@ -1001,8 +1048,23 @@ async function initApp() {
         }, 280);
       });
 
-      // Tap on card launches book
-      cardEl.querySelector('.btn-read-launch').addEventListener('click', (e) => {
+      // Edit book details button
+      const editBtn = cardEl.querySelector('.btn-book-edit');
+      if (editBtn) {
+        editBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (cardEl.classList.contains('swiped')) {
+            cardEl.style.transform = 'translateX(0px)';
+            cardEl.classList.remove('swiped');
+            item.classList.remove('is-swiping');
+            return;
+          }
+          openEditBookModal(book);
+        });
+      }
+
+      // Tap on Read button directly loads book into reader
+      cardEl.querySelector('.btn-read-launch').addEventListener('click', async (e) => {
         e.stopPropagation();
         if (cardEl.classList.contains('swiped')) {
           cardEl.style.transform = 'translateX(0px)';
@@ -1010,9 +1072,10 @@ async function initApp() {
           item.classList.remove('is-swiping');
           return;
         }
-        openLaunchModal(book);
+        await loadBook(book.id);
       });
 
+      // Tap on book info opens starting needle launch modal
       cardEl.querySelector('.book-info').addEventListener('click', () => {
         if (cardEl.classList.contains('swiped')) {
           cardEl.style.transform = 'translateX(0px)';
@@ -1033,14 +1096,25 @@ async function initApp() {
   }
 
   async function loadBook(bookId) {
+    if (isPlaying) {
+      await stop();
+    }
+    pauseHud.classList.remove('active');
+    countdownHud.classList.remove('active');
+    isCountingDown = false;
+
     state.activeDocId = bookId;
     await Storage.saveSettings(state);
 
     currentBookMeta = await Storage.getBookMeta(bookId);
     if (!currentBookMeta) return;
 
-    currentChunkIndex = Math.floor(currentBookMeta.currentIndex / 1000);
+    currentChunkIndex = Math.floor((currentBookMeta.currentIndex || 0) / 1000);
     currentChunkWords = await Storage.getBookChunk(bookId, currentChunkIndex);
+    if (!currentChunkWords || currentChunkWords.length === 0) {
+      currentChunkIndex = 0;
+      currentChunkWords = (await Storage.getBookChunk(bookId, 0)) || [];
+    }
 
     if (bookId !== 'scratchpad') {
       textInput.style.display = 'none';
@@ -1058,7 +1132,7 @@ async function initApp() {
       }
     }
 
-    const indexInChunk = currentBookMeta.currentIndex % 1000;
+    const indexInChunk = (currentBookMeta.currentIndex || 0) % 1000;
     displayWord(currentChunkWords[indexInChunk] || '');
     updateScrubberAndStats();
     updateStageBookBadge();
@@ -1182,6 +1256,16 @@ async function initApp() {
     pendingLaunchDoc = null;
   });
 
+  if (btnLaunchEditBook) {
+    btnLaunchEditBook.addEventListener('click', async () => {
+      if (!pendingLaunchDoc) return;
+      const targetDoc = pendingLaunchDoc;
+      AudioSystem.playModalClose();
+      launchModal.classList.remove('active');
+      await openEditBookModal(targetDoc);
+    });
+  }
+
   // --------------------------------------------------------------------------
   // About Tachyon Modal
   // --------------------------------------------------------------------------
@@ -1207,6 +1291,28 @@ async function initApp() {
   // --------------------------------------------------------------------------
   // Add / Edit Book Modal
   // --------------------------------------------------------------------------
+  async function openEditBookModal(book) {
+    if (!book) return;
+    AudioSystem.playModalOpen();
+    editingBookId = book.id;
+    bookModalTitle.textContent = 'Edit Book';
+    editBookTitleInput.value = book.title || '';
+    editBookAuthorInput.value = book.author || '';
+    editBookContentInput.value = 'Loading text...';
+
+    selectedModalColor = book.color || 'white';
+    modalColorDots.forEach(d => d.classList.toggle('active', d.dataset.color === selectedModalColor));
+    addBookModal.classList.add('active');
+
+    try {
+      const words = await Storage.getAllBookWords(book.id);
+      editBookContentInput.value = words.join(' ');
+    } catch (err) {
+      console.warn("Could not retrieve all book words:", err);
+      editBookContentInput.value = '';
+    }
+  }
+
   btnAddBook.addEventListener('click', () => {
     AudioSystem.playModalOpen();
     editingBookId = null;
@@ -1243,18 +1349,26 @@ async function initApp() {
 
     await Storage.saveBook(id, title, author, words, selectedModalColor);
     addBookModal.classList.remove('active');
+
+    if (currentBookMeta && currentBookMeta.id === id) {
+      await loadBook(id);
+    }
+
     renderLibrary();
     AudioSystem.playSuccessChime();
+    editingBookId = null;
   });
 
   btnCancelAddModal.addEventListener('click', () => {
     AudioSystem.playModalClose();
     addBookModal.classList.remove('active');
+    editingBookId = null;
   });
 
   btnCloseAddModal.addEventListener('click', () => {
     AudioSystem.playModalClose();
     addBookModal.classList.remove('active');
+    editingBookId = null;
   });
 
   // --------------------------------------------------------------------------

@@ -19,12 +19,12 @@
     if ('caches' in window) {
       caches.keys().then(names => {
         for (const name of names) {
-          if (name !== 'tachyon-v26') caches.delete(name);
+          if (name !== 'tachyon-v27') caches.delete(name);
         }
       });
     }
   </script>
-  <link rel="stylesheet" href="assets/css/modern.css?v=26">
+  <link rel="stylesheet" href="assets/css/modern.css?v=27">
 </head>
 <body data-theme="obsidian">
 
@@ -128,9 +128,9 @@
           </div>
           <div class="hud-actions">
             <button class="btn-media-circle" id="hudJumpBackBtn" title="Rewind 10 words" aria-label="Rewind 10 words">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                <path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.2 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/>
-                <text x="12" y="16.5" font-size="7.5" font-weight="900" text-anchor="middle" fill="currentColor" font-family="-apple-system, sans-serif">10</text>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                <text x="12" y="15.5" font-size="7" font-weight="900" text-anchor="middle" fill="currentColor" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif">10</text>
               </svg>
             </button>
             <button class="btn-media-hero" id="hudResumeBtn" title="Resume reading" aria-label="Resume reading">
@@ -139,19 +139,17 @@
           </div>
         </div>
 
-        <!-- Resume Loading Circle Overlay -->
+        <!-- Resume Countdown Overlay (3-Second Countdown: 3, 2, 1) -->
         <div class="overlay-hud" id="countdownHud">
           <div class="resume-loader-box">
-            <div class="resume-spinner-dial">
-              <svg viewBox="0 0 50 50" class="resume-spinner-svg">
-                <circle class="spinner-track" cx="25" cy="25" r="20"></circle>
-                <circle class="spinner-glow-head" cx="25" cy="25" r="20"></circle>
+            <div class="countdown-dial-wrap">
+              <svg viewBox="0 0 100 100" class="countdown-svg">
+                <circle class="countdown-circle-bg" cx="50" cy="50" r="42"></circle>
+                <circle class="countdown-circle-prog" id="countdownCircleProg" cx="50" cy="50" r="42"></circle>
               </svg>
-              <div class="resume-spinner-icon">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><polygon points="8 5 19 12 8 19 8 5"></polygon></svg>
-              </div>
+              <div class="countdown-number" id="countdownNumber">3</div>
             </div>
-            <div class="resume-affirmation">Resuming...</div>
+            <div class="resume-affirmation" id="countdownAffirmation">Get Ready...</div>
           </div>
         </div>
       </section>
@@ -178,12 +176,11 @@
       <!-- Intuitive Controls Deck (Centered YouTube-style Clean Icon Media Controls) -->
       <section class="controls-deck">
         <div class="primary-media-row">
-          <!-- Rewind 10 Words (Points Counter-Clockwise / Backwards Left) -->
+          <!-- Rewind 10 Words (Points Counter-Clockwise Left) -->
           <button class="btn-media-circle" id="btnRewind10" title="Rewind 10 words" aria-label="Rewind 10 words">
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden="true">
-              <path d="M11 4.5A7.5 7.5 0 1 0 19.5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <polyline points="12 1.5 8.5 4.5 12 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <text x="12" y="14.6" fill="currentColor" font-size="6.8" font-weight="800" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif" text-anchor="middle">10</text>
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+              <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+              <text x="12" y="15.5" font-size="7" font-weight="900" text-anchor="middle" fill="currentColor" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif">10</text>
             </svg>
           </button>
 
@@ -194,12 +191,11 @@
             </svg>
           </button>
 
-          <!-- Skip Forward 10 Words (Points Clockwise / Forwards Right) -->
+          <!-- Skip Forward 10 Words (Points Clockwise Right) -->
           <button class="btn-media-circle" id="btnSkip10" title="Skip forward 10 words" aria-label="Skip forward 10 words">
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden="true">
-              <path d="M13 4.5A7.5 7.5 0 1 1 4.5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <polyline points="12 1.5 15.5 4.5 12 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <text x="12" y="14.6" fill="currentColor" font-size="6.8" font-weight="800" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif" text-anchor="middle">10</text>
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+              <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/>
+              <text x="12" y="15.5" font-size="7" font-weight="900" text-anchor="middle" fill="currentColor" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif">10</text>
             </svg>
           </button>
         </div>
@@ -564,31 +560,33 @@
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 14px;">
-        <button class="btn-save" id="btnLaunchRead" style="width: 100%; padding: 13px; font-size: 15px;">Read</button>
+        <button class="btn-save" id="btnLaunchRead" style="width: 100%; padding: 13px; font-size: 15px;">Read from Here</button>
+        <button class="btn-cancel" id="btnLaunchEditBook" style="width: 100%; padding: 10px; font-size: 13px; text-align: center;">Edit Book Details</button>
       </div>
     </div>
   </div>
 
-  <!-- Session Completion Modal -->
+  <!-- Session Completion Modal (Clean Centered Stats, No Bubbles) -->
   <div class="modern-modal-backdrop" id="completionModal">
-    <div class="modern-dialog" style="text-align: center; align-items: center;">
-      <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--bg-surface-active); color: var(--text-primary); display: flex; align-items: center; justify-content: center; margin-bottom: 4px;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <div class="modern-dialog" style="text-align: center; align-items: center; max-width: 380px;">
+      <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; box-shadow: 0 0 20px var(--accent-glow);">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
       </div>
       <h2 style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">Reading Finished</h2>
 
-      <div class="hud-stats-grid" style="max-width: 100%; margin: 16px 0;">
-        <div class="hud-stat-cell">
-          <span class="hud-stat-label">Words Read</span>
-          <span class="hud-stat-val" id="statWordsRead">0</span>
+      <div class="completion-metrics-center">
+        <div class="completion-metric-group">
+          <div class="completion-metric-val" id="statWordsRead">0</div>
+          <div class="completion-metric-sub">words read</div>
         </div>
-        <div class="hud-stat-cell">
-          <span class="hud-stat-label">Time Saved</span>
-          <span class="hud-stat-val" id="statTimeSaved">0s</span>
+        <div class="completion-metric-sep">•</div>
+        <div class="completion-metric-group">
+          <div class="completion-metric-val" id="statTimeSaved">0s</div>
+          <div class="completion-metric-sub">time saved</div>
         </div>
       </div>
 
-      <button class="btn-save" id="btnCloseCompletion" style="width: 100%; padding: 12px; font-size: 14px;">Done</button>
+      <button class="btn-save" id="btnCloseCompletion" style="width: 100%; margin-top: 18px; padding: 13px; font-size: 15px;">Done</button>
     </div>
   </div>
 
@@ -626,6 +624,6 @@
   </div>
 
   <!-- Main Modular Modern Application Script -->
-  <script type="module" src="assets/js/modern-app.js?v=26"></script>
+  <script type="module" src="assets/js/modern-app.js?v=27"></script>
 </body>
 </html>

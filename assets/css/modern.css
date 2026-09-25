@@ -75,6 +75,9 @@ body[data-theme="obsidian"], body[data-theme="oled"] {
   --text-secondary: #8E8E93;
   --slider-track: rgba(255, 255, 255, 0.18);
   --slider-thumb-bg: #FFFFFF;
+  --btn-primary-bg: #FFFFFF;
+  --btn-primary-text: #000000;
+  --btn-primary-shadow: 0 4px 14px rgba(255, 255, 255, 0.25);
   --shadow-liquid: 0 14px 34px -8px rgba(0, 0, 0, 0.7), inset 0 1px 1px 0 rgba(255, 255, 255, 0.14);
 }
 
@@ -87,6 +90,9 @@ body[data-theme="graphite"] {
   --text-secondary: #98989D;
   --slider-track: rgba(255, 255, 255, 0.2);
   --slider-thumb-bg: #FFFFFF;
+  --btn-primary-bg: #FFFFFF;
+  --btn-primary-text: #000000;
+  --btn-primary-shadow: 0 4px 14px rgba(255, 255, 255, 0.22);
   --shadow-liquid: 0 14px 34px -8px rgba(0, 0, 0, 0.65), inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);
 }
 
@@ -101,6 +107,9 @@ body[data-theme="parchment"] {
   --slider-track: rgba(68, 52, 34, 0.22);
   --slider-thumb-bg: #342718;
   --slider-thumb-shadow: 0 3px 10px rgba(68, 52, 34, 0.35);
+  --btn-primary-bg: #342718;
+  --btn-primary-text: #F5EEDB;
+  --btn-primary-shadow: 0 4px 14px rgba(52, 39, 24, 0.3);
   --shadow-liquid: 0 12px 30px -8px rgba(92, 70, 44, 0.16), inset 0 1px 1px 0 rgba(255, 255, 255, 0.6);
 }
 
@@ -115,6 +124,9 @@ body[data-theme="vellum"] {
   --slider-track: rgba(0, 0, 0, 0.18);
   --slider-thumb-bg: #111827;
   --slider-thumb-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  --btn-primary-bg: #111827;
+  --btn-primary-text: #FFFFFF;
+  --btn-primary-shadow: 0 4px 14px rgba(17, 24, 39, 0.25);
   --shadow-liquid: 0 10px 30px -8px rgba(0, 0, 0, 0.08), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
 }
 
@@ -549,6 +561,14 @@ button:active {
   padding: 24px;
   text-align: center;
 }
+body[data-theme="parchment"] .overlay-hud {
+  background: rgba(245, 238, 219, 0.94);
+  border: 1px solid rgba(68, 52, 34, 0.15);
+}
+body[data-theme="vellum"] .overlay-hud {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
 .overlay-hud.active {
   display: flex !important;
   opacity: 1;
@@ -598,7 +618,33 @@ button:active {
   gap: 16px;
 }
 
-/* Resume Loading Circle Spinner */
+#hudResumeBtn {
+  width: auto;
+  min-width: 132px;
+  height: 52px;
+  padding: 0 24px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  box-shadow: var(--btn-primary-shadow);
+  cursor: pointer;
+  transition: transform 0.2s var(--spring-bouncy), box-shadow 0.2s ease;
+}
+#hudResumeBtn:hover {
+  transform: scale(1.05);
+}
+#hudResumeBtn:active {
+  transform: scale(0.95);
+}
+
+/* 3-Second Resume Countdown Dial Overlay */
 .resume-loader-box {
   display: flex;
   flex-direction: column;
@@ -610,46 +656,54 @@ button:active {
   from { opacity: 0; transform: scale(0.85); }
   to { opacity: 1; transform: scale(1); }
 }
-.resume-spinner-dial {
+.countdown-dial-wrap {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 96px;
+  height: 96px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.resume-spinner-svg {
+.countdown-svg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  animation: resumeSpinnerRotate 0.9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  transform: rotate(-90deg);
 }
-.spinner-track {
+.countdown-circle-bg {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.08);
-  stroke-width: 4;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 5;
 }
-.spinner-glow-head {
+body[data-theme="parchment"] .countdown-circle-bg {
+  stroke: rgba(68, 52, 34, 0.15);
+}
+body[data-theme="vellum"] .countdown-circle-bg {
+  stroke: rgba(0, 0, 0, 0.1);
+}
+.countdown-circle-prog {
   fill: none;
   stroke: var(--accent);
-  stroke-width: 4;
+  stroke-width: 5;
   stroke-linecap: round;
-  stroke-dasharray: 60 70;
+  stroke-dasharray: 264;
   stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.85s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-@keyframes resumeSpinnerRotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-.resume-spinner-icon {
+.countdown-number {
   position: relative;
   z-index: 2;
+  font-size: 38px;
+  font-weight: 800;
   color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  filter: drop-shadow(0 0 8px var(--accent-glow));
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-shadow: 0 0 16px var(--accent-glow);
+  transition: transform 0.18s var(--spring-bouncy), opacity 0.18s ease;
+}
+.countdown-number.pulse {
+  transform: scale(1.25);
 }
 .resume-affirmation {
   margin-top: 14px;
@@ -1077,12 +1131,12 @@ button:active {
   gap: 6px;
   padding: 8px 18px;
   border-radius: var(--radius-full);
-  background: var(--text-primary);
-  color: #000000;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25);
+  box-shadow: var(--btn-primary-shadow);
   transition: all 0.2s var(--spring-bouncy);
 }
 .btn-primary-pill:hover {
@@ -1226,6 +1280,31 @@ button:active {
   align-items: center;
   gap: 10px;
 }
+.btn-book-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface-elevated);
+  box-shadow: var(--shadow-liquid);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s var(--spring-bouncy);
+}
+.btn-book-edit:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface-active);
+  transform: translateY(-1px);
+}
+.btn-book-edit:active {
+  transform: scale(0.94);
+}
+.btn-book-edit svg {
+  stroke: currentColor;
+}
 .btn-read-launch {
   padding: 8px 18px;
   border-radius: var(--radius-full);
@@ -1238,8 +1317,8 @@ button:active {
   transition: all 0.2s var(--spring-bouncy);
 }
 .btn-read-launch:hover {
-  background: var(--text-primary);
-  color: #000000;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
 }
 
 /* ==========================================================================
@@ -1650,12 +1729,58 @@ button:active {
 .btn-save {
   padding: 10px 24px;
   border-radius: var(--radius-full);
-  background: var(--text-primary);
-  color: #000000;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
   font-weight: 700;
   font-size: 13px;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25);
+  box-shadow: var(--btn-primary-shadow);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.btn-save:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+.btn-save:active {
+  transform: scale(0.96);
+}
+
+/* Session Completion Modal (Centered Metrics, No Bubbles) */
+.completion-metrics-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin: 22px 0 16px;
+  width: 100%;
+}
+.completion-metric-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.completion-metric-val {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+.completion-metric-sub {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+.completion-metric-sep {
+  font-size: 20px;
+  color: var(--text-secondary);
+  opacity: 0.35;
+  line-height: 1;
 }
 
 /* ==========================================================================

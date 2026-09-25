@@ -289,7 +289,21 @@ export const Storage = {
       }
     });
   },
-  
+
+  async getAllBookWords(id) {
+    const meta = await this.getBookMeta(id);
+    if (!meta || !meta.totalWords) return [];
+    const totalChunks = Math.ceil(meta.totalWords / 1000);
+    const allWords = [];
+    for (let i = 0; i < totalChunks; i++) {
+      const chunk = await this.getBookChunk(id, i);
+      if (chunk && chunk.length > 0) {
+        allWords.push(...chunk);
+      }
+    }
+    return allWords;
+  },
+
   async deleteBook(id) {
     delete memoryFallback.booksMeta[id];
     Object.keys(memoryFallback.booksChunks).forEach(k => {
