@@ -248,6 +248,58 @@ export const AudioSystem = {
         break;
       }
 
+      // ----------------------------------------------------------------------
+      // 6. Warm Vinyl Tick (warm_vinyl)
+      // Nostalgic, ultra-damped vintage turntable stylus micro-tick:
+      // Bandpassed warm vinyl crackle + 260Hz organic wooden plinth body.
+      // Zero high-frequency harshness for fatigue-free long reading sessions.
+      // ----------------------------------------------------------------------
+      case 'warm_vinyl': {
+        // Layer A: Micro-dusted analog needle transit (soft low-pass burst)
+        if (this.noiseBuffer) {
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = this.noiseBuffer;
+          const bandpass = this.ctx.createBiquadFilter();
+          bandpass.type = 'bandpass';
+          bandpass.frequency.setValueAtTime(1400, t);
+          bandpass.Q.setValueAtTime(2.2, t);
+
+          const noiseGain = this.ctx.createGain();
+          noiseGain.gain.setValueAtTime(0.16 * finalVolume, t);
+          noiseGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.006);
+
+          noise.connect(bandpass);
+          bandpass.connect(noiseGain);
+          noiseGain.connect(this.ctx.destination);
+          noise.start(t);
+          noise.stop(t + 0.007);
+        }
+
+        // Layer B: Warm acoustic vinyl plinth / wood resonance
+        const osc = this.ctx.createOscillator();
+        const lowpass = this.ctx.createBiquadFilter();
+        const gain = this.ctx.createGain();
+
+        lowpass.type = 'lowpass';
+        lowpass.frequency.setValueAtTime(850, t);
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(260, t);
+        osc.frequency.exponentialRampToValueAtTime(110, t + 0.016 * speedFactor);
+
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.46 * finalVolume, t + 0.0012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.018 * speedFactor);
+
+        osc.connect(lowpass);
+        lowpass.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(t);
+        osc.stop(t + 0.02 * speedFactor);
+        break;
+      }
+
       default: {
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
@@ -270,12 +322,63 @@ export const AudioSystem = {
   // Console & iOS Inspired UI Sound Palette
   // --------------------------------------------------------------------------
 
-  // Tactile Button Press (Xbox 'A' / PS5 Cross Button / iOS Tap)
+  // UI Micro-Tick (Slider detents / toggles)
+  playUiTick() {
+    this.playPresetSelect();
+  },
+
+  // Tactile Button Press (Xbox 'A' / PS5 Cross Button / iOS Tap / Vinyl Tap)
   // Dual-transient: 2.2kHz contact transient + 180Hz damped bottom-out (30ms)
   playButtonPress() {
     if (!this.canPlayUi()) return;
     const t = this.ctx.currentTime;
 
+    if (this.profile === 'warm_vinyl') {
+      // Warm Vinyl Button Tap: mellow analog needle-drop click + deep warm thump
+      if (this.noiseBuffer) {
+        const click = this.ctx.createBufferSource();
+        click.buffer = this.noiseBuffer;
+        const bp = this.ctx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.setValueAtTime(1200, t);
+        bp.Q.setValueAtTime(2.5, t);
+
+        const clickGain = this.ctx.createGain();
+        clickGain.gain.setValueAtTime(0.18 * this.volume, t);
+        clickGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.008);
+
+        click.connect(bp);
+        bp.connect(clickGain);
+        clickGain.connect(this.ctx.destination);
+        click.start(t);
+        click.stop(t + 0.009);
+      }
+
+      const osc = this.ctx.createOscillator();
+      const filter = this.ctx.createBiquadFilter();
+      const gain = this.ctx.createGain();
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(800, t);
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(240, t);
+      osc.frequency.exponentialRampToValueAtTime(90, t + 0.028);
+
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.38 * this.volume, t + 0.002);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.032);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(t);
+      osc.stop(t + 0.035);
+      return;
+    }
+
+    // Default Tactile Button Press (Xbox 'A' / PS5 Cross Button / iOS Tap)
     // Transient click
     if (this.noiseBuffer) {
       const click = this.ctx.createBufferSource();
@@ -320,11 +423,50 @@ export const AudioSystem = {
     osc.stop(t + 0.035);
   },
 
-  // Sliding Tab Navigation (Xbox Dashboard / PS5 Home Bar Tile Slide)
+  // Sliding Tab Navigation (Xbox Dashboard / PS5 Home Bar Tile Slide / Vinyl Sleeve)
   // Airy aerodynamic swish + subtle landing pop (28ms)
   playTabSwitch() {
     if (!this.canPlayUi()) return;
     const t = this.ctx.currentTime;
+
+    if (this.profile === 'warm_vinyl') {
+      // Soft vinyl sleeve slide & gentle landing
+      if (this.noiseBuffer) {
+        const whoosh = this.ctx.createBufferSource();
+        whoosh.buffer = this.noiseBuffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(1100, t);
+        filter.frequency.exponentialRampToValueAtTime(400, t + 0.035);
+
+        const whooshGain = this.ctx.createGain();
+        whooshGain.gain.setValueAtTime(0, t);
+        whooshGain.gain.linearRampToValueAtTime(0.12 * this.volume, t + 0.005);
+        whooshGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.035);
+
+        whoosh.connect(filter);
+        filter.connect(whooshGain);
+        whooshGain.connect(this.ctx.destination);
+        whoosh.start(t);
+        whoosh.stop(t + 0.038);
+      }
+
+      const tap = this.ctx.createOscillator();
+      const tapGain = this.ctx.createGain();
+      tap.type = 'sine';
+      tap.frequency.setValueAtTime(220, t + 0.008);
+      tap.frequency.exponentialRampToValueAtTime(120, t + 0.03);
+
+      tapGain.gain.setValueAtTime(0, t + 0.008);
+      tapGain.gain.linearRampToValueAtTime(0.18 * this.volume, t + 0.012);
+      tapGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.035);
+
+      tap.connect(tapGain);
+      tapGain.connect(this.ctx.destination);
+      tap.start(t + 0.008);
+      tap.stop(t + 0.038);
+      return;
+    }
 
     // Aerodynamic airy whoosh
     if (this.noiseBuffer) {

@@ -1,7 +1,7 @@
-import { Storage } from './storage.js?v=23';
-import { AudioSystem } from './audio.js?v=23';
-import { RSVP } from './rsvp.js?v=23';
-import { PreloadedLibrary } from './data.js?v=23';
+import { Storage } from './storage.js?v=24';
+import { AudioSystem } from './audio.js?v=24';
+import { RSVP } from './rsvp.js?v=24';
+import { PreloadedLibrary } from './data.js?v=24';
 
 async function initApp() {
   // Main Container & Stage
