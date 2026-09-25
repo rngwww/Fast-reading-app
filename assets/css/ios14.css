@@ -77,6 +77,7 @@
 
   /* Focal Swatches Palette */
   --palette-white: #FFFFFF;
+  --palette-black: #000000;
   --palette-red: #FF453A;
   --palette-pink: #FF375F;
   --palette-purple: #BF5AF2;
@@ -545,8 +546,8 @@ body[data-theme="vellum"] .reader-stage {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.08);
   border: 0.5px solid var(--border-subtle);
-  font-size: 11px;
-  font-weight: 200;
+  font-size: 13px;
+  font-weight: 300;
   letter-spacing: 0.04em;
   color: var(--text-secondary);
 }
@@ -707,12 +708,12 @@ body[data-theme="vellum"] .stage-book-badge {
   gap: 2px;
 }
 .hud-stat-label {
-  font-size: 11px;
-  font-weight: 200;
+  font-size: 13px;
+  font-weight: 300;
   color: var(--text-secondary);
 }
 .hud-stat-val {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 300;
   color: var(--text-primary);
 }
@@ -796,8 +797,8 @@ body[data-theme="vellum"] .stage-book-badge {
   transform: scale(1.18);
 }
 .resume-affirmation {
-  font-size: 13px;
-  font-weight: 200;
+  font-size: 15px;
+  font-weight: 300;
   letter-spacing: 0.06em;
   color: var(--text-secondary);
 }
@@ -819,8 +820,8 @@ body[data-theme="vellum"] .stage-book-badge {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 13px;
-  font-weight: 200;
+  font-size: 14.5px;
+  font-weight: 300;
   color: var(--text-secondary);
 }
 .btn-mini-reset {
@@ -831,8 +832,8 @@ body[data-theme="vellum"] .stage-book-badge {
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.08);
   color: var(--text-primary);
-  font-size: 11px;
-  font-weight: 200;
+  font-size: 12.5px;
+  font-weight: 300;
 }
 body[data-theme="vellum"] .btn-mini-reset {
   background: rgba(0, 0, 0, 0.06);
@@ -1114,12 +1115,12 @@ body[data-theme="vellum"] .btn-mini-action {
   display: none;
 }
 .quote-text {
-  font-size: 14px;
+  font-size: 15.5px;
   font-style: italic;
-  font-weight: 200;
+  font-weight: 300;
   color: var(--text-secondary);
   text-align: center;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .modern-textarea {
@@ -1130,9 +1131,9 @@ body[data-theme="vellum"] .btn-mini-action {
   border: 0.5px solid var(--border-subtle);
   padding: 12px;
   color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 200;
-  line-height: 1.5;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.6;
   resize: vertical;
 }
 body[data-theme="vellum"] .modern-textarea {
@@ -1143,8 +1144,8 @@ body[data-theme="vellum"] .modern-textarea {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 12px;
-  font-weight: 200;
+  font-size: 13.5px;
+  font-weight: 300;
   color: var(--text-secondary);
 }
 .reading-estimate {
@@ -1282,8 +1283,8 @@ body[data-theme="vellum"] .btn-primary-pill {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  font-weight: 200;
+  font-size: 14px;
+  font-weight: 300;
   color: var(--text-secondary);
 }
 
@@ -1538,7 +1539,7 @@ body[data-theme="vellum"] .book-ring-bg {
   height: 26px;
   border-radius: 50%;
   cursor: pointer;
-  transition: transform 0.2s var(--spring-bouncy), box-shadow 0.2s ease;
+  transition: transform 0.2s var(--spring-bouncy), box-shadow 0.2s ease, opacity 0.2s ease;
 }
 .accent-dot:active {
   transform: scale(0.85);
@@ -1546,6 +1547,17 @@ body[data-theme="vellum"] .book-ring-bg {
 .accent-dot.active {
   transform: scale(1.22);
   box-shadow: 0 0 0 2.5px var(--bg-app), 0 0 0 4.5px var(--swatch-color, #FFFFFF);
+}
+.accent-dot[data-color="black"] {
+  border: 1px solid rgba(128, 128, 128, 0.45);
+}
+.accent-dot.disabled {
+  opacity: 0.18 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  filter: grayscale(1);
+  transform: scale(0.85);
+  box-shadow: none !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -1580,10 +1592,10 @@ body[data-theme="vellum"] .book-ring-bg {
   color: var(--text-primary);
 }
 .prime-card-hero p {
-  font-size: 13px;
-  font-weight: 200;
+  font-size: 15px;
+  font-weight: 300;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.55;
   max-width: 340px;
 }
 .plan-cards-row {
@@ -1611,8 +1623,8 @@ body[data-theme="vellum"] .book-ring-bg {
   color: var(--text-primary);
 }
 .plan-card span {
-  font-size: 11px;
-  font-weight: 200;
+  font-size: 12.5px;
+  font-weight: 300;
   color: var(--text-secondary);
 }
 .plan-card.selected {
@@ -1658,10 +1670,10 @@ body[data-theme="vellum"] .book-ring-bg {
   margin-bottom: 2px;
 }
 .step-text p {
-  font-size: 13px;
-  font-weight: 200;
+  font-size: 15px;
+  font-weight: 300;
   color: var(--text-secondary);
-  line-height: 1.45;
+  line-height: 1.55;
 }
 
 /* --------------------------------------------------------------------------
@@ -1855,12 +1867,12 @@ body[data-theme="vellum"] .modern-dialog::before {
   gap: 2px;
 }
 .launch-chip-label {
-  font-size: 10px;
-  font-weight: 200;
+  font-size: 11.5px;
+  font-weight: 300;
   color: var(--text-secondary);
 }
 .launch-chip-val {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 300;
   color: var(--text-primary);
 }
@@ -1891,7 +1903,7 @@ body[data-theme="vellum"] .modern-dialog::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 13.5px;
 }
 .needle-pos-info {
   display: flex;
@@ -1899,8 +1911,8 @@ body[data-theme="vellum"] .modern-dialog::before {
   gap: 6px;
 }
 .needle-hint {
-  font-size: 11px;
-  font-weight: 200;
+  font-size: 13px;
+  font-weight: 300;
   color: var(--text-secondary);
 }
 .needle-preview-box {
@@ -1910,9 +1922,9 @@ body[data-theme="vellum"] .modern-dialog::before {
   background: rgba(0, 0, 0, 0.25);
   border: 0.5px solid var(--border-subtle);
   padding: 10px 12px;
-  font-size: 13px;
-  font-weight: 200;
-  line-height: 1.6;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.7;
 }
 body[data-theme="vellum"] .needle-preview-box {
   background: rgba(0, 0, 0, 0.04);
@@ -2001,8 +2013,8 @@ body[data-theme="vellum"] .btn-save {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 .about-version-tag {
-  font-size: 12px;
-  font-weight: 200;
+  font-size: 13.5px;
+  font-weight: 300;
   color: var(--text-secondary);
 }
 .about-specs-list {
@@ -2018,7 +2030,7 @@ body[data-theme="vellum"] .btn-save {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--text-secondary);
 }
 .about-spec-row strong {

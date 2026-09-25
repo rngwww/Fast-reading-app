@@ -19,12 +19,12 @@
     if ('caches' in window) {
       caches.keys().then(names => {
         for (const name of names) {
-          if (name !== 'tachyon-v31') caches.delete(name);
+          if (name !== 'tachyon-v32') caches.delete(name);
         }
       });
     }
   </script>
-  <link rel="stylesheet" href="assets/css/ios14.css?v=31">
+  <link rel="stylesheet" href="assets/css/ios14.css?v=32">
 </head>
 <body data-theme="obsidian">
 
@@ -452,6 +452,7 @@
         </div>
         <div class="accent-swatches-wrap" id="accentDots">
           <div class="accent-dot active" data-color="white" style="background: var(--palette-white); --swatch-color: var(--palette-white);" title="White"></div>
+          <div class="accent-dot" data-color="black" style="background: var(--palette-black); --swatch-color: var(--palette-black);" title="Black"></div>
           <div class="accent-dot" data-color="red" style="background: var(--palette-red); --swatch-color: var(--palette-red);" title="Crimson"></div>
           <div class="accent-dot" data-color="pink" style="background: var(--palette-pink); --swatch-color: var(--palette-pink);" title="Pink"></div>
           <div class="accent-dot" data-color="purple" style="background: var(--palette-purple); --swatch-color: var(--palette-purple);" title="Purple"></div>
@@ -666,6 +667,6 @@
   </div>
 
   <!-- Main Modular Modern Application Script -->
-  <script type="module" src="assets/js/modern-app.js?v=31"></script>
+  <script type="module" src="assets/js/modern-app.js?v=32"></script>
 </body>
 </html>

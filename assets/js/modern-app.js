@@ -171,10 +171,50 @@ async function initApp() {
   // --------------------------------------------------------------------------
   // Theming, Font & Accent System
   // --------------------------------------------------------------------------
+  function updateFocalColorAvailability() {
+    const theme = state.appTheme || 'obsidian';
+    const isDarkTheme = (theme === 'obsidian' || theme === 'graphite');
+    const isLightTheme = (theme === 'vellum');
+
+    // Rule: Cannot select black focal color with obsidian or graphite
+    // Rule: Cannot select white focal color with Light mode (vellum)
+    accentDots.forEach(dot => {
+      const color = dot.dataset.color;
+      let disabled = false;
+
+      if (color === 'black' && isDarkTheme) {
+        disabled = true;
+      } else if (color === 'white' && isLightTheme) {
+        disabled = true;
+      }
+
+      dot.classList.toggle('disabled', disabled);
+      if (disabled) {
+        dot.setAttribute('aria-disabled', 'true');
+        dot.setAttribute('title', color === 'black' ? 'Black unavailable in dark themes' : 'White unavailable in light theme');
+      } else {
+        dot.removeAttribute('aria-disabled');
+        dot.setAttribute('title', color.charAt(0).toUpperCase() + color.slice(1));
+      }
+    });
+
+    // Auto-adjust if the user's active color clashes with the newly chosen theme
+    if (state.colorPalette === 'black' && isDarkTheme) {
+      state.colorPalette = 'white';
+      Storage.saveSettings(state);
+    } else if (state.colorPalette === 'white' && isLightTheme) {
+      state.colorPalette = 'black';
+      Storage.saveSettings(state);
+    }
+  }
+
   function applyTheme() {
     const root = document.documentElement;
     const theme = state.appTheme || 'obsidian';
-    const accent = state.colorPalette || 'white';
+
+    updateFocalColorAvailability();
+
+    const accent = state.colorPalette || (theme === 'vellum' ? 'black' : 'white');
 
     document.body.setAttribute('data-theme', theme);
     root.style.setProperty('--accent', `var(--palette-${accent})`);
@@ -1488,8 +1528,20 @@ async function initApp() {
 
   accentDots.forEach(dot => {
     dot.addEventListener('click', () => {
+      const color = dot.dataset.color;
+      const theme = state.appTheme || 'obsidian';
+      const isDarkTheme = (theme === 'obsidian' || theme === 'graphite');
+      const isLightTheme = (theme === 'vellum');
+
+      if (color === 'black' && isDarkTheme) {
+        return; // Prohibited: black with dark theme
+      }
+      if (color === 'white' && isLightTheme) {
+        return; // Prohibited: white with Light mode
+      }
+
       AudioSystem.playButtonPress();
-      state.colorPalette = dot.dataset.color;
+      state.colorPalette = color;
       Storage.saveSettings(state);
       applyTheme();
     });
