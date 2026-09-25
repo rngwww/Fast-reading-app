@@ -1518,6 +1518,19 @@ async function initApp() {
     setTimeout(() => updateNavPill(firstActiveTab), 100);
   }
 
+  // Live iOS 14 Status Bar Clock
+  const iosStatusTime = document.getElementById('iosStatusTime');
+  if (iosStatusTime) {
+    function updateIosClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      let minutes = now.getMinutes();
+      iosStatusTime.textContent = `${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
+    }
+    updateIosClock();
+    setInterval(updateIosClock, 10000);
+  }
+
   // Load active book or scratchpad
   try {
     if (state.activeDocId && state.activeDocId !== 'scratchpad') {

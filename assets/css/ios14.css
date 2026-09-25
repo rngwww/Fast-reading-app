@@ -1,0 +1,1910 @@
+/* ==========================================================================
+   TACHYON — Apple iOS 14 UI Kit Design System
+   System Font: Helvetica Neue Ultra Light (Everywhere)
+   Based on Apple iOS 14 UI Kit for Figma
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Typography: Helvetica Neue Ultra Light
+   -------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Helvetica Neue Ultra Light';
+  font-style: normal;
+  font-weight: 100;
+  src: local('Helvetica Neue UltraLight'),
+       local('HelveticaNeue-UltraLight'),
+       local('Helvetica Neue Light'),
+       url('https://fonts.cdnfonts.com/s/14188/HelveticaNeueUltraLight.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Helvetica Neue Ultra Light';
+  font-style: normal;
+  font-weight: 200;
+  src: local('Helvetica Neue UltraLight'),
+       local('HelveticaNeue-UltraLight'),
+       local('Helvetica Neue Light'),
+       url('https://fonts.cdnfonts.com/s/14188/HelveticaNeueUltraLight.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Helvetica Neue Ultra Light';
+  font-style: italic;
+  font-weight: 100;
+  src: local('Helvetica Neue UltraLight Italic'),
+       local('HelveticaNeue-UltraLightItalic'),
+       url('https://fonts.cdnfonts.com/s/14188/HelveticaNeueUltraLightItal.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Helvetica Neue Ultra Light';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Helvetica Neue Light'),
+       local('HelveticaNeue-Light'),
+       url('https://fonts.cdnfonts.com/s/14188/HelveticaNeue-Light.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Helvetica Neue Ultra Light';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Helvetica Neue Regular'),
+       local('HelveticaNeue'),
+       url('https://fonts.cdnfonts.com/s/14188/HelveticaNeue-Roman.woff') format('woff');
+}
+
+/* Fallback webfonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500&display=swap');
+
+:root {
+  /* Universal System Font: Helvetica Neue Ultra Light */
+  --font-main: "Helvetica Neue Ultra Light", "HelveticaNeue-UltraLight", "Helvetica Neue", "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  --font-serif: -apple-system-serif, "New York", "Charter", "Georgia", serif;
+  --font-mono: "SF Mono", "Helvetica Neue", Menlo, Monaco, Consolas, monospace;
+  --rsvp-font: var(--font-main);
+
+  /* iOS 14 Color Palette */
+  --ios-blue: #0A84FF;
+  --ios-green: #34C759;
+  --ios-indigo: #5E5CE6;
+  --ios-orange: #FF9F0A;
+  --ios-pink: #FF375F;
+  --ios-purple: #BF5AF2;
+  --ios-red: #FF453A;
+  --ios-teal: #64D2FF;
+  --ios-yellow: #FFD60A;
+
+  /* Focal Swatches Palette */
+  --palette-white: #FFFFFF;
+  --palette-red: #FF453A;
+  --palette-pink: #FF375F;
+  --palette-purple: #BF5AF2;
+  --palette-blue: #0A84FF;
+  --palette-green: #34C759;
+  --palette-yellow: #FFD60A;
+  --palette-orange: #FF9F0A;
+
+  /* Default Dark Mode (Apple iOS 14 Dark System) */
+  --bg-app: #000000;
+  --bg-surface: rgba(28, 28, 30, 0.85);
+  --bg-surface-elevated: rgba(44, 44, 46, 0.85);
+  --bg-surface-active: rgba(58, 58, 62, 0.95);
+
+  --border-subtle: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.22);
+  --border-glow: rgba(10, 132, 255, 0.35);
+
+  --text-primary: #FFFFFF;
+  --text-secondary: #8E8E93;
+  --text-tertiary: #636366;
+
+  /* System Accent */
+  --accent: var(--palette-white);
+  --accent-glow: rgba(255, 255, 255, 0.25);
+  --accent-soft: rgba(255, 255, 255, 0.12);
+
+  /* iOS 14 Materials & Curves */
+  --ios-blur: blur(25px) saturate(180%);
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* Apple Physics */
+  --spring: cubic-bezier(0.25, 1, 0.5, 1);
+  --spring-bouncy: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --tempo-duration: 0.17s;
+}
+
+/* --------------------------------------------------------------------------
+   2. Themes
+   -------------------------------------------------------------------------- */
+body[data-theme="obsidian"], body[data-theme="oled"] {
+  --bg-app: #000000;
+  --bg-surface: rgba(28, 28, 30, 0.85);
+  --bg-surface-elevated: rgba(44, 44, 46, 0.85);
+  --bg-surface-active: rgba(58, 58, 62, 0.95);
+  --text-primary: #FFFFFF;
+  --text-secondary: #8E8E93;
+  --border-subtle: rgba(255, 255, 255, 0.12);
+}
+
+body[data-theme="graphite"] {
+  --bg-app: #121214;
+  --bg-surface: rgba(30, 30, 34, 0.85);
+  --bg-surface-elevated: rgba(46, 46, 52, 0.85);
+  --bg-surface-active: rgba(64, 64, 72, 0.95);
+  --text-primary: #FFFFFF;
+  --text-secondary: #98989D;
+  --border-subtle: rgba(255, 255, 255, 0.12);
+}
+
+body[data-theme="parchment"] {
+  --bg-app: #F5EEDB;
+  --bg-surface: rgba(242, 235, 219, 0.88);
+  --bg-surface-elevated: rgba(230, 222, 204, 0.94);
+  --bg-surface-active: rgba(215, 205, 185, 0.98);
+  --text-primary: #342718;
+  --text-secondary: #7A6953;
+  --text-tertiary: #A2917C;
+  --border-subtle: rgba(68, 52, 34, 0.15);
+}
+
+body[data-theme="vellum"] {
+  /* iOS 14 Light System Grouped */
+  --bg-app: #F2F2F7;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #F9F9FB;
+  --bg-surface-active: #E5E5EA;
+  --text-primary: #000000;
+  --text-secondary: #8E8E93;
+  --text-tertiary: #C7C7CC;
+  --border-subtle: rgba(60, 60, 67, 0.15);
+  --border-strong: rgba(60, 60, 67, 0.28);
+}
+
+/* --------------------------------------------------------------------------
+   3. Universal Typography: Helvetica Neue Ultra Light Everywhere
+   -------------------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  font-family: var(--font-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+html, body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  font-weight: 200; /* Ultra Light */
+  letter-spacing: 0.015em;
+  overflow-x: hidden;
+  transition: background-color 0.35s var(--spring), color 0.3s ease;
+}
+
+button, input, select, textarea {
+  font-family: var(--font-main);
+  font-weight: 200;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: transparent;
+  user-select: none;
+  touch-action: manipulation;
+  transition: transform 0.2s var(--spring-bouncy), opacity 0.2s ease, background 0.2s ease;
+}
+button:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+/* --------------------------------------------------------------------------
+   4. Atmospheric Ambient Liquid Glow (Subtle iOS Backdrop)
+   -------------------------------------------------------------------------- */
+.ambient-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.ambient-circle-1 {
+  position: absolute;
+  top: -8vw;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70vw;
+  height: 45vw;
+  max-width: 650px;
+  max-height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  filter: blur(90px);
+  opacity: 0.35;
+  transition: background 0.6s var(--spring);
+}
+.ambient-circle-2 {
+  position: absolute;
+  bottom: -10vw;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 75vw;
+  height: 40vw;
+  max-width: 700px;
+  max-height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+  filter: blur(100px);
+}
+
+/* --------------------------------------------------------------------------
+   5. App Container & iOS 14 Shell Layout
+   -------------------------------------------------------------------------- */
+.modern-app {
+  position: relative;
+  z-index: 1;
+  max-width: 680px;
+  margin: 0 auto;
+  padding-top: calc(8px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  padding-left: calc(16px + env(safe-area-inset-left, 0px));
+  padding-right: calc(16px + env(safe-area-inset-right, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* --------------------------------------------------------------------------
+   6. iOS 14 Status Bar
+   -------------------------------------------------------------------------- */
+.ios-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px 10px 6px;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--text-primary);
+  user-select: none;
+}
+.ios-status-time {
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: -0.2px;
+}
+.ios-status-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ios-battery-icon {
+  display: flex;
+  align-items: center;
+}
+.ios-battery-pill {
+  width: 22px;
+  height: 11px;
+  border: 1px solid var(--text-primary);
+  border-radius: 3.5px;
+  padding: 1.5px;
+  display: flex;
+  align-items: center;
+}
+.ios-battery-level {
+  width: 100%;
+  height: 100%;
+  background: var(--text-primary);
+  border-radius: 1.5px;
+}
+.ios-battery-nipple {
+  width: 1.5px;
+  height: 4px;
+  background: var(--text-primary);
+  border-radius: 0 1px 1px 0;
+  margin-left: 1px;
+}
+
+/* --------------------------------------------------------------------------
+   7. iOS 14 Navigation Header Bar
+   -------------------------------------------------------------------------- */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0 8px 0;
+}
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.brand-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--text-primary);
+  color: var(--bg-app);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.brand-mark svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+.brand-title {
+  font-size: 20px;
+  font-weight: 200;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+}
+.top-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-top-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  background: var(--bg-surface);
+  border: 0.5px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 200;
+  backdrop-filter: var(--ios-blur);
+}
+.btn-top-action:hover {
+  background: var(--bg-surface-elevated);
+}
+
+/* --------------------------------------------------------------------------
+   8. iOS 14 Bottom Tab Bar (Pinned Navigation)
+   -------------------------------------------------------------------------- */
+.floating-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(22, 22, 24, 0.88);
+  backdrop-filter: blur(30px) saturate(190%);
+  -webkit-backdrop-filter: blur(30px) saturate(190%);
+  border-top: 0.5px solid var(--border-subtle);
+  padding: 8px 12px calc(6px + env(safe-area-inset-bottom, 0px)) 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: background 0.3s ease;
+}
+body[data-theme="vellum"] .floating-nav {
+  background: rgba(248, 248, 248, 0.92);
+  border-top: 0.5px solid rgba(60, 60, 67, 0.18);
+}
+body[data-theme="parchment"] .floating-nav {
+  background: rgba(242, 235, 219, 0.92);
+  border-top: 0.5px solid rgba(68, 52, 34, 0.15);
+}
+
+.nav-pill-container {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+/* Sliding active pill indicator */
+.nav-sliding-pill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  transition: transform 0.28s var(--spring-bouncy), width 0.28s var(--spring-bouncy);
+}
+body[data-theme="vellum"] .nav-sliding-pill {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.nav-tab-btn {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 6px;
+  color: var(--text-secondary);
+  border-radius: 10px;
+  transition: color 0.2s ease, transform 0.2s var(--spring);
+}
+.nav-tab-btn svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+  transition: transform 0.2s ease, stroke 0.2s ease;
+}
+.nav-tab-btn span {
+  font-size: 10px;
+  font-weight: 200;
+  letter-spacing: 0.02em;
+}
+
+/* Active Tab: Vibrant iOS Accent Highlight */
+.nav-tab-btn.active {
+  color: var(--accent);
+}
+.nav-tab-btn.active svg {
+  stroke: var(--accent);
+  fill: var(--accent-soft);
+  transform: translateY(-1px);
+}
+.nav-tab-btn:active {
+  transform: scale(0.92);
+}
+
+/* Authentic iOS Home Indicator bar */
+.ios-home-indicator {
+  width: 134px;
+  height: 4.5px;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 100px;
+  margin: 8px auto 2px;
+}
+body[data-theme="vellum"] .ios-home-indicator {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   9. Tab Panels
+   -------------------------------------------------------------------------- */
+.tab-panel {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+  animation: iosTabFadeIn 0.25s ease-out;
+}
+.tab-panel.active {
+  display: flex;
+}
+@keyframes iosTabFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   10. Optical Reticle RSVP Stage
+   -------------------------------------------------------------------------- */
+.reader-stage {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  backdrop-filter: var(--ios-blur);
+  -webkit-backdrop-filter: var(--ios-blur);
+  border: 0.5px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  user-select: none;
+}
+body[data-theme="vellum"] .reader-stage {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Stage Top Toolbar (Active Book Title) */
+.stage-top-toolbar {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.stage-book-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 0.5px solid var(--border-subtle);
+  font-size: 11px;
+  font-weight: 200;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+body[data-theme="vellum"] .stage-book-badge {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Optical Reticle Center Guides */
+.optical-reticle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 38.2%;
+  width: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.reticle-mark-top {
+  position: absolute;
+  top: 14px;
+  left: -1px;
+  width: 2px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 1px;
+  opacity: 0.85;
+}
+.reticle-mark-bottom {
+  position: absolute;
+  bottom: 14px;
+  left: -1px;
+  width: 2px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 1px;
+  opacity: 0.85;
+}
+.reticle-hairline {
+  position: absolute;
+  top: 36px;
+  bottom: 36px;
+  left: 0;
+  width: 1px;
+  background: var(--accent);
+  opacity: 0.12;
+}
+
+/* RSVP Word Frame: Pure Ultra Light Letterforms */
+.rsvp-word-frame {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: baseline;
+  font-family: var(--rsvp-font);
+  font-size: 52px;
+  line-height: 1;
+  font-weight: 100; /* Ultra Light */
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.word-pre {
+  text-align: right;
+  color: var(--text-primary);
+  opacity: 0.95;
+  font-weight: 200;
+}
+.word-focal {
+  color: var(--accent);
+  font-weight: 300;
+  text-shadow: 0 0 16px var(--accent-glow);
+  transform: translateY(-0.5px);
+}
+.word-post {
+  text-align: left;
+  color: var(--text-primary);
+  opacity: 0.95;
+  font-weight: 200;
+}
+
+/* Gesture Feedback Pills */
+.gesture-feedback {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) scale(0.8);
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 0.5px solid var(--border-subtle);
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 300;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.25s var(--spring-bouncy);
+  z-index: 10;
+}
+.gesture-feedback.left { left: 24px; }
+.gesture-feedback.right { right: 24px; }
+.gesture-feedback.active {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+/* --------------------------------------------------------------------------
+   11. Overlays: Pause HUD & 3-Second Countdown
+   -------------------------------------------------------------------------- */
+.overlay-hud {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 20;
+}
+.overlay-hud.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.hud-title {
+  font-size: 17px;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+.hud-stats-grid {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.hud-stat-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.hud-stat-label {
+  font-size: 11px;
+  font-weight: 200;
+  color: var(--text-secondary);
+}
+.hud-stat-val {
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--text-primary);
+}
+.hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 6px;
+}
+
+/* Resume Countdown Dial (3, 2, 1) */
+.resume-loader-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.countdown-dial-wrap {
+  position: relative;
+  width: 90px;
+  height: 90px;
+}
+.countdown-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.countdown-circle-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 4;
+}
+.countdown-circle-prog {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 264;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.95s linear;
+}
+.countdown-number {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  font-weight: 100; /* Ultra Light */
+  color: var(--text-primary);
+}
+.resume-affirmation {
+  font-size: 13px;
+  font-weight: 200;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   12. iOS 14 Progress Scrubber Card
+   -------------------------------------------------------------------------- */
+.scrubber-card {
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  backdrop-filter: var(--ios-blur);
+  border: 0.5px solid var(--border-subtle);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.scrubber-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 200;
+  color: var(--text-secondary);
+}
+.btn-mini-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 200;
+}
+body[data-theme="vellum"] .btn-mini-reset {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* iOS 14 UISlider */
+.scrubber-track-wrap {
+  width: 100%;
+}
+.scrubber-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.18);
+  outline: none;
+  cursor: pointer;
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-size: var(--scrub-pct, 0%) 100%;
+  background-repeat: no-repeat;
+}
+body[data-theme="vellum"] .scrubber-slider {
+  background: rgba(0, 0, 0, 0.15);
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-size: var(--scrub-pct, 0%) 100%;
+  background-repeat: no-repeat;
+}
+.scrubber-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.scrubber-slider::-webkit-slider-thumb:active {
+  transform: scale(1.15);
+}
+
+/* --------------------------------------------------------------------------
+   13. Controls Deck: Media, Speed & Volume
+   -------------------------------------------------------------------------- */
+.controls-deck {
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  backdrop-filter: var(--ios-blur);
+  border: 0.5px solid var(--border-subtle);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Primary Media Row */
+.primary-media-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+.btn-media-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--bg-surface-elevated);
+  border: 0.5px solid var(--border-subtle);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.btn-media-circle:hover {
+  background: var(--bg-surface-active);
+}
+.btn-media-hero {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  color: var(--bg-app);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+.btn-media-hero:active {
+  transform: scale(0.92);
+}
+
+/* Speed Controls: iOS 14 Segmented Control */
+.speed-control-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.speed-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 200;
+  color: var(--text-secondary);
+}
+.speed-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tempo-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  animation: tempoPulse var(--tempo-duration, 0.17s) infinite alternate;
+}
+@keyframes tempoPulse {
+  from { opacity: 0.3; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1.15); }
+}
+
+.speed-stepper-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(118, 118, 128, 0.2);
+  border-radius: 8px;
+  padding: 2px 4px;
+}
+.btn-stepper {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--text-primary);
+}
+.speed-badge {
+  padding: 0 8px;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--text-primary);
+}
+.speed-badge small {
+  font-size: 9px;
+  font-weight: 200;
+  color: var(--text-secondary);
+  margin-left: 2px;
+}
+
+/* iOS 14 UISegmentedControl for Speed Presets */
+.speed-presets-row {
+  display: flex;
+  align-items: center;
+  background: rgba(118, 118, 128, 0.22);
+  border-radius: 9px;
+  padding: 2px;
+  gap: 2px;
+}
+.speed-preset-btn {
+  flex: 1;
+  height: 30px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 200;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.speed-preset-btn.active {
+  background: #FFFFFF;
+  color: #000000;
+  font-weight: 300;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+body[data-theme="vellum"] .speed-preset-btn.active {
+  background: #FFFFFF;
+  color: #000000;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Audio & Volume Strip */
+.audio-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 4px;
+}
+.btn-icon-mute {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+.vol-slider-wrap {
+  flex: 1;
+}
+.vol-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.18);
+  outline: none;
+  cursor: pointer;
+}
+body[data-theme="vellum"] .vol-slider {
+  background: rgba(0, 0, 0, 0.15);
+}
+.vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   14. Text Input & Scratchpad Panel
+   -------------------------------------------------------------------------- */
+.input-panel {
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  backdrop-filter: var(--ios-blur);
+  border: 0.5px solid var(--border-subtle);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.input-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.input-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-mini-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 200;
+}
+body[data-theme="vellum"] .btn-mini-action {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.text-box-wrap {
+  position: relative;
+  width: 100%;
+}
+.scratchpad-quote-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.scratchpad-quote-overlay.hidden {
+  display: none;
+}
+.quote-text {
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 200;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.modern-textarea {
+  width: 100%;
+  min-height: 90px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.25);
+  border: 0.5px solid var(--border-subtle);
+  padding: 12px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 200;
+  line-height: 1.5;
+  resize: vertical;
+}
+body[data-theme="vellum"] .modern-textarea {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.input-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 200;
+  color: var(--text-secondary);
+}
+.reading-estimate {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.reading-estimate svg {
+  width: 13px;
+  height: 13px;
+}
+
+#returnScratchBtnWrap {
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   15. Library Tab (iOS 14 Inset Grouped Table View)
+   -------------------------------------------------------------------------- */
+.library-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 4px 10px 4px;
+}
+.library-title-group h2 {
+  font-size: 32px;
+  font-weight: 200;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+}
+.btn-primary-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 18px;
+  background: var(--accent);
+  color: #000000;
+  font-size: 13px;
+  font-weight: 300;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+body[data-theme="vellum"] .btn-primary-pill {
+  background: var(--ios-blue);
+  color: #FFFFFF;
+}
+
+/* Inset Grouped Book Items */
+.library-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.book-card-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+  touch-action: pan-y;
+}
+.book-swipe-delete-bg {
+  position: absolute;
+  inset: 0;
+  background: var(--ios-red);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 20px;
+  border-radius: var(--radius-md);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.book-card-item.is-swiping .book-swipe-delete-bg {
+  opacity: 1;
+}
+.btn-swipe-delete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 300;
+}
+.book-card {
+  position: relative;
+  z-index: 2;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  backdrop-filter: var(--ios-blur);
+  -webkit-backdrop-filter: var(--ios-blur);
+  border: 0.5px solid var(--border-subtle);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform 0.25s var(--spring-bouncy), background 0.2s ease;
+  cursor: pointer;
+  user-select: none;
+}
+.book-card:hover {
+  background: var(--bg-surface-elevated);
+}
+.book-card.swiped {
+  transform: translateX(-88px);
+}
+.book-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.book-title {
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+}
+.book-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 200;
+  color: var(--text-secondary);
+}
+
+/* Reading Progress Circular Ring */
+.book-actions-group {
+  display: flex;
+  align-items: center;
+}
+.book-ring-wrap {
+  position: relative;
+  width: 36px;
+  height: 36px;
+}
+.book-ring-wrap svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.book-ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 3.5;
+}
+body[data-theme="vellum"] .book-ring-bg {
+  stroke: rgba(0, 0, 0, 0.1);
+}
+.book-ring-prog {
+  fill: none;
+  stroke: var(--card-color, var(--accent));
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s ease;
+}
+.book-ring-val {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 300;
+  color: var(--text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   16. Settings Tab (iOS 14 Inset Grouped Table View)
+   -------------------------------------------------------------------------- */
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.settings-group-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+.settings-group-title svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* Typography Selector */
+.font-selector-row {
+  display: flex;
+  background: var(--bg-surface);
+  backdrop-filter: var(--ios-blur);
+  border: 0.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  gap: 4px;
+}
+.font-choice-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+.font-choice-btn strong {
+  font-size: 14px;
+  font-weight: 300;
+}
+.font-choice-btn small {
+  font-size: 10px;
+  font-weight: 200;
+}
+.font-choice-btn.active {
+  background: var(--bg-surface-elevated);
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Sound Profile Chips Grid */
+.sound-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.sound-chip {
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  border: 0.5px solid var(--border-subtle);
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.sound-chip span {
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--text-primary);
+}
+.sound-chip small {
+  font-size: 10px;
+  font-weight: 200;
+  color: var(--text-secondary);
+}
+.sound-chip.active {
+  background: var(--bg-surface-elevated);
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+.eq-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 10px;
+  margin-top: 4px;
+}
+.eq-bar {
+  width: 2px;
+  height: 4px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+.sound-chip.active .eq-bar:nth-child(1) { height: 8px; }
+.sound-chip.active .eq-bar:nth-child(2) { height: 10px; }
+.sound-chip.active .eq-bar:nth-child(3) { height: 6px; }
+
+/* Tier Toggle Row & iOS 14 UISwitch */
+.tier-toggle-row {
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  backdrop-filter: var(--ios-blur);
+  border: 0.5px solid var(--border-subtle);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.btn-tier-switch {
+  padding: 6px 14px;
+  border-radius: 16px;
+  background: rgba(118, 118, 128, 0.24);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 300;
+}
+
+/* Appearance: Themes */
+.themes-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.theme-picker-card {
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  border: 0.5px solid var(--border-subtle);
+  padding: 10px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.theme-swatch-box {
+  width: 38px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 300;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+.theme-title {
+  font-size: 11px;
+  font-weight: 200;
+  color: var(--text-secondary);
+}
+.theme-picker-card.active {
+  border-color: var(--accent);
+  background: var(--bg-surface-elevated);
+}
+
+/* Appearance: Focal Accent Color Swatches */
+.accent-swatches-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-surface);
+  backdrop-filter: var(--ios-blur);
+  border: 0.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+}
+.accent-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s var(--spring-bouncy), box-shadow 0.2s ease;
+}
+.accent-dot:active {
+  transform: scale(0.85);
+}
+.accent-dot.active {
+  transform: scale(1.22);
+  box-shadow: 0 0 0 2.5px var(--bg-app), 0 0 0 4.5px var(--swatch-color, #FFFFFF);
+}
+
+/* --------------------------------------------------------------------------
+   17. Prime Tab: Apple Subscription Card
+   -------------------------------------------------------------------------- */
+.prime-card-hero {
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  backdrop-filter: var(--ios-blur);
+  border: 0.5px solid var(--border-subtle);
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+}
+.prime-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--ios-blue), var(--ios-purple));
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.prime-card-hero h2 {
+  font-size: 26px;
+  font-weight: 200;
+  letter-spacing: -0.3px;
+  color: var(--text-primary);
+}
+.prime-card-hero p {
+  font-size: 13px;
+  font-weight: 200;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  max-width: 340px;
+}
+.plan-cards-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 340px;
+  margin: 6px 0;
+}
+.plan-card {
+  flex: 1;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-elevated);
+  border: 0.5px solid var(--border-subtle);
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.plan-card strong {
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--text-primary);
+}
+.plan-card span {
+  font-size: 11px;
+  font-weight: 200;
+  color: var(--text-secondary);
+}
+.plan-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 14px var(--accent-glow);
+}
+
+/* --------------------------------------------------------------------------
+   18. Guide Tab
+   -------------------------------------------------------------------------- */
+.guide-card {
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  backdrop-filter: var(--ios-blur);
+  border: 0.5px solid var(--border-subtle);
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.guide-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.step-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-surface-elevated);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 300;
+  flex-shrink: 0;
+}
+.step-text h3 {
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.step-text p {
+  font-size: 13px;
+  font-weight: 200;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+/* --------------------------------------------------------------------------
+   19. Modals & iOS 14 Presentation Sheets
+   -------------------------------------------------------------------------- */
+.modern-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+.modern-modal-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modern-dialog {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 20px 20px 0 0;
+  background: var(--bg-surface);
+  backdrop-filter: var(--ios-blur);
+  -webkit-backdrop-filter: var(--ios-blur);
+  border-top: 0.5px solid var(--border-strong);
+  padding: 20px 20px calc(24px + env(safe-area-inset-bottom, 0px)) 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transform: translateY(100%);
+  transition: transform 0.32s var(--spring-bouncy);
+}
+.modern-modal-backdrop.active .modern-dialog {
+  transform: translateY(0);
+}
+
+/* iOS Sheet Grabber Handle Pill */
+.modern-dialog::before {
+  content: '';
+  width: 36px;
+  height: 5px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.3);
+  margin: -8px auto 6px auto;
+  align-self: center;
+}
+body[data-theme="vellum"] .modern-dialog::before {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Centered Alert Dialogs for Completion & About */
+#completionModal, #aboutModal {
+  align-items: center;
+}
+#completionModal .modern-dialog, #aboutModal .modern-dialog {
+  border-radius: 20px;
+  margin: auto;
+  max-width: 380px;
+  transform: scale(0.92) translateY(0);
+  opacity: 0;
+  border: 0.5px solid var(--border-subtle);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  transition: transform 0.28s var(--spring-bouncy), opacity 0.25s ease;
+}
+#completionModal.active .modern-dialog, #aboutModal.active .modern-dialog {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+#completionModal .modern-dialog::before, #aboutModal .modern-dialog::before {
+  display: none;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-title {
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--text-primary);
+}
+.btn-close-modal {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(118, 118, 128, 0.24);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+/* Modal Segmented Tabs Nav */
+.modal-tabs-nav {
+  display: flex;
+  background: rgba(118, 118, 128, 0.24);
+  border-radius: 9px;
+  padding: 2px;
+  gap: 2px;
+}
+.modal-tab-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 200;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.modal-tab-btn.active {
+  background: #FFFFFF;
+  color: #000000;
+  font-weight: 300;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.modal-tab-panel {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+.modal-tab-panel.active {
+  display: flex;
+}
+
+.launch-telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.launch-telemetry-chip {
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.2);
+  border: 0.5px solid var(--border-subtle);
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.launch-chip-label {
+  font-size: 10px;
+  font-weight: 200;
+  color: var(--text-secondary);
+}
+.launch-chip-val {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--text-primary);
+}
+
+.launch-progress-wrap {
+  width: 100%;
+}
+.launch-progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+.launch-progress-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.needle-editor-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.needle-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+}
+.needle-pos-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.needle-hint {
+  font-size: 11px;
+  font-weight: 200;
+  color: var(--text-secondary);
+}
+.needle-preview-box {
+  max-height: 130px;
+  overflow-y: auto;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.25);
+  border: 0.5px solid var(--border-subtle);
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 200;
+  line-height: 1.6;
+}
+body[data-theme="vellum"] .needle-preview-box {
+  background: rgba(0, 0, 0, 0.04);
+}
+.needle-word {
+  cursor: pointer;
+  padding: 1px 2px;
+  border-radius: 3px;
+}
+.needle-word:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+.needle-word.needle-active {
+  background: var(--accent);
+  color: #000000;
+  font-weight: 400;
+}
+
+#modalColorDots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  padding: 6px 0;
+}
+
+.btn-save {
+  border-radius: 12px;
+  background: var(--text-primary);
+  color: var(--bg-app);
+  font-size: 15px;
+  font-weight: 300;
+  padding: 12px;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+body[data-theme="vellum"] .btn-save {
+  background: var(--ios-blue);
+  color: #FFFFFF;
+}
+
+/* Completion Metrics Center */
+.completion-metrics-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 12px 0;
+}
+.completion-metric-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.completion-metric-val {
+  font-size: 28px;
+  font-weight: 200;
+  color: var(--text-primary);
+}
+.completion-metric-sub {
+  font-size: 11px;
+  font-weight: 200;
+  color: var(--text-secondary);
+}
+.completion-metric-sep {
+  color: var(--text-secondary);
+  font-size: 18px;
+}
+
+/* About Modal Hero */
+.about-hero-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 6px 0;
+}
+.about-icon-glow {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--text-primary);
+  color: var(--bg-app);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+.about-version-tag {
+  font-size: 12px;
+  font-weight: 200;
+  color: var(--text-secondary);
+}
+.about-specs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px 14px;
+  margin: 10px 0;
+}
+.about-spec-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.about-spec-row strong {
+  color: var(--text-primary);
+  font-weight: 300;
+}
