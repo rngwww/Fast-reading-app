@@ -19,12 +19,12 @@
     if ('caches' in window) {
       caches.keys().then(names => {
         for (const name of names) {
-          if (name !== 'tachyon-v29') caches.delete(name);
+          if (name !== 'tachyon-v30') caches.delete(name);
         }
       });
     }
   </script>
-  <link rel="stylesheet" href="assets/css/ios14.css?v=29">
+  <link rel="stylesheet" href="assets/css/ios14.css?v=30">
 </head>
 <body data-theme="obsidian">
 
@@ -228,7 +228,6 @@
         <div class="speed-control-section">
           <div class="speed-header-row">
             <div class="speed-title-wrap">
-              <span class="tempo-led" id="tempoLed"></span>
               <span>Speed</span>
             </div>
             <div class="speed-stepper-wrap">
@@ -260,7 +259,7 @@
 
       <!-- Text Input Panel -->
       <section class="input-panel">
-        <div class="input-header">
+        <div class="input-header" id="inputHeader">
           <div class="input-actions">
             <button class="btn-mini-action" id="btnPasteClipboard" title="Paste text from clipboard">
               <svg viewBox="0 0 24 24" fill="none" width="13" height="13" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
@@ -285,7 +284,7 @@
           <textarea class="modern-textarea" id="textInput" placeholder="" aria-label="Input text for reading"></textarea>
         </div>
 
-        <div class="input-footer">
+        <div class="input-footer" id="inputFooter">
           <div class="reading-estimate">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             <span id="readingEstimate">0 words</span>
@@ -651,6 +650,6 @@
   </div>
 
   <!-- Main Modular Modern Application Script -->
-  <script type="module" src="assets/js/modern-app.js?v=29"></script>
+  <script type="module" src="assets/js/modern-app.js?v=30"></script>
 </body>
 </html>

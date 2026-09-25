@@ -422,15 +422,16 @@ body[data-theme="parchment"] .floating-nav {
 /* Sliding active pill indicator */
 .nav-sliding-pill {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
   pointer-events: none;
   transition: transform 0.28s var(--spring-bouncy), width 0.28s var(--spring-bouncy);
 }
 body[data-theme="vellum"] .nav-sliding-pill {
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .nav-tab-btn {
@@ -553,76 +554,90 @@ body[data-theme="vellum"] .stage-book-badge {
   background: rgba(0, 0, 0, 0.05);
 }
 
-/* Optical Reticle Center Guides */
+/* Optical Reticle Center Guides (Mathematically Aligned to Focal Point) */
 .optical-reticle {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 38.2%;
-  width: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.reticle-mark-top, .reticle-mark-bottom {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 16px;
+  background: var(--accent);
+  border-radius: 2px;
+  opacity: 0.85;
+  transition: opacity 0.25s ease, background 0.3s ease;
 }
 .reticle-mark-top {
-  position: absolute;
-  top: 14px;
-  left: -1px;
-  width: 2px;
-  height: 18px;
-  background: var(--accent);
-  border-radius: 1px;
-  opacity: 0.85;
+  top: calc(50% - 56px);
 }
 .reticle-mark-bottom {
-  position: absolute;
-  bottom: 14px;
-  left: -1px;
-  width: 2px;
-  height: 18px;
-  background: var(--accent);
-  border-radius: 1px;
-  opacity: 0.85;
+  bottom: calc(50% - 56px);
 }
 .reticle-hairline {
   position: absolute;
-  top: 36px;
-  bottom: 36px;
-  left: 0;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 1px;
-  background: var(--accent);
-  opacity: 0.12;
+  background: linear-gradient(180deg, transparent 0%, var(--accent) 30%, var(--accent) 70%, transparent 100%);
+  opacity: 0.15;
 }
 
-/* RSVP Word Frame: Pure Ultra Light Letterforms */
+/* RSVP Word Frame: Pure Ultra Light Letterforms Perfectly Locked to 50% */
 .rsvp-word-frame {
   position: relative;
   z-index: 3;
+  width: 100%;
   display: flex;
   align-items: baseline;
+  justify-content: center;
   font-family: var(--rsvp-font);
-  font-size: 52px;
-  line-height: 1;
+  font-size: clamp(48px, 11vw, 76px);
+  line-height: 1.1;
   font-weight: 100; /* Ultra Light */
-  letter-spacing: 0.02em;
+  letter-spacing: -0.5px;
   white-space: nowrap;
   pointer-events: none;
+  text-align: center;
 }
 .word-pre {
+  flex: 1;
   text-align: right;
   color: var(--text-primary);
   opacity: 0.95;
+  white-space: pre;
   font-weight: 200;
 }
 .word-focal {
+  flex: none;
   color: var(--accent);
   font-weight: 300;
-  text-shadow: 0 0 16px var(--accent-glow);
-  transform: translateY(-0.5px);
+  text-shadow: 0 0 20px var(--accent-glow);
+  padding: 0 1px;
+  position: relative;
+  text-align: center;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 .word-post {
+  flex: 1;
   text-align: left;
   color: var(--text-primary);
   opacity: 0.95;
+  white-space: pre;
   font-weight: 200;
 }
 
@@ -901,16 +916,7 @@ body[data-theme="vellum"] .scrubber-slider {
   gap: 6px;
 }
 .tempo-led {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent-glow);
-  animation: tempoPulse var(--tempo-duration, 0.17s) infinite alternate;
-}
-@keyframes tempoPulse {
-  from { opacity: 0.3; transform: scale(0.85); }
-  to { opacity: 1; transform: scale(1.15); }
+  display: none !important;
 }
 
 .speed-stepper-wrap {

@@ -252,8 +252,10 @@ async function initApp() {
     if (!activeBtn || !navSlidingPill) return;
     const container = activeBtn.parentElement;
     if (!container) return;
-    const w = activeBtn.offsetWidth || activeBtn.getBoundingClientRect().width;
-    const l = activeBtn.offsetLeft !== undefined ? activeBtn.offsetLeft : (activeBtn.getBoundingClientRect().left - container.getBoundingClientRect().left);
+    const btnRect = activeBtn.getBoundingClientRect();
+    const contRect = container.getBoundingClientRect();
+    const l = btnRect.left - contRect.left;
+    const w = btnRect.width;
     navSlidingPill.style.width = `${w}px`;
     navSlidingPill.style.transform = `translateX(${l}px)`;
   }
@@ -408,13 +410,11 @@ async function initApp() {
       btnPlayHeroIcon.innerHTML = '<rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"></rect>';
       btnPlayHero.style.background = '#FFFFFF';
       btnPlayHero.style.color = '#000000';
-      if (tempoLed) tempoLed.classList.add('active');
     } else {
       // Play icon (triangle)
       btnPlayHeroIcon.innerHTML = '<polygon points="7 5 19 12 7 19 7 5" fill="currentColor"></polygon>';
       btnPlayHero.style.background = '#FFFFFF';
       btnPlayHero.style.color = '#000000';
-      if (tempoLed) tempoLed.classList.remove('active');
     }
   }
 
@@ -784,20 +784,24 @@ async function initApp() {
       if (immediate) {
         quoteText.textContent = quoteList[quoteIndex % quoteList.length];
         quoteOverlay.classList.remove('hidden');
+        quoteOverlay.style.display = 'flex';
         quoteOverlay.style.opacity = '1';
       } else {
         quoteOverlay.style.opacity = '0';
         setTimeout(() => {
-          if (textInput.value.trim() === '' && document.activeElement !== textInput) {
+          const stillScratchpad = !state.activeDocId || state.activeDocId === 'scratchpad';
+          if (stillScratchpad && textInput.value.trim() === '' && document.activeElement !== textInput) {
             quoteIndex = (quoteIndex + 1) % quoteList.length;
             quoteText.textContent = quoteList[quoteIndex % quoteList.length];
             quoteOverlay.classList.remove('hidden');
+            quoteOverlay.style.display = 'flex';
             quoteOverlay.style.opacity = '1';
           }
         }, 400);
       }
     } else {
       quoteOverlay.style.opacity = '0';
+      quoteOverlay.style.display = 'none';
       quoteOverlay.classList.add('hidden');
     }
   }
@@ -886,12 +890,19 @@ async function initApp() {
     state.activeDocId = 'scratchpad';
     await Storage.saveSettings(state);
     returnScratchBtnWrap.style.display = 'none';
+    if (scratchpadWrap) scratchpadWrap.style.display = 'block';
     textInput.style.display = 'block';
+    const inputFooter = document.getElementById('inputFooter') || document.querySelector('.input-footer');
+    if (inputFooter) inputFooter.style.display = 'flex';
+    const inputHeader = document.getElementById('inputHeader') || document.querySelector('.input-header');
+    if (inputHeader) inputHeader.style.display = 'flex';
+
     if (textInput.value.trim() === '') {
       startQuoteRotation();
     } else {
       if (quoteOverlay) {
         quoteOverlay.style.opacity = '0';
+        quoteOverlay.style.display = 'none';
         quoteOverlay.classList.add('hidden');
       }
       stopQuoteRotation();
@@ -1086,14 +1097,25 @@ async function initApp() {
 
     if (bookId !== 'scratchpad') {
       textInput.style.display = 'none';
-      returnScratchBtnWrap.style.display = 'block';
+      if (scratchpadWrap) scratchpadWrap.style.display = 'none';
       stopQuoteRotation();
       if (quoteOverlay) {
         quoteOverlay.style.opacity = '0';
+        quoteOverlay.style.display = 'none';
         quoteOverlay.classList.add('hidden');
       }
+      const inputFooter = document.getElementById('inputFooter') || document.querySelector('.input-footer');
+      if (inputFooter) inputFooter.style.display = 'none';
+      const inputHeader = document.getElementById('inputHeader') || document.querySelector('.input-header');
+      if (inputHeader) inputHeader.style.display = 'none';
+      returnScratchBtnWrap.style.display = 'block';
     } else {
       textInput.style.display = 'block';
+      if (scratchpadWrap) scratchpadWrap.style.display = 'block';
+      const inputFooter = document.getElementById('inputFooter') || document.querySelector('.input-footer');
+      if (inputFooter) inputFooter.style.display = 'flex';
+      const inputHeader = document.getElementById('inputHeader') || document.querySelector('.input-header');
+      if (inputHeader) inputHeader.style.display = 'flex';
       returnScratchBtnWrap.style.display = 'none';
       if (textInput.value.trim() === '') {
         startQuoteRotation();
