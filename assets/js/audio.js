@@ -380,384 +380,431 @@ export const AudioSystem = {
 
     // Default Tactile Button Press (Xbox 'A' / PS5 Cross Button / iOS Tap)
     // Transient click
-    if (this.noiseBuffer) {
-      const click = this.ctx.createBufferSource();
-      click.buffer = this.noiseBuffer;
-      const bp = this.ctx.createBiquadFilter();
-      bp.type = 'bandpass';
-      bp.frequency.setValueAtTime(2400, t);
-      bp.Q.setValueAtTime(4.0, t);
-
-      const clickGain = this.ctx.createGain();
-      clickGain.gain.setValueAtTime(0.24 * this.volume, t);
-      clickGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.006);
-
-      click.connect(bp);
-      bp.connect(clickGain);
-      clickGain.connect(this.ctx.destination);
-      click.start(t);
-      click.stop(t + 0.007);
-    }
-
-    // Acoustic body thump
-    const osc = this.ctx.createOscillator();
-    const filter = this.ctx.createBiquadFilter();
-    const gain = this.ctx.createGain();
-
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(1400, t);
-
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(320, t);
-    osc.frequency.exponentialRampToValueAtTime(120, t + 0.026);
-
-    gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(0.4 * this.volume, t + 0.001);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
-
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.ctx.destination);
-
-    osc.start(t);
-    osc.stop(t + 0.035);
-  },
-
-  // Sliding Tab Navigation (Xbox Dashboard / PS5 Home Bar Tile Slide / Vinyl Sleeve)
-  // Airy aerodynamic swish + subtle landing pop (28ms)
-  playTabSwitch() {
-    if (!this.canPlayUi()) return;
-    const t = this.ctx.currentTime;
-
-    if (this.profile === 'warm_vinyl') {
-      // Soft vinyl sleeve slide & gentle landing
+    try {
       if (this.noiseBuffer) {
-        const whoosh = this.ctx.createBufferSource();
-        whoosh.buffer = this.noiseBuffer;
-        const filter = this.ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(1100, t);
-        filter.frequency.exponentialRampToValueAtTime(400, t + 0.035);
+        const click = this.ctx.createBufferSource();
+        click.buffer = this.noiseBuffer;
+        const bp = this.ctx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.setValueAtTime(2400, t);
+        bp.Q.setValueAtTime(4.0, t);
 
-        const whooshGain = this.ctx.createGain();
-        whooshGain.gain.setValueAtTime(0, t);
-        whooshGain.gain.linearRampToValueAtTime(0.12 * this.volume, t + 0.005);
-        whooshGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.035);
+        const clickGain = this.ctx.createGain();
+        clickGain.gain.setValueAtTime(0.24 * this.volume, t);
+        clickGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.006);
 
-        whoosh.connect(filter);
-        filter.connect(whooshGain);
-        whooshGain.connect(this.ctx.destination);
-        whoosh.start(t);
-        whoosh.stop(t + 0.038);
+        click.connect(bp);
+        bp.connect(clickGain);
+        clickGain.connect(this.ctx.destination);
+        click.start(t);
+        click.stop(t + 0.007);
       }
 
-      const tap = this.ctx.createOscillator();
-      const tapGain = this.ctx.createGain();
-      tap.type = 'sine';
-      tap.frequency.setValueAtTime(220, t + 0.008);
-      tap.frequency.exponentialRampToValueAtTime(120, t + 0.03);
-
-      tapGain.gain.setValueAtTime(0, t + 0.008);
-      tapGain.gain.linearRampToValueAtTime(0.18 * this.volume, t + 0.012);
-      tapGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.035);
-
-      tap.connect(tapGain);
-      tapGain.connect(this.ctx.destination);
-      tap.start(t + 0.008);
-      tap.stop(t + 0.038);
-      return;
-    }
-
-    // Aerodynamic airy whoosh
-    if (this.noiseBuffer) {
-      const whoosh = this.ctx.createBufferSource();
-      whoosh.buffer = this.noiseBuffer;
-      const filter = this.ctx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(1900, t);
-      filter.frequency.exponentialRampToValueAtTime(800, t + 0.028);
-      filter.Q.setValueAtTime(1.8, t);
-
-      const whooshGain = this.ctx.createGain();
-      whooshGain.gain.setValueAtTime(0, t);
-      whooshGain.gain.linearRampToValueAtTime(0.14 * this.volume, t + 0.004);
-      whooshGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.028);
-
-      whoosh.connect(filter);
-      filter.connect(whooshGain);
-      whooshGain.connect(this.ctx.destination);
-      whoosh.start(t);
-      whoosh.stop(t + 0.03);
-    }
-
-    // Gentle tactile landing tap
-    const tap = this.ctx.createOscillator();
-    const tapGain = this.ctx.createGain();
-    tap.type = 'sine';
-    tap.frequency.setValueAtTime(320, t + 0.008);
-    tap.frequency.exponentialRampToValueAtTime(180, t + 0.028);
-
-    tapGain.gain.setValueAtTime(0, t + 0.008);
-    tapGain.gain.linearRampToValueAtTime(0.18 * this.volume, t + 0.012);
-    tapGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.032);
-
-    tap.connect(tapGain);
-    tapGain.connect(this.ctx.destination);
-    tap.start(t + 0.008);
-    tap.stop(t + 0.035);
-  },
-
-  // Directional Skip & Rewind 10 Words (PS5 / Xbox Menu Bump)
-  // Forward: crisp ascending double-pulse (16ms) | Rewind: soft descending double-pulse (16ms)
-  playJump(isForward = true) {
-    if (!this.canPlayUi()) return;
-    const t = this.ctx.currentTime;
-    const f1 = isForward ? 520 : 680;
-    const f2 = isForward ? 740 : 460;
-
-    [f1, f2].forEach((freq, idx) => {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      const delay = idx * 0.018;
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, t + delay);
-
-      gain.gain.setValueAtTime(0, t + delay);
-      gain.gain.linearRampToValueAtTime(0.22 * this.volume, t + delay + 0.002);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + delay + 0.016);
-
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(t + delay);
-      osc.stop(t + delay + 0.02);
-    });
-  },
-
-  // Rotary Notch Steppers (iOS Digital Crown / Picker Wheel Click)
-  // Ultra-crisp 7ms high-precision mechanical tick
-  playPresetSelect() {
-    if (!this.canPlayUi()) return;
-    const t = this.ctx.currentTime;
-
-    if (this.noiseBuffer) {
-      const click = this.ctx.createBufferSource();
-      click.buffer = this.noiseBuffer;
-      const bp = this.ctx.createBiquadFilter();
-      bp.type = 'bandpass';
-      bp.frequency.setValueAtTime(2600, t);
-      bp.Q.setValueAtTime(6.0, t);
-
-      const g = this.ctx.createGain();
-      g.gain.setValueAtTime(0.3 * this.volume, t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.007);
-
-      click.connect(bp);
-      bp.connect(g);
-      g.connect(this.ctx.destination);
-      click.start(t);
-      click.stop(t + 0.008);
-    }
-
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(540, t);
-    osc.frequency.exponentialRampToValueAtTime(220, t + 0.008);
-
-    gain.gain.setValueAtTime(0.2 * this.volume, t);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.009);
-
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-    osc.start(t);
-    osc.stop(t + 0.01);
-  },
-
-  // Zen Focus Mode (PS5 System Suspend / Xbox Guide Atmosphere)
-  // Enter: Cinematic sub-bass ambient drop (2000Hz -> 50Hz) | Exit: Crisp airy release
-  playZenToggle(isEntering = true) {
-    if (!this.canPlayUi()) return;
-    const t = this.ctx.currentTime;
-
-    if (isEntering) {
-      // Cinematic vacuum drop: sub-bass dive while lowpass filter smoothly seals shut
       const osc = this.ctx.createOscillator();
       const filter = this.ctx.createBiquadFilter();
       const gain = this.ctx.createGain();
 
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(2400, t);
-      filter.frequency.exponentialRampToValueAtTime(60, t + 0.24);
+      filter.frequency.setValueAtTime(1400, t);
 
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(160, t);
-      osc.frequency.exponentialRampToValueAtTime(45, t + 0.22);
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(320, t);
+      osc.frequency.exponentialRampToValueAtTime(120, t + 0.026);
 
-      gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.4 * this.volume, t + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.26);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.linearRampToValueAtTime(Math.max(0.0001, 0.4 * this.volume), t + 0.001);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
 
       osc.connect(filter);
       filter.connect(gain);
       gain.connect(this.ctx.destination);
 
       osc.start(t);
-      osc.stop(t + 0.28);
-    } else {
-      // Crisp airy release (console resume sensation)
+      osc.stop(t + 0.035);
+    } catch (e) {
+      console.warn("playButtonPress error:", e);
+    }
+  },
+
+  // Sliding Tab Navigation (Xbox Dashboard / PS5 Home Bar Tile Slide / Vinyl Sleeve)
+  // Airy aerodynamic swish + subtle landing pop (28ms)
+  playTabSwitch() {
+    try {
+      if (!this.canPlayUi()) return;
+      if (this.volume <= 0.001) return;
+      const t = this.ctx.currentTime;
+
+      if (this.profile === 'warm_vinyl') {
+        // Soft vinyl sleeve slide & gentle landing
+        if (this.noiseBuffer) {
+          const whoosh = this.ctx.createBufferSource();
+          whoosh.buffer = this.noiseBuffer;
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(1100, t);
+          filter.frequency.exponentialRampToValueAtTime(400, t + 0.035);
+
+          const whooshGain = this.ctx.createGain();
+          whooshGain.gain.setValueAtTime(0.0001, t);
+          whooshGain.gain.linearRampToValueAtTime(Math.max(0.0001, 0.12 * this.volume), t + 0.005);
+          whooshGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.035);
+
+          whoosh.connect(filter);
+          filter.connect(whooshGain);
+          whooshGain.connect(this.ctx.destination);
+          whoosh.start(t);
+          whoosh.stop(t + 0.038);
+        }
+
+        const tap = this.ctx.createOscillator();
+        const tapGain = this.ctx.createGain();
+        tap.type = 'sine';
+        tap.frequency.setValueAtTime(220, t + 0.008);
+        tap.frequency.exponentialRampToValueAtTime(120, t + 0.03);
+
+        tapGain.gain.setValueAtTime(0.0001, t + 0.008);
+        tapGain.gain.linearRampToValueAtTime(Math.max(0.0001, 0.18 * this.volume), t + 0.012);
+        tapGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.035);
+
+        tap.connect(tapGain);
+        tapGain.connect(this.ctx.destination);
+        tap.start(t + 0.008);
+        tap.stop(t + 0.038);
+        return;
+      }
+
+      // Aerodynamic airy whoosh
+      if (this.noiseBuffer) {
+        const whoosh = this.ctx.createBufferSource();
+        whoosh.buffer = this.noiseBuffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1900, t);
+        filter.frequency.exponentialRampToValueAtTime(800, t + 0.028);
+        filter.Q.setValueAtTime(1.8, t);
+
+        const whooshGain = this.ctx.createGain();
+        whooshGain.gain.setValueAtTime(0.0001, t);
+        whooshGain.gain.linearRampToValueAtTime(Math.max(0.0001, 0.14 * this.volume), t + 0.004);
+        whooshGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.028);
+
+        whoosh.connect(filter);
+        filter.connect(whooshGain);
+        whooshGain.connect(this.ctx.destination);
+        whoosh.start(t);
+        whoosh.stop(t + 0.03);
+      }
+
+      // Gentle tactile landing tap
+      const tap = this.ctx.createOscillator();
+      const tapGain = this.ctx.createGain();
+      tap.type = 'sine';
+      tap.frequency.setValueAtTime(320, t + 0.008);
+      tap.frequency.exponentialRampToValueAtTime(180, t + 0.028);
+
+      tapGain.gain.setValueAtTime(0.0001, t + 0.008);
+      tapGain.gain.linearRampToValueAtTime(Math.max(0.0001, 0.18 * this.volume), t + 0.012);
+      tapGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.032);
+
+      tap.connect(tapGain);
+      tapGain.connect(this.ctx.destination);
+      tap.start(t + 0.008);
+      tap.stop(t + 0.035);
+    } catch (e) {
+      console.warn("playTabSwitch error:", e);
+    }
+  },
+
+  // Directional Skip & Rewind 10 Words (PS5 / Xbox Menu Bump)
+  // Forward: crisp ascending double-pulse (16ms) | Rewind: soft descending double-pulse (16ms)
+  playJump(isForward = true) {
+    try {
+      if (!this.canPlayUi()) return;
+      if (this.volume <= 0.001) return;
+      const t = this.ctx.currentTime;
+      const f1 = isForward ? 520 : 680;
+      const f2 = isForward ? 740 : 460;
+
+      [f1, f2].forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const delay = idx * 0.018;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t + delay);
+
+        gain.gain.setValueAtTime(0.0001, t + delay);
+        gain.gain.linearRampToValueAtTime(Math.max(0.0001, 0.22 * this.volume), t + delay + 0.002);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + delay + 0.016);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t + delay);
+        osc.stop(t + delay + 0.02);
+      });
+    } catch (e) {
+      console.warn("playJump error:", e);
+    }
+  },
+
+  // Rotary Notch Steppers (iOS Digital Crown / Picker Wheel Click)
+  // Ultra-crisp 7ms high-precision mechanical tick
+  playPresetSelect() {
+    try {
+      if (!this.canPlayUi()) return;
+      if (this.volume <= 0.001) return;
+      const t = this.ctx.currentTime;
+
+      if (this.noiseBuffer) {
+        const click = this.ctx.createBufferSource();
+        click.buffer = this.noiseBuffer;
+        const bp = this.ctx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.setValueAtTime(2600, t);
+        bp.Q.setValueAtTime(6.0, t);
+
+        const g = this.ctx.createGain();
+        g.gain.setValueAtTime(Math.max(0.0001, 0.3 * this.volume), t);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.007);
+
+        click.connect(bp);
+        bp.connect(g);
+        g.connect(this.ctx.destination);
+        click.start(t);
+        click.stop(t + 0.008);
+      }
+
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(540, t);
+      osc.frequency.exponentialRampToValueAtTime(220, t + 0.008);
 
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(140, t);
-      osc.frequency.exponentialRampToValueAtTime(480, t + 0.12);
-
-      gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.22 * this.volume, t + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.linearRampToValueAtTime(Math.max(0.0001, 0.2 * this.volume), t + 0.001);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.009);
 
       osc.connect(gain);
       gain.connect(this.ctx.destination);
-
       osc.start(t);
-      osc.stop(t + 0.16);
+      osc.stop(t + 0.01);
+    } catch (e) {
+      console.warn("playPresetSelect error:", e);
+    }
+  },
+
+  // Zen Focus Mode (PS5 System Suspend / Xbox Guide Atmosphere)
+  // Enter: Cinematic sub-bass ambient drop (2000Hz -> 50Hz) | Exit: Crisp airy release
+  playZenToggle(isEntering = true) {
+    try {
+      if (!this.canPlayUi()) return;
+      if (this.volume <= 0.001) return;
+      const t = this.ctx.currentTime;
+
+      if (isEntering) {
+        const osc = this.ctx.createOscillator();
+        const filter = this.ctx.createBiquadFilter();
+        const gain = this.ctx.createGain();
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(2400, t);
+        filter.frequency.exponentialRampToValueAtTime(60, t + 0.24);
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(160, t);
+        osc.frequency.exponentialRampToValueAtTime(45, t + 0.22);
+
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.linearRampToValueAtTime(Math.max(0.0001, 0.4 * this.volume), t + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.26);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(t);
+        osc.stop(t + 0.28);
+      } else {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(140, t);
+        osc.frequency.exponentialRampToValueAtTime(480, t + 0.12);
+
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.linearRampToValueAtTime(Math.max(0.0001, 0.22 * this.volume), t + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(t);
+        osc.stop(t + 0.16);
+      }
+    } catch (e) {
+      console.warn("playZenToggle error:", e);
     }
   },
 
   // Modal Dialog Open (PS5 Notification / Xbox Card Slide-in)
   // Subtle two-tone glass acoustic interval: E5 (659Hz) -> B5 (987Hz) with warm 2.2kHz filter (70ms)
   playModalOpen() {
-    if (!this.canPlayUi()) return;
-    const t = this.ctx.currentTime;
-    const notes = [659.25, 987.77]; // E5, B5 (pure fifth)
+    try {
+      if (!this.canPlayUi()) return;
+      if (this.volume <= 0.001) return;
+      const t = this.ctx.currentTime;
+      const notes = [659.25, 987.77]; // E5, B5 (pure fifth)
 
-    notes.forEach((freq, idx) => {
-      const osc = this.ctx.createOscillator();
-      const filter = this.ctx.createBiquadFilter();
-      const gain = this.ctx.createGain();
-      const delay = idx * 0.024;
+      notes.forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const filter = this.ctx.createBiquadFilter();
+        const gain = this.ctx.createGain();
+        const delay = idx * 0.024;
 
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(2200, t + delay);
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(2200, t + delay);
 
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, t + delay);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t + delay);
 
-      gain.gain.setValueAtTime(0, t + delay);
-      gain.gain.linearRampToValueAtTime(0.18 * this.volume, t + delay + 0.004);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + delay + 0.08);
+        gain.gain.setValueAtTime(0.0001, t + delay);
+        gain.gain.linearRampToValueAtTime(Math.max(0.0001, 0.18 * this.volume), t + delay + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + delay + 0.08);
 
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(this.ctx.destination);
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
 
-      osc.start(t + delay);
-      osc.stop(t + delay + 0.09);
-    });
+        osc.start(t + delay);
+        osc.stop(t + delay + 0.09);
+      });
+    } catch (e) {
+      console.warn("playModalOpen error:", e);
+    }
   },
 
   // Modal Dialog Close (PS5 Circle / Xbox 'B' Back Button)
   // Understated descending release tap (20ms)
   playModalClose() {
-    if (!this.canPlayUi()) return;
-    const t = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
+    try {
+      if (!this.canPlayUi()) return;
+      if (this.volume <= 0.001) return;
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
 
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(540, t);
-    osc.frequency.exponentialRampToValueAtTime(260, t + 0.02);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(540, t);
+      osc.frequency.exponentialRampToValueAtTime(260, t + 0.02);
 
-    gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(0.18 * this.volume, t + 0.002);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.022);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.linearRampToValueAtTime(Math.max(0.0001, 0.18 * this.volume), t + 0.002);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.022);
 
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
 
-    osc.start(t);
-    osc.stop(t + 0.025);
+      osc.start(t);
+      osc.stop(t + 0.025);
+    } catch (e) {
+      console.warn("playModalClose error:", e);
+    }
   },
 
   // Sample Chip Select (iOS Haptic Peek / Pop)
   // Double micro-tick (420Hz and 640Hz, 12ms each)
   playSampleSelect() {
-    if (!this.canPlayUi()) return;
-    const t = this.ctx.currentTime;
-    const osc1 = this.ctx.createOscillator();
-    const osc2 = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
+    try {
+      if (!this.canPlayUi()) return;
+      if (this.volume <= 0.001) return;
+      const t = this.ctx.currentTime;
+      const osc1 = this.ctx.createOscillator();
+      const osc2 = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
 
-    osc1.type = 'sine';
-    osc2.type = 'sine';
-    osc1.frequency.setValueAtTime(420, t);
-    osc2.frequency.setValueAtTime(640, t + 0.016);
+      osc1.type = 'sine';
+      osc2.type = 'sine';
+      osc1.frequency.setValueAtTime(420, t);
+      osc2.frequency.setValueAtTime(640, t + 0.016);
 
-    gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(0.2 * this.volume, t + 0.002);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.linearRampToValueAtTime(Math.max(0.0001, 0.2 * this.volume), t + 0.002);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
 
-    osc1.connect(gain);
-    osc2.connect(gain);
-    gain.connect(this.ctx.destination);
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(this.ctx.destination);
 
-    osc1.start(t);
-    osc2.start(t + 0.016);
-    osc1.stop(t + 0.045);
-    osc2.stop(t + 0.045);
+      osc1.start(t);
+      osc2.start(t + 0.016);
+      osc1.stop(t + 0.045);
+      osc2.stop(t + 0.045);
+    } catch (e) {
+      console.warn("playSampleSelect error:", e);
+    }
   },
 
   // Countdown Beep (PS5 Ready / Launch Prompt)
   playCountdownBeep(isFinal = false) {
-    if (!this.canPlay()) return;
-    const t = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
+    try {
+      if (!this.canPlay()) return;
+      if (this.volume <= 0.001) return;
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
 
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(isFinal ? 880 : 587.33, t);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(isFinal ? 880 : 587.33, t);
 
-    gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(0.25 * this.volume, t + 0.005);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.linearRampToValueAtTime(Math.max(0.0001, 0.25 * this.volume), t + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
 
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
 
-    osc.start(t);
-    osc.stop(t + 0.14);
+      osc.start(t);
+      osc.stop(t + 0.14);
+    } catch (e) {
+      console.warn("playCountdownBeep error:", e);
+    }
   },
 
   // Session Completion Fanfare (PS5 Trophy / Xbox Achievement chime)
   // Warm crystalline shimmer chord: A4 (440Hz), E5 (659Hz), C#6 (1108Hz) with soft analog bloom
   playSuccessChime() {
-    if (!this.canPlay()) return;
-    const t = this.ctx.currentTime;
-    const chord = [440.0, 659.25, 1108.73]; // A Major triad in open voicing
+    try {
+      if (!this.canPlay()) return;
+      if (this.volume <= 0.001) return;
+      const t = this.ctx.currentTime;
+      const chord = [440.0, 659.25, 1108.73]; // A Major triad in open voicing
 
-    chord.forEach((freq, i) => {
-      const osc = this.ctx.createOscillator();
-      const filter = this.ctx.createBiquadFilter();
-      const gain = this.ctx.createGain();
-      const delay = i * 0.035;
+      chord.forEach((freq, i) => {
+        const osc = this.ctx.createOscillator();
+        const filter = this.ctx.createBiquadFilter();
+        const gain = this.ctx.createGain();
+        const delay = i * 0.035;
 
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(2600, t + delay);
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(2600, t + delay);
 
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, t + delay);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t + delay);
 
-      gain.gain.setValueAtTime(0, t + delay);
-      gain.gain.linearRampToValueAtTime(0.22 * this.volume, t + delay + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + delay + 0.55);
+        gain.gain.setValueAtTime(0.0001, t + delay);
+        gain.gain.linearRampToValueAtTime(Math.max(0.0001, 0.22 * this.volume), t + delay + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + delay + 0.55);
 
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(this.ctx.destination);
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
 
-      osc.start(t + delay);
-      osc.stop(t + delay + 0.6);
-    });
+        osc.start(t + delay);
+        osc.stop(t + delay + 0.6);
+      });
+    } catch (e) {
+      console.warn("playSuccessChime error:", e);
+    }
   }
 };

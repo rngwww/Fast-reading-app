@@ -19,12 +19,12 @@
     if ('caches' in window) {
       caches.keys().then(names => {
         for (const name of names) {
-          if (name !== 'tachyon-v25') caches.delete(name);
+          if (name !== 'tachyon-v26') caches.delete(name);
         }
       });
     }
   </script>
-  <link rel="stylesheet" href="assets/css/modern.css?v=25">
+  <link rel="stylesheet" href="assets/css/modern.css?v=26">
 </head>
 <body data-theme="obsidian">
 
@@ -178,12 +178,12 @@
       <!-- Intuitive Controls Deck (Centered YouTube-style Clean Icon Media Controls) -->
       <section class="controls-deck">
         <div class="primary-media-row">
-          <!-- Rewind 10 Words -->
+          <!-- Rewind 10 Words (Points Counter-Clockwise / Backwards Left) -->
           <button class="btn-media-circle" id="btnRewind10" title="Rewind 10 words" aria-label="Rewind 10 words">
-            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" aria-hidden="true">
-              <path d="M12 4.5A7.5 7.5 0 1 0 19.5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <polyline points="9 2 12 4.5 9 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <text x="12" y="14.8" fill="currentColor" font-size="7.2" font-weight="900" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif" text-anchor="middle">10</text>
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden="true">
+              <path d="M11 4.5A7.5 7.5 0 1 0 19.5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <polyline points="12 1.5 8.5 4.5 12 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="12" y="14.6" fill="currentColor" font-size="6.8" font-weight="800" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif" text-anchor="middle">10</text>
             </svg>
           </button>
 
@@ -194,12 +194,12 @@
             </svg>
           </button>
 
-          <!-- Skip Forward 10 Words -->
+          <!-- Skip Forward 10 Words (Points Clockwise / Forwards Right) -->
           <button class="btn-media-circle" id="btnSkip10" title="Skip forward 10 words" aria-label="Skip forward 10 words">
-            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" aria-hidden="true">
-              <path d="M12 4.5A7.5 7.5 0 1 1 4.5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <polyline points="15 2 12 4.5 15 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <text x="12" y="14.8" fill="currentColor" font-size="7.2" font-weight="900" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif" text-anchor="middle">10</text>
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden="true">
+              <path d="M13 4.5A7.5 7.5 0 1 1 4.5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <polyline points="12 1.5 15.5 4.5 12 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="12" y="14.6" fill="currentColor" font-size="6.8" font-weight="800" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif" text-anchor="middle">10</text>
             </svg>
           </button>
         </div>
@@ -259,10 +259,8 @@
         </div>
 
         <div class="text-box-wrap" id="scratchpadWrap">
-          <div class="scratchpad-quote-overlay" id="quoteOverlay">
-            <div class="quote-mark">“</div>
+          <div class="scratchpad-quote-overlay" id="quoteOverlay" aria-hidden="true">
             <div class="quote-text" id="quoteText">The more that you read, the more things you will know.</div>
-            <div class="quote-hint">Tap here or paste text to read</div>
           </div>
           <textarea class="modern-textarea" id="textInput" placeholder="" aria-label="Input text for reading"></textarea>
         </div>
@@ -628,6 +626,6 @@
   </div>
 
   <!-- Main Modular Modern Application Script -->
-  <script type="module" src="assets/js/modern-app.js?v=25"></script>
+  <script type="module" src="assets/js/modern-app.js?v=26"></script>
 </body>
 </html>

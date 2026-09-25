@@ -1,7 +1,7 @@
-import { Storage } from './storage.js?v=24';
-import { AudioSystem } from './audio.js?v=24';
-import { RSVP } from './rsvp.js?v=24';
-import { PreloadedLibrary } from './data.js?v=24';
+import { Storage } from './storage.js?v=26';
+import { AudioSystem } from './audio.js?v=26';
+import { RSVP } from './rsvp.js?v=26';
+import { PreloadedLibrary, Quotes } from './data.js?v=26';
 
 async function initApp() {
   // Main Container & Stage
@@ -26,8 +26,6 @@ async function initApp() {
   const hudResumeBtn = document.getElementById('hudResumeBtn');
 
   const countdownHud = document.getElementById('countdownHud');
-  const countdownNumber = document.getElementById('countdownNumber');
-  const ringActive = document.getElementById('ringActive');
 
   // Scrubber
   const progressScrubber = document.getElementById('progressScrubber');
@@ -248,10 +246,41 @@ async function initApp() {
     if (!activeBtn || !navSlidingPill) return;
     const container = activeBtn.parentElement;
     if (!container) return;
-    const cRect = container.getBoundingClientRect();
-    const bRect = activeBtn.getBoundingClientRect();
-    navSlidingPill.style.width = `${bRect.width}px`;
-    navSlidingPill.style.transform = `translateX(${bRect.left - cRect.left}px)`;
+    const w = activeBtn.offsetWidth || activeBtn.getBoundingClientRect().width;
+    const l = activeBtn.offsetLeft !== undefined ? activeBtn.offsetLeft : (activeBtn.getBoundingClientRect().left - container.getBoundingClientRect().left);
+    navSlidingPill.style.width = `${w}px`;
+    navSlidingPill.style.transform = `translateX(${l}px)`;
+  }
+
+  function switchTab(targetId) {
+    if (!targetId) return;
+    try {
+      AudioSystem.playTabSwitch();
+    } catch (e) {
+      console.warn("Tab switch audio failed:", e);
+    }
+
+    navTabBtns.forEach(b => {
+      const isMatch = b.dataset.target === targetId;
+      b.classList.toggle('active', isMatch);
+    });
+
+    const targetBtn = document.querySelector(`.nav-tab-btn[data-target="${targetId}"]`);
+    if (targetBtn) {
+      updateNavPill(targetBtn);
+    }
+
+    tabPanels.forEach(panel => {
+      panel.classList.toggle('active', panel.id === targetId);
+    });
+
+    if (targetId === 'tabLibrary') {
+      try {
+        renderLibrary();
+      } catch (err) {
+        console.warn("renderLibrary error:", err);
+      }
+    }
   }
 
   window.addEventListener('resize', () => {
@@ -266,20 +295,10 @@ async function initApp() {
   });
 
   navTabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      AudioSystem.playTabSwitch();
-      navTabBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      updateNavPill(btn);
-
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       const targetId = btn.dataset.target;
-      tabPanels.forEach(panel => {
-        panel.classList.toggle('active', panel.id === targetId);
-      });
-
-      if (targetId === 'tabLibrary') {
-        renderLibrary();
-      }
+      switchTab(targetId);
     });
   });
 
@@ -718,13 +737,13 @@ async function initApp() {
     const isFocused = document.activeElement === textInput;
 
     if (isScratchpad && isEmpty && !isFocused) {
-      const quoteList = Quotes.emptyState || [];
+      const quoteList = Quotes && Quotes.emptyState ? Quotes.emptyState : [];
       if (quoteList.length === 0) return;
 
       if (immediate) {
         quoteText.textContent = quoteList[quoteIndex % quoteList.length];
         quoteOverlay.classList.remove('hidden');
-        quoteOverlay.style.opacity = '0.9';
+        quoteOverlay.style.opacity = '1';
       } else {
         quoteOverlay.style.opacity = '0';
         setTimeout(() => {
@@ -732,9 +751,9 @@ async function initApp() {
             quoteIndex = (quoteIndex + 1) % quoteList.length;
             quoteText.textContent = quoteList[quoteIndex % quoteList.length];
             quoteOverlay.classList.remove('hidden');
-            quoteOverlay.style.opacity = '0.9';
+            quoteOverlay.style.opacity = '1';
           }
-        }, 360);
+        }, 400);
       }
     } else {
       quoteOverlay.style.opacity = '0';
@@ -747,7 +766,7 @@ async function initApp() {
     updateQuoteDisplay(true);
     quoteTimerId = setInterval(() => {
       updateQuoteDisplay(false);
-    }, 7000);
+    }, 6000);
   }
 
   function stopQuoteRotation() {
@@ -827,7 +846,15 @@ async function initApp() {
     await Storage.saveSettings(state);
     returnScratchBtnWrap.style.display = 'none';
     textInput.style.display = 'block';
-    startQuoteRotation();
+    if (textInput.value.trim() === '') {
+      startQuoteRotation();
+    } else {
+      if (quoteOverlay) {
+        quoteOverlay.style.opacity = '0';
+        quoteOverlay.classList.add('hidden');
+      }
+      stopQuoteRotation();
+    }
     await prepareScratchpad();
   });
 
@@ -1018,9 +1045,17 @@ async function initApp() {
     if (bookId !== 'scratchpad') {
       textInput.style.display = 'none';
       returnScratchBtnWrap.style.display = 'block';
+      stopQuoteRotation();
+      if (quoteOverlay) {
+        quoteOverlay.style.opacity = '0';
+        quoteOverlay.classList.add('hidden');
+      }
     } else {
       textInput.style.display = 'block';
       returnScratchBtnWrap.style.display = 'none';
+      if (textInput.value.trim() === '') {
+        startQuoteRotation();
+      }
     }
 
     const indexInChunk = currentBookMeta.currentIndex % 1000;
@@ -1029,8 +1064,7 @@ async function initApp() {
     updateStageBookBadge();
 
     // Switch to Reader tab
-    const readerTab = document.querySelector('[data-target="tabReader"]');
-    if (readerTab) readerTab.click();
+    switchTab('tabReader');
   }
 
   // --------------------------------------------------------------------------
