@@ -19,12 +19,12 @@
     if ('caches' in window) {
       caches.keys().then(names => {
         for (const name of names) {
-          if (name !== 'tachyon-v30') caches.delete(name);
+          if (name !== 'tachyon-v31') caches.delete(name);
         }
       });
     }
   </script>
-  <link rel="stylesheet" href="assets/css/ios14.css?v=30">
+  <link rel="stylesheet" href="assets/css/ios14.css?v=31">
 </head>
 <body data-theme="obsidian">
 
@@ -100,8 +100,6 @@
           <span>Guide</span>
         </button>
       </div>
-      <!-- iOS 14 Home Indicator Bar -->
-      <div class="ios-home-indicator"></div>
     </nav>
 
     <!-- TAB 1: READER (MAIN STAGE) -->
@@ -163,14 +161,24 @@
           </div>
         </div>
 
-        <!-- Resume Countdown Overlay (3-Second Countdown: 3, 2, 1) -->
+        <!-- Resume Countdown Overlay (Authentic iOS 14 Activity Spinner: 3, 2, 1) -->
         <div class="overlay-hud" id="countdownHud">
           <div class="resume-loader-box">
             <div class="countdown-dial-wrap">
-              <svg viewBox="0 0 100 100" class="countdown-svg">
-                <circle class="countdown-circle-bg" cx="50" cy="50" r="42"></circle>
-                <circle class="countdown-circle-prog" id="countdownCircleProg" cx="50" cy="50" r="42"></circle>
-              </svg>
+              <div class="ios-activity-spinner" aria-label="Loading">
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+              </div>
               <div class="countdown-number" id="countdownNumber">3</div>
             </div>
             <div class="resume-affirmation" id="countdownAffirmation">Get Ready...</div>
@@ -522,72 +530,80 @@
         </button>
       </div>
 
-      <!-- Tab 1: Read & Progress Panel -->
-      <div class="modal-tab-panel active" id="bookModalReadPanel">
-        <!-- Modern Telemetry Grid -->
-        <div class="launch-telemetry-grid">
-          <div class="launch-telemetry-chip">
-            <span class="launch-chip-label">Total Words</span>
-            <span class="launch-chip-val" id="launchTotalWords">0</span>
-          </div>
-          <div class="launch-telemetry-chip">
-            <span class="launch-chip-label">Progress</span>
-            <span class="launch-chip-val" id="launchProgressPct">0%</span>
-          </div>
-          <div class="launch-telemetry-chip">
-            <span class="launch-chip-label">Est. Time</span>
-            <span class="launch-chip-val" id="launchEstTime">0m</span>
-          </div>
-        </div>
-
-        <!-- Glowing Liquid Progress Track -->
-        <div class="launch-progress-wrap">
-          <div class="launch-progress-track">
-            <div class="launch-progress-bar" id="launchProgressBar" style="width: 0%;"></div>
-          </div>
-        </div>
-
-        <!-- Starting Needle Text Selector -->
-        <div class="needle-editor-wrap">
-          <div class="needle-header-row">
-            <div class="needle-pos-info">
-              <span style="color: var(--accent); font-weight: 700;">📍 Start Position:</span>
-              <strong id="needlePosLabel" style="color: var(--text-primary); font-variant-numeric: tabular-nums;">Word 0 (0%)</strong>
+      <!-- Sliding Tab Viewport for Smooth Transitions -->
+      <div class="modal-tabs-viewport">
+        <div class="modal-tabs-slider" id="bookModalTabsSlider">
+          <!-- Tab 1: Read & Progress Panel -->
+          <div class="modal-tab-panel" id="bookModalReadPanel">
+            <!-- Modern Telemetry Grid -->
+            <div class="launch-telemetry-grid">
+              <div class="launch-telemetry-chip">
+                <span class="launch-chip-label">Total Words</span>
+                <span class="launch-chip-val" id="launchTotalWords">0</span>
+              </div>
+              <div class="launch-telemetry-chip">
+                <span class="launch-chip-label">Progress</span>
+                <span class="launch-chip-val" id="launchProgressPct">0%</span>
+              </div>
+              <div class="launch-telemetry-chip">
+                <span class="launch-chip-label">Est. Time</span>
+                <span class="launch-chip-val" id="launchEstTime">0m</span>
+              </div>
             </div>
-            <button class="btn-mini-reset" id="btnLaunchResetProg" title="Reset needle to start">
-              <span>Reset to Start</span>
-            </button>
+
+            <!-- Glowing Liquid Progress Track -->
+            <div class="launch-progress-wrap">
+              <div class="launch-progress-track">
+                <div class="launch-progress-bar" id="launchProgressBar" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- Starting Needle Text Selector -->
+            <div class="needle-editor-wrap">
+              <div class="needle-header-row">
+                <div class="needle-pos-info">
+                  <span style="color: var(--accent); font-weight: 700;">📍 Start Position:</span>
+                  <strong id="needlePosLabel" style="color: var(--text-primary); font-variant-numeric: tabular-nums;">Word 0 (0%)</strong>
+                </div>
+                <button class="btn-mini-reset" id="btnLaunchResetProg" title="Reset needle to start">
+                  <span>Reset to Start</span>
+                </button>
+              </div>
+              <p class="needle-hint">Tap any word in the text below to place your starting needle:</p>
+              <div class="needle-preview-box" id="needlePreviewBox">
+                <!-- Dynamically populated interactive word spans -->
+              </div>
+            </div>
+
+            <button class="btn-save" id="btnLaunchRead" style="width: 100%; margin-top: 14px; padding: 13px; font-size: 15px;">Read</button>
           </div>
-          <p class="needle-hint">Tap any word in the text below to place your starting needle:</p>
-          <div class="needle-preview-box" id="needlePreviewBox">
-            <!-- Dynamically populated interactive word spans -->
+
+          <!-- Tab 2: Edit Details Panel -->
+          <div class="modal-tab-panel" id="bookModalEditPanel" style="gap: 12px;">
+            <input type="text" class="modern-textarea" id="editBookTitleInput" placeholder="Title" style="height: 44px; padding: 10px 14px;">
+            <input type="text" class="modern-textarea" id="editBookAuthorInput" placeholder="Author (optional)" style="height: 44px; padding: 10px 14px;">
+            <textarea class="modern-textarea" id="editBookContentInput" placeholder="Paste or edit content here..." style="height: 150px;"></textarea>
+
+            <div>
+              <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 8px; text-align: center;">Tag Color:</label>
+              <div class="accent-swatches-wrap" id="modalColorDots">
+                <div class="accent-dot active" data-color="white" style="background: var(--palette-white);"></div>
+                <div class="accent-dot" data-color="red" style="background: var(--palette-red);"></div>
+                <div class="accent-dot" data-color="pink" style="background: var(--palette-pink);"></div>
+                <div class="accent-dot" data-color="purple" style="background: var(--palette-purple);"></div>
+                <div class="accent-dot" data-color="blue" style="background: var(--palette-blue);"></div>
+                <div class="accent-dot" data-color="green" style="background: var(--palette-green);"></div>
+                <div class="accent-dot" data-color="yellow" style="background: var(--palette-yellow);"></div>
+                <div class="accent-dot" data-color="orange" style="background: var(--palette-orange);"></div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <button class="btn-save" id="btnSaveAddModal" style="flex: 2; padding: 13px; font-size: 15px;">Save Changes</button>
+              <button type="button" class="btn-delete-book-modal" id="btnDeleteCurrentBook" title="Delete this book">Delete Book</button>
+            </div>
           </div>
         </div>
-
-        <button class="btn-save" id="btnLaunchRead" style="width: 100%; margin-top: 14px; padding: 13px; font-size: 15px;">Read</button>
-      </div>
-
-      <!-- Tab 2: Edit Details Panel -->
-      <div class="modal-tab-panel" id="bookModalEditPanel" style="display: none; flex-direction: column; gap: 12px;">
-        <input type="text" class="modern-textarea" id="editBookTitleInput" placeholder="Title" style="height: 44px; padding: 10px 14px;">
-        <input type="text" class="modern-textarea" id="editBookAuthorInput" placeholder="Author (optional)" style="height: 44px; padding: 10px 14px;">
-        <textarea class="modern-textarea" id="editBookContentInput" placeholder="Paste or edit content here..." style="height: 150px;"></textarea>
-
-        <div>
-          <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 8px; text-align: center;">Tag Color:</label>
-          <div class="accent-swatches-wrap" id="modalColorDots">
-            <div class="accent-dot active" data-color="white" style="background: var(--palette-white);"></div>
-            <div class="accent-dot" data-color="red" style="background: var(--palette-red);"></div>
-            <div class="accent-dot" data-color="pink" style="background: var(--palette-pink);"></div>
-            <div class="accent-dot" data-color="purple" style="background: var(--palette-purple);"></div>
-            <div class="accent-dot" data-color="blue" style="background: var(--palette-blue);"></div>
-            <div class="accent-dot" data-color="green" style="background: var(--palette-green);"></div>
-            <div class="accent-dot" data-color="yellow" style="background: var(--palette-yellow);"></div>
-            <div class="accent-dot" data-color="orange" style="background: var(--palette-orange);"></div>
-          </div>
-        </div>
-
-        <button class="btn-save" id="btnSaveAddModal" style="width: 100%; margin-top: 6px; padding: 13px; font-size: 15px;">Save Changes</button>
       </div>
     </div>
   </div>
@@ -650,6 +666,6 @@
   </div>
 
   <!-- Main Modular Modern Application Script -->
-  <script type="module" src="assets/js/modern-app.js?v=30"></script>
+  <script type="module" src="assets/js/modern-app.js?v=31"></script>
 </body>
 </html>

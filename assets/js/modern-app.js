@@ -82,6 +82,7 @@ async function initApp() {
   const bookModalTabsNav = document.getElementById('bookModalTabsNav');
   const btnBookTabRead = document.getElementById('btnBookTabRead');
   const btnBookTabEdit = document.getElementById('btnBookTabEdit');
+  const bookModalTabsSlider = document.getElementById('bookModalTabsSlider');
   const bookModalReadPanel = document.getElementById('bookModalReadPanel');
   const bookModalEditPanel = document.getElementById('bookModalEditPanel');
 
@@ -101,6 +102,7 @@ async function initApp() {
   const editBookContentInput = document.getElementById('editBookContentInput');
   const modalColorDots = document.querySelectorAll('#modalColorDots .accent-dot');
   const btnSaveAddModal = document.getElementById('btnSaveAddModal');
+  const btnDeleteCurrentBook = document.getElementById('btnDeleteCurrentBook');
 
   // About Modal & Brand Trigger
   const brandLockup = document.getElementById('brandLockup');
@@ -455,7 +457,7 @@ async function initApp() {
   }
 
   // --------------------------------------------------------------------------
-  // 3-Second Resume Countdown Sequence (3, 2, 1, Read!)
+  // 3-Second Resume Countdown Sequence (3, 2, 1, Read!) with iOS 14 Spinner
   // --------------------------------------------------------------------------
   function startCountdown(onComplete) {
     if (isCountingDown) return;
@@ -469,10 +471,6 @@ async function initApp() {
         countdownNumber.classList.remove('pulse');
         void countdownNumber.offsetWidth;
         countdownNumber.classList.add('pulse');
-      }
-      if (countdownCircleProg) {
-        const offset = (3 - step) * 88;
-        countdownCircleProg.style.strokeDashoffset = `${offset}`;
       }
       if (countdownAffirmation) {
         if (step === 3) countdownAffirmation.textContent = 'Ready...';
@@ -491,9 +489,6 @@ async function initApp() {
       } else {
         clearInterval(countdownIntervalId);
         countdownIntervalId = null;
-        if (countdownCircleProg) {
-          countdownCircleProg.style.strokeDashoffset = '264';
-        }
         setTimeout(() => {
           isCountingDown = false;
           countdownHud.classList.remove('active');
@@ -911,17 +906,40 @@ async function initApp() {
   });
 
   // --------------------------------------------------------------------------
-  // Library Management with iOS Swipe-to-Delete
+  // Library Management with Persistent Deletions & Smooth Animations
   // --------------------------------------------------------------------------
+  function getDeletedBookIds() {
+    try {
+      return JSON.parse(localStorage.getItem('tachyon_deleted_book_ids') || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function markBookDeleted(id) {
+    const deleted = getDeletedBookIds();
+    if (!deleted.includes(id)) {
+      deleted.push(id);
+      localStorage.setItem('tachyon_deleted_book_ids', JSON.stringify(deleted));
+    }
+    localStorage.setItem('tachyon_library_seeded', 'true');
+  }
+
   async function ensurePreloadedBooks() {
+    const isSeeded = localStorage.getItem('tachyon_library_seeded');
+    if (isSeeded) return;
+
+    const deletedIds = getDeletedBookIds();
     const existing = await Storage.getLibraryMeta();
-    const nonScratch = existing.filter(b => b.id !== 'scratchpad');
-    if (nonScratch.length === 0) {
-      for (const item of PreloadedLibrary) {
+    const existingIds = new Set(existing.map(b => b.id));
+
+    for (const item of PreloadedLibrary) {
+      if (!deletedIds.includes(item.id) && !existingIds.has(item.id)) {
         const words = RSVP.parseText(item.content, '');
         await Storage.saveBook(item.id, item.title, item.author, words, 'white');
       }
     }
+    localStorage.setItem('tachyon_library_seeded', 'true');
   }
 
   async function renderLibrary() {
@@ -929,6 +947,20 @@ async function initApp() {
     const metaList = await Storage.getLibraryMeta();
     libraryGrid.innerHTML = '';
     const books = metaList.filter(b => b.id !== 'scratchpad');
+
+    if (books.length === 0) {
+      libraryGrid.innerHTML = `
+        <div style="text-align: center; padding: 48px 16px; color: var(--text-secondary);">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 12px; opacity: 0.5;">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          <div style="font-size: 16px; font-weight: 300; margin-bottom: 4px; color: var(--text-primary);">Your Library is Empty</div>
+          <div style="font-size: 13px; font-weight: 200;">Tap "+ Add Book" above to import or paste text.</div>
+        </div>
+      `;
+      return;
+    }
 
     books.forEach(book => {
       const item = document.createElement('div');
@@ -1040,10 +1072,8 @@ async function initApp() {
       deleteBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
         AudioSystem.playButtonPress();
-        item.style.transition = 'max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease';
-        item.style.opacity = '0';
-        item.style.maxHeight = '0px';
-        item.style.marginBottom = '0px';
+        item.classList.add('deleting');
+        markBookDeleted(book.id);
         setTimeout(async () => {
           await Storage.deleteBook(book.id);
           if (state.activeDocId === book.id) {
@@ -1201,17 +1231,11 @@ async function initApp() {
     if (tabName === 'read') {
       btnBookTabRead.classList.add('active');
       btnBookTabEdit.classList.remove('active');
-      bookModalReadPanel.style.display = 'flex';
-      bookModalReadPanel.classList.add('active');
-      bookModalEditPanel.style.display = 'none';
-      bookModalEditPanel.classList.remove('active');
+      if (bookModalTabsSlider) bookModalTabsSlider.classList.remove('show-edit');
     } else {
       btnBookTabEdit.classList.add('active');
       btnBookTabRead.classList.remove('active');
-      bookModalEditPanel.style.display = 'flex';
-      bookModalEditPanel.classList.add('active');
-      bookModalReadPanel.style.display = 'none';
-      bookModalReadPanel.classList.remove('active');
+      if (bookModalTabsSlider) bookModalTabsSlider.classList.add('show-edit');
     }
   }
 
@@ -1226,6 +1250,29 @@ async function initApp() {
     btnBookTabEdit.addEventListener('click', () => {
       AudioSystem.playButtonPress();
       switchBookModalTab('edit');
+    });
+  }
+
+  if (btnDeleteCurrentBook) {
+    btnDeleteCurrentBook.addEventListener('click', async () => {
+      if (!pendingLaunchDoc) return;
+      const bookId = pendingLaunchDoc.id;
+      AudioSystem.playButtonPress();
+      markBookDeleted(bookId);
+      closeBookDetailModal();
+
+      const card = document.querySelector(`.book-card-item[data-id="${bookId}"]`);
+      if (card) {
+        card.classList.add('deleting');
+      }
+
+      setTimeout(async () => {
+        await Storage.deleteBook(bookId);
+        if (state.activeDocId === bookId) {
+          await loadBook('scratchpad');
+        }
+        renderLibrary();
+      }, 280);
     });
   }
 
@@ -1256,6 +1303,7 @@ async function initApp() {
       selectedModalColor = book.color || 'white';
       modalColorDots.forEach(d => d.classList.toggle('active', d.dataset.color === selectedModalColor));
       btnSaveAddModal.textContent = 'Save Changes';
+      if (btnDeleteCurrentBook) btnDeleteCurrentBook.style.display = 'flex';
 
       bookModalTabsNav.style.display = 'flex';
       switchBookModalTab('read');
@@ -1284,6 +1332,7 @@ async function initApp() {
       selectedModalColor = 'white';
       modalColorDots.forEach(d => d.classList.toggle('active', d.dataset.color === 'white'));
       btnSaveAddModal.textContent = 'Add to Library';
+      if (btnDeleteCurrentBook) btnDeleteCurrentBook.style.display = 'none';
 
       bookModalTabsNav.style.display = 'none';
       switchBookModalTab('edit');
