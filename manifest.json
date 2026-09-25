@@ -2,10 +2,10 @@
   "name": "TACHYON High-Velocity RSVP Reader",
   "short_name": "TACHYON",
   "description": "Read faster than thought with RSVP technology.",
-  "start_url": ".",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#08080A",
-  "theme_color": "#08080A",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "orientation": "portrait",
   "icons": [
     {

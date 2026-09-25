@@ -53,8 +53,10 @@ async function initApp() {
   const volIconSvg = document.getElementById('volIconSvg');
   const volSlider = document.getElementById('volSlider');
 
-  // Text Input Panel
+  // Text Input Panel & Motivational Quotes Overlay
   const textInput = document.getElementById('textInput');
+  const quoteOverlay = document.getElementById('quoteOverlay');
+  const quoteText = document.getElementById('quoteText');
   const btnPasteClipboard = document.getElementById('btnPasteClipboard');
   const btnClearText = document.getElementById('btnClearText');
   const readingEstimate = document.getElementById('readingEstimate');
@@ -82,16 +84,25 @@ async function initApp() {
   const btnSaveAddModal = document.getElementById('btnSaveAddModal');
   const modalColorDots = document.querySelectorAll('#modalColorDots .accent-dot');
 
+  // Launch & Starting Needle Modal
   const launchModal = document.getElementById('launchModal');
   const launchTitle = document.getElementById('launchTitle');
   const launchAuthor = document.getElementById('launchAuthor');
   const launchTotalWords = document.getElementById('launchTotalWords');
   const launchProgressPct = document.getElementById('launchProgressPct');
-  const launchStartSlider = document.getElementById('launchStartSlider');
-  const launchSliderLabel = document.getElementById('launchSliderLabel');
+  const launchEstTime = document.getElementById('launchEstTime');
+  const launchProgressBar = document.getElementById('launchProgressBar');
+  const needlePosLabel = document.getElementById('needlePosLabel');
+  const needlePreviewBox = document.getElementById('needlePreviewBox');
   const btnLaunchRead = document.getElementById('btnLaunchRead');
   const btnLaunchResetProg = document.getElementById('btnLaunchResetProg');
   const btnCloseLaunchModal = document.getElementById('btnCloseLaunchModal');
+
+  // About Modal & Brand Trigger
+  const brandLockup = document.getElementById('brandLockup');
+  const btnOpenAbout = document.getElementById('btnOpenAbout');
+  const aboutModal = document.getElementById('aboutModal');
+  const btnCloseAboutModal = document.getElementById('btnCloseAboutModal');
 
   const completionModal = document.getElementById('completionModal');
   const statWordsRead = document.getElementById('statWordsRead');
@@ -235,9 +246,24 @@ async function initApp() {
   // --------------------------------------------------------------------------
   function updateNavPill(activeBtn) {
     if (!activeBtn || !navSlidingPill) return;
-    navSlidingPill.style.width = `${activeBtn.offsetWidth}px`;
-    navSlidingPill.style.transform = `translateX(${activeBtn.offsetLeft - 4}px)`;
+    const container = activeBtn.parentElement;
+    if (!container) return;
+    const cRect = container.getBoundingClientRect();
+    const bRect = activeBtn.getBoundingClientRect();
+    navSlidingPill.style.width = `${bRect.width}px`;
+    navSlidingPill.style.transform = `translateX(${bRect.left - cRect.left}px)`;
   }
+
+  window.addEventListener('resize', () => {
+    const active = document.querySelector('.nav-tab-btn.active');
+    if (active) updateNavPill(active);
+  });
+  window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+      const active = document.querySelector('.nav-tab-btn.active');
+      if (active) updateNavPill(active);
+    }, 120);
+  });
 
   navTabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -390,7 +416,7 @@ async function initApp() {
     setPlayButtonVisual(false);
 
     if (isCountingDown) {
-      clearInterval(countdownIntervalId);
+      clearTimeout(countdownIntervalId);
       isCountingDown = false;
       countdownHud.classList.remove('active');
     }
@@ -401,36 +427,20 @@ async function initApp() {
   }
 
   // --------------------------------------------------------------------------
-  // Countdown Ring (3, 2, 1)
+  // Resume Loading Circle Animation
   // --------------------------------------------------------------------------
   function startCountdown(onComplete) {
     if (isCountingDown) return;
     isCountingDown = true;
     countdownHud.classList.add('active');
+    AudioSystem.playButtonPress();
 
-    let count = 3;
-    countdownNumber.textContent = count;
-    ringActive.style.strokeDashoffset = 0;
-    AudioSystem.playCountdownBeep(false);
-
-    const circumference = 283;
-    ringActive.style.transition = 'stroke-dashoffset 1s linear';
-    ringActive.style.strokeDashoffset = (circumference * (3 - count + 1)) / 3;
-
-    countdownIntervalId = setInterval(() => {
-      count--;
-      if (count > 0) {
-        countdownNumber.textContent = count;
-        ringActive.style.strokeDashoffset = (circumference * (3 - count + 1)) / 3;
-        AudioSystem.playCountdownBeep(false);
-      } else {
-        clearInterval(countdownIntervalId);
-        isCountingDown = false;
-        countdownHud.classList.remove('active');
-        AudioSystem.playCountdownBeep(true);
-        if (onComplete) onComplete();
-      }
-    }, 850);
+    countdownIntervalId = setTimeout(() => {
+      isCountingDown = false;
+      countdownHud.classList.remove('active');
+      AudioSystem.playCountdownBeep(true);
+      if (onComplete) onComplete();
+    }, 600);
   }
 
   // --------------------------------------------------------------------------
@@ -695,8 +705,89 @@ async function initApp() {
     updateStageBookBadge();
   }
 
+  // --------------------------------------------------------------------------
+  // Scratchpad Motivational Quotes Engine (7-second rotation with fade)
+  // --------------------------------------------------------------------------
+  let quoteTimerId = null;
+  let quoteIndex = 0;
+
+  function updateQuoteDisplay(immediate = false) {
+    if (!quoteOverlay || !quoteText) return;
+    const isScratchpad = !state.activeDocId || state.activeDocId === 'scratchpad';
+    const isEmpty = textInput.value.trim() === '';
+    const isFocused = document.activeElement === textInput;
+
+    if (isScratchpad && isEmpty && !isFocused) {
+      const quoteList = Quotes.emptyState || [];
+      if (quoteList.length === 0) return;
+
+      if (immediate) {
+        quoteText.textContent = quoteList[quoteIndex % quoteList.length];
+        quoteOverlay.classList.remove('hidden');
+        quoteOverlay.style.opacity = '0.9';
+      } else {
+        quoteOverlay.style.opacity = '0';
+        setTimeout(() => {
+          if (textInput.value.trim() === '' && document.activeElement !== textInput) {
+            quoteIndex = (quoteIndex + 1) % quoteList.length;
+            quoteText.textContent = quoteList[quoteIndex % quoteList.length];
+            quoteOverlay.classList.remove('hidden');
+            quoteOverlay.style.opacity = '0.9';
+          }
+        }, 360);
+      }
+    } else {
+      quoteOverlay.style.opacity = '0';
+      quoteOverlay.classList.add('hidden');
+    }
+  }
+
+  function startQuoteRotation() {
+    stopQuoteRotation();
+    updateQuoteDisplay(true);
+    quoteTimerId = setInterval(() => {
+      updateQuoteDisplay(false);
+    }, 7000);
+  }
+
+  function stopQuoteRotation() {
+    if (quoteTimerId) {
+      clearInterval(quoteTimerId);
+      quoteTimerId = null;
+    }
+  }
+
+  textInput.addEventListener('focus', () => {
+    if (quoteOverlay) {
+      quoteOverlay.style.opacity = '0';
+      quoteOverlay.classList.add('hidden');
+    }
+    stopQuoteRotation();
+  });
+
+  textInput.addEventListener('blur', () => {
+    if (textInput.value.trim() === '') {
+      startQuoteRotation();
+    }
+  });
+
+  if (quoteOverlay) {
+    quoteOverlay.addEventListener('click', () => {
+      textInput.focus();
+    });
+  }
+
   textInput.addEventListener('input', async () => {
     updateReadingEstimate();
+    if (textInput.value.trim() !== '') {
+      if (quoteOverlay) {
+        quoteOverlay.style.opacity = '0';
+        quoteOverlay.classList.add('hidden');
+      }
+      stopQuoteRotation();
+    } else {
+      startQuoteRotation();
+    }
     if (!isPlaying) {
       await prepareScratchpad();
     }
@@ -708,6 +799,11 @@ async function initApp() {
       if (clipText && clipText.trim()) {
         textInput.value = clipText.trim();
         updateReadingEstimate();
+        if (quoteOverlay) {
+          quoteOverlay.style.opacity = '0';
+          quoteOverlay.classList.add('hidden');
+        }
+        stopQuoteRotation();
         await prepareScratchpad();
         AudioSystem.playButtonPress();
       }
@@ -721,6 +817,7 @@ async function initApp() {
     AudioSystem.playButtonPress();
     textInput.value = '';
     updateReadingEstimate();
+    startQuoteRotation();
     await prepareScratchpad();
   });
 
@@ -730,6 +827,7 @@ async function initApp() {
     await Storage.saveSettings(state);
     returnScratchBtnWrap.style.display = 'none';
     textInput.style.display = 'block';
+    startQuoteRotation();
     await prepareScratchpad();
   });
 
@@ -760,7 +858,7 @@ async function initApp() {
 
       const pct = book.totalWords > 0 ? Math.min(100, Math.round((book.currentIndex / book.totalWords) * 100)) : 0;
       const isComplete = pct >= 100;
-      const ringOffset = 88 - (88 * (pct / 100));
+      const ringOffset = 100.5 - (100.5 * (pct / 100));
 
       item.innerHTML = `
         <div class="book-swipe-delete-bg">
@@ -785,9 +883,9 @@ async function initApp() {
           </div>
           <div class="book-actions-group">
             <div class="book-ring-wrap" title="${pct}% read">
-              <svg viewBox="0 0 36 36">
-                <circle class="book-ring-bg" cx="18" cy="18" r="14"></circle>
-                <circle class="book-ring-prog" cx="18" cy="18" r="14" stroke-dasharray="88" stroke-dashoffset="${ringOffset}"></circle>
+              <svg viewBox="0 0 40 40">
+                <circle class="book-ring-bg" cx="20" cy="20" r="16"></circle>
+                <circle class="book-ring-prog" cx="20" cy="20" r="16" stroke-dasharray="100.5" stroke-dashoffset="${ringOffset}"></circle>
               </svg>
               <span class="book-ring-val">${pct}%</span>
             </div>
@@ -808,6 +906,7 @@ async function initApp() {
         startX = clientX;
         currentDiff = 0;
         isSwiping = true;
+        item.classList.add('is-swiping');
         cardEl.style.transition = 'none';
       }
 
@@ -831,9 +930,11 @@ async function initApp() {
         if (currentDiff < -45) {
           cardEl.style.transform = 'translateX(-88px)';
           cardEl.classList.add('swiped');
+          item.classList.add('is-swiping');
         } else {
           cardEl.style.transform = 'translateX(0px)';
           cardEl.classList.remove('swiped');
+          item.classList.remove('is-swiping');
         }
       }
 
@@ -879,6 +980,7 @@ async function initApp() {
         if (cardEl.classList.contains('swiped')) {
           cardEl.style.transform = 'translateX(0px)';
           cardEl.classList.remove('swiped');
+          item.classList.remove('is-swiping');
           return;
         }
         openLaunchModal(book);
@@ -888,6 +990,7 @@ async function initApp() {
         if (cardEl.classList.contains('swiped')) {
           cardEl.style.transform = 'translateX(0px)';
           cardEl.classList.remove('swiped');
+          item.classList.remove('is-swiping');
           return;
         }
         openLaunchModal(book);
@@ -931,49 +1034,112 @@ async function initApp() {
   }
 
   // --------------------------------------------------------------------------
-  // Launch Modal (with scrub slider)
+  // Launch Modal & Starting Needle Text Selector
   // --------------------------------------------------------------------------
-  function openLaunchModal(book) {
+  let pendingNeedleIndex = 0;
+
+  function updateNeedleStats() {
+    if (!pendingLaunchDoc) return;
+    const total = pendingLaunchDoc.totalWords || 1;
+    const pct = Math.min(100, Math.round((pendingNeedleIndex / total) * 100));
+    if (launchProgressPct) launchProgressPct.textContent = `${pct}%`;
+    if (launchProgressBar) launchProgressBar.style.width = `${pct}%`;
+    if (needlePosLabel) {
+      needlePosLabel.textContent = `Word ${pendingNeedleIndex.toLocaleString()} (${pct}%)`;
+    }
+  }
+
+  async function renderNeedlePreview(book) {
+    if (!needlePreviewBox) return;
+    needlePreviewBox.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 14px;">Loading excerpt...</div>';
+
+    const chunkIdx = Math.floor(pendingNeedleIndex / 1000);
+    let words = await Storage.getBookChunk(book.id, chunkIdx);
+    if (!words || words.length === 0) {
+      words = await Storage.getBookChunk(book.id, 0);
+    }
+    if (!words || words.length === 0) {
+      needlePreviewBox.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 14px;">No preview text available</div>';
+      return;
+    }
+
+    const chunkBase = chunkIdx * 1000;
+    needlePreviewBox.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+
+    words.forEach((w, localIdx) => {
+      const globalIdx = chunkBase + localIdx;
+      const span = document.createElement('span');
+      span.className = 'needle-word' + (globalIdx === pendingNeedleIndex ? ' needle-active' : '');
+      span.textContent = w + ' ';
+      span.dataset.idx = globalIdx;
+
+      span.addEventListener('click', (e) => {
+        e.stopPropagation();
+        AudioSystem.playButtonPress();
+        pendingNeedleIndex = globalIdx;
+        needlePreviewBox.querySelectorAll('.needle-word.needle-active').forEach(el => el.classList.remove('needle-active'));
+        span.classList.add('needle-active');
+        updateNeedleStats();
+      });
+
+      fragment.appendChild(span);
+    });
+
+    needlePreviewBox.appendChild(fragment);
+
+    setTimeout(() => {
+      const activeEl = needlePreviewBox.querySelector('.needle-word.needle-active');
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+  }
+
+  async function openLaunchModal(book) {
     AudioSystem.playModalOpen();
     pendingLaunchDoc = book;
+    pendingNeedleIndex = book.currentIndex || 0;
+
     launchTitle.textContent = book.title;
     launchAuthor.textContent = book.author || 'Unknown';
     launchTotalWords.textContent = book.totalWords.toLocaleString();
 
-    const pct = book.totalWords > 0 ? ((book.currentIndex / book.totalWords) * 100).toFixed(0) : 0;
-    launchProgressPct.textContent = `${pct}%`;
-    launchStartSlider.value = pct;
-    launchSliderLabel.textContent = `Word ${book.currentIndex.toLocaleString()} (${pct}%)`;
+    const wpm = state.wpm || 350;
+    const estMins = Math.max(1, Math.ceil(book.totalWords / wpm));
+    if (launchEstTime) {
+      launchEstTime.textContent = `~${estMins}m`;
+    }
+
+    updateNeedleStats();
+    await renderNeedlePreview(book);
 
     launchModal.classList.add('active');
   }
 
-  launchStartSlider.addEventListener('input', (e) => {
+  btnLaunchResetProg.addEventListener('click', async () => {
     if (!pendingLaunchDoc) return;
-    const pct = parseFloat(e.target.value);
-    const wordIndex = Math.floor((pct / 100) * pendingLaunchDoc.totalWords);
-    launchSliderLabel.textContent = `Word ${wordIndex.toLocaleString()} (${pct.toFixed(0)}%)`;
+    AudioSystem.playButtonPress();
+    pendingNeedleIndex = 0;
+    updateNeedleStats();
+    if (needlePreviewBox) {
+      needlePreviewBox.querySelectorAll('.needle-word.needle-active').forEach(el => el.classList.remove('needle-active'));
+      const firstWord = needlePreviewBox.querySelector('.needle-word[data-idx="0"]');
+      if (firstWord) {
+        firstWord.classList.add('needle-active');
+        firstWord.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+    await Storage.updateBookProgress(pendingLaunchDoc.id, 0);
   });
 
   btnLaunchRead.addEventListener('click', async () => {
     if (!pendingLaunchDoc) return;
     AudioSystem.playModalClose();
-    const pct = parseFloat(launchStartSlider.value);
-    const targetWordIndex = Math.floor((pct / 100) * pendingLaunchDoc.totalWords);
-
-    pendingLaunchDoc.currentIndex = targetWordIndex;
-    await Storage.updateBookProgress(pendingLaunchDoc.id, targetWordIndex);
+    pendingLaunchDoc.currentIndex = pendingNeedleIndex;
+    await Storage.updateBookProgress(pendingLaunchDoc.id, pendingNeedleIndex);
     launchModal.classList.remove('active');
     await loadBook(pendingLaunchDoc.id);
-  });
-
-  btnLaunchResetProg.addEventListener('click', async () => {
-    if (!pendingLaunchDoc) return;
-    AudioSystem.playButtonPress();
-    launchStartSlider.value = 0;
-    launchSliderLabel.textContent = 'Word 0 (0%)';
-    launchProgressPct.textContent = '0%';
-    await Storage.updateBookProgress(pendingLaunchDoc.id, 0);
   });
 
   btnCloseLaunchModal.addEventListener('click', () => {
@@ -981,6 +1147,28 @@ async function initApp() {
     launchModal.classList.remove('active');
     pendingLaunchDoc = null;
   });
+
+  // --------------------------------------------------------------------------
+  // About Tachyon Modal
+  // --------------------------------------------------------------------------
+  function openAboutModal() {
+    AudioSystem.playModalOpen();
+    if (aboutModal) aboutModal.classList.add('active');
+  }
+
+  function closeAboutModal() {
+    AudioSystem.playModalClose();
+    if (aboutModal) aboutModal.classList.remove('active');
+  }
+
+  if (brandLockup) brandLockup.addEventListener('click', openAboutModal);
+  if (btnOpenAbout) btnOpenAbout.addEventListener('click', openAboutModal);
+  if (btnCloseAboutModal) btnCloseAboutModal.addEventListener('click', closeAboutModal);
+  if (aboutModal) {
+    aboutModal.addEventListener('click', (e) => {
+      if (e.target === aboutModal) closeAboutModal();
+    });
+  }
 
   // --------------------------------------------------------------------------
   // Add / Edit Book Modal
@@ -1178,6 +1366,9 @@ async function initApp() {
       await loadBook(state.activeDocId);
     } else {
       await prepareScratchpad();
+      if (textInput.value.trim() === '') {
+        startQuoteRotation();
+      }
     }
   } catch (err) {
     console.warn("Could not load book/scratchpad, showing welcome text:", err);
@@ -1186,7 +1377,7 @@ async function initApp() {
 
   updateReadingEstimate();
   window.__appInitialized = true;
-  console.log("TACHYON Modern v23 Initialized Successfully!");
+  console.log("TACHYON Modern v25 Initialized Successfully!");
 }
 
 // Reliable boot trigger

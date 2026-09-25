@@ -2,11 +2,14 @@ export const Quotes = {
   emptyState: [
     "The more that you read, the more things you will know. — Dr. Seuss",
     "Reading is to the mind what exercise is to the body. — Joseph Addison",
-    "I do not read books. I absorb their neural signatures. — Tachyon Micro-Lore",
-    "Your eyes were meant to absorb concepts, not count syllables. — Speed Reader Proverb",
-    "A reader lives a thousand lives before he dies. The fast reader lives ten thousand. — Adapted from George R.R. Martin",
-    "Speed is the byproduct of effortless focus. — Kinetic Reading Axiom",
-    "Think in paragraphs, absorb in words, unlock in seconds. — Tachyon Principle"
+    "Your eyes were meant to absorb concepts, not count syllables.",
+    "A reader lives a thousand lives before he dies. The fast reader lives ten thousand.",
+    "Speed is the byproduct of effortless focus.",
+    "Think in paragraphs, absorb in concepts, unlock in seconds.",
+    "The capacity to learn is a gift; the ability to learn is a skill; the willingness to learn is a choice. — Brian Herbert",
+    "Focus is not saying yes to what you need to do, but saying no to a hundred other things.",
+    "Lock in your vision. Let momentum take over.",
+    "Quiet the mind, accelerate the cognition."
   ],
   countdown: [
     "Lock In",

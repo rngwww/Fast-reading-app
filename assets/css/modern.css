@@ -337,13 +337,14 @@ button:active {
 .nav-sliding-pill {
   position: absolute;
   top: 4px;
-  left: 4px;
+  left: 0;
   height: calc(100% - 8px);
   background: var(--bg-surface-elevated);
   border-radius: var(--radius-full);
   z-index: 1;
   transition: all 0.35s var(--spring-bouncy);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.16);
+  pointer-events: none;
 }
 
 /* ==========================================================================
@@ -594,47 +595,66 @@ button:active {
   gap: 16px;
 }
 
-/* Countdown Dial */
-.countdown-box {
+/* Resume Loading Circle Spinner */
+.resume-loader-box {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  animation: resumePopIn 0.3s var(--spring-bouncy);
 }
-.countdown-dial {
+@keyframes resumePopIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+.resume-spinner-dial {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.countdown-dial svg {
+.resume-spinner-svg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  transform: rotate(-90deg);
+  animation: resumeSpinnerRotate 0.9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
-.ring-track {
+.spinner-track {
   fill: none;
   stroke: rgba(255, 255, 255, 0.08);
-  stroke-width: 5;
+  stroke-width: 4;
 }
-.ring-active {
+.spinner-glow-head {
   fill: none;
   stroke: var(--accent);
-  stroke-width: 5;
+  stroke-width: 4;
   stroke-linecap: round;
-  stroke-dasharray: 283;
+  stroke-dasharray: 60 70;
   stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
 }
-.countdown-number {
-  font-size: 42px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
+@keyframes resumeSpinnerRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.resume-spinner-icon {
+  position: relative;
   z-index: 2;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+}
+.resume-affirmation {
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
 /* ==========================================================================
@@ -719,12 +739,12 @@ button:active {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 18px;
-  padding: 6px 0;
+  gap: 24px;
+  padding: 8px 0;
 }
 .btn-media-circle {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: var(--bg-surface-elevated);
   box-shadow: var(--shadow-liquid);
@@ -733,10 +753,11 @@ button:active {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: transform 0.2s var(--spring-bouncy), background 0.2s ease;
 }
 .btn-media-circle:hover {
   background: var(--bg-surface-active);
-  transform: scale(1.06);
+  transform: scale(1.08);
 }
 .btn-media-circle:active {
   transform: scale(0.92);
@@ -744,8 +765,8 @@ button:active {
 
 /* Prominent Center Play / Pause Hero Button (Icon Only) */
 .btn-media-hero {
-  width: 60px;
-  height: 60px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
   background: var(--accent);
   color: #000000;
@@ -754,6 +775,7 @@ button:active {
   justify-content: center;
   box-shadow: 0 8px 24px var(--accent-glow), 0 2px 6px rgba(0, 0, 0, 0.4);
   cursor: pointer;
+  transition: transform 0.2s var(--spring-bouncy), box-shadow 0.2s ease;
 }
 .btn-media-hero:hover {
   transform: scale(1.08);
@@ -763,6 +785,27 @@ button:active {
 }
 .btn-media-hero svg {
   fill: currentColor;
+}
+
+/* Mini Reset Button inside Scrubber Meta */
+.btn-mini-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface-elevated);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+.btn-mini-reset:hover {
+  background: var(--bg-surface-active);
+  color: var(--text-primary);
 }
 
 /* Speed Controls & Steppers */
@@ -1074,6 +1117,14 @@ button:active {
   justify-content: center;
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
   z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+.book-card-item.is-swiping .book-swipe-delete-bg,
+.book-card.swiped ~ .book-swipe-delete-bg {
+  opacity: 1;
+  pointer-events: auto;
 }
 .btn-swipe-delete {
   background: transparent;
@@ -1107,16 +1158,6 @@ button:active {
   transition: transform 0.25s var(--spring);
   will-change: transform;
 }
-.book-card::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: var(--card-color, #FFFFFF);
-  border-radius: 4px 0 0 4px;
-}
 .book-info {
   flex: 1;
   display: flex;
@@ -1137,11 +1178,11 @@ button:active {
   color: var(--text-secondary);
 }
 
-/* Circular Progress Ring */
+/* Circular Progress Ring - 40px with generous inner room */
 .book-ring-wrap {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1155,20 +1196,26 @@ button:active {
 .book-ring-bg {
   fill: none;
   stroke: rgba(255, 255, 255, 0.08);
-  stroke-width: 3;
+  stroke-width: 3.2;
 }
 .book-ring-prog {
   fill: none;
   stroke: var(--card-color, #FFFFFF);
-  stroke-width: 3;
+  stroke-width: 3.2;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.4s ease;
 }
 .book-ring-val {
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
   position: absolute;
   color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .book-actions-group {
@@ -1609,6 +1656,246 @@ button:active {
 }
 
 /* ==========================================================================
+   Scratchpad Motivational Quote Overlay
+   ========================================================================== */
+.text-box-wrap {
+  position: relative;
+}
+.scratchpad-quote-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px 28px;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.4s ease, transform 0.4s var(--spring);
+}
+.scratchpad-quote-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+}
+.quote-mark {
+  font-size: 32px;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.6;
+  margin-bottom: 6px;
+  font-family: Georgia, serif;
+}
+.quote-text {
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--text-primary);
+  opacity: 0.9;
+  max-width: 90%;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.quote-hint {
+  font-size: 11px;
+  font-style: normal;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  margin-top: 10px;
+  letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   Modern Telemetry & Book Edit Starting Needle System
+   ========================================================================== */
+.launch-telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 14px 0 10px;
+}
+.launch-telemetry-chip {
+  background: var(--bg-surface-elevated);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.launch-chip-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.launch-chip-val {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Glowing Liquid Progress Track */
+.launch-progress-wrap {
+  width: 100%;
+  margin-bottom: 16px;
+}
+.launch-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+.launch-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #FF5E7E);
+  box-shadow: 0 0 12px var(--accent-glow);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+/* Starting Needle Text Selector */
+.needle-editor-wrap {
+  background: var(--bg-surface-elevated);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--shadow-liquid);
+}
+.needle-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+.needle-pos-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+}
+.needle-hint {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  opacity: 0.75;
+  margin: 0;
+}
+.needle-preview-box {
+  max-height: 160px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  user-select: none;
+  -webkit-user-select: none;
+  scrollbar-width: thin;
+}
+.needle-preview-box::-webkit-scrollbar {
+  width: 4px;
+}
+.needle-preview-box::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+.needle-word {
+  display: inline-block;
+  padding: 1px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin: 0 1px;
+}
+.needle-word:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+}
+.needle-word.needle-active {
+  background: var(--accent);
+  color: #000000;
+  font-weight: 800;
+  box-shadow: 0 0 10px var(--accent-glow);
+  position: relative;
+  transform: scale(1.06);
+}
+
+/* ==========================================================================
+   About Tachyon Modal
+   ========================================================================== */
+.about-hero-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+.about-icon-glow {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--bg-surface-active);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 24px var(--accent-glow);
+}
+.about-version-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.about-specs-list {
+  background: var(--bg-surface-elevated);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  display: flex;
+  flex-direction: column;
+}
+.about-spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  font-size: 12.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.about-spec-row:last-child {
+  border-bottom: none;
+}
+.about-spec-row span {
+  color: var(--text-secondary);
+}
+.about-spec-row strong {
+  color: var(--text-primary);
+}
+.brand-lockup {
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.brand-lockup:hover {
+  opacity: 0.85;
+  transform: scale(1.02);
+}
+.brand-lockup:active {
+  transform: scale(0.97);
+}
+
+/* ==========================================================================
    Responsive Adaptations
    ========================================================================== */
 @media (max-width: 600px) {
@@ -1623,32 +1910,45 @@ button:active {
     padding: 3px;
     gap: 2px;
     width: 100%;
-    justify-content: space-around;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    overflow: hidden;
   }
   .nav-tab-btn {
-    padding: 8px 12px;
+    padding: 7px 6px;
     font-size: 11px;
-    gap: 4px;
-    flex: 1;
+    gap: 3px;
+    flex: 1 1 0;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .nav-tab-btn span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 10.5px;
   }
   .nav-tab-btn svg {
-    width: 16px;
-    height: 16px;
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
   }
   .reader-stage {
     min-height: 250px;
     padding: 28px 16px;
   }
   .primary-media-row {
-    gap: 14px;
+    gap: 18px;
+    justify-content: center;
   }
   .btn-media-circle {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
   }
   .btn-media-hero {
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
   }
   .speed-presets-row {
     grid-template-columns: repeat(4, 1fr);
