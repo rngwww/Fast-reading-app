@@ -1211,9 +1211,12 @@ body[data-theme="vellum"] .countdown-circle-bg {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  transition: transform 0.25s var(--spring);
+  cursor: pointer;
+  transition: transform 0.25s var(--spring), background 0.15s ease;
   will-change: transform;
+}
+.book-card:hover {
+  background: var(--bg-surface-elevated);
 }
 .book-info {
   flex: 1;
@@ -1743,6 +1746,54 @@ body[data-theme="vellum"] .countdown-circle-bg {
 }
 .btn-save:active {
   transform: scale(0.96);
+}
+
+/* Modal Segmented Tab Navigation */
+.modal-tabs-nav {
+  display: flex;
+  background: var(--bg-surface);
+  padding: 4px;
+  border-radius: var(--radius-full);
+  gap: 4px;
+  margin: 4px 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+body[data-theme="parchment"] .modal-tabs-nav {
+  border: 1px solid rgba(68, 52, 34, 0.12);
+}
+body[data-theme="vellum"] .modal-tabs-nav {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+.modal-tab-btn {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: all 0.2s var(--spring-bouncy);
+}
+.modal-tab-btn svg {
+  fill: currentColor;
+}
+.modal-tab-btn.active {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  box-shadow: var(--btn-primary-shadow);
+}
+.modal-tab-panel {
+  display: none;
+  width: 100%;
+}
+.modal-tab-panel.active {
+  display: flex;
+  flex-direction: column;
 }
 
 /* Session Completion Modal (Centered Metrics, No Bubbles) */

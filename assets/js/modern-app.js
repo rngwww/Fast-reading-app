@@ -1,7 +1,7 @@
-import { Storage } from './storage.js?v=27';
-import { AudioSystem } from './audio.js?v=27';
-import { RSVP } from './rsvp.js?v=27';
-import { PreloadedLibrary, Quotes } from './data.js?v=27';
+import { Storage } from './storage.js?v=28';
+import { AudioSystem } from './audio.js?v=28';
+import { RSVP } from './rsvp.js?v=28';
+import { PreloadedLibrary, Quotes } from './data.js?v=28';
 
 async function initApp() {
   // Main Container & Stage
@@ -74,31 +74,33 @@ async function initApp() {
   const libraryGrid = document.getElementById('libraryGrid');
   const btnAddBook = document.getElementById('btnAddBook');
 
-  // Modals
-  const addBookModal = document.getElementById('addBookModal');
+  // Unified Book Details Modal (Read & Progress + Edit Tabs)
+  const bookDetailModal = document.getElementById('bookDetailModal');
   const bookModalTitle = document.getElementById('bookModalTitle');
-  const editBookTitleInput = document.getElementById('editBookTitleInput');
-  const editBookAuthorInput = document.getElementById('editBookAuthorInput');
-  const editBookContentInput = document.getElementById('editBookContentInput');
-  const btnCloseAddModal = document.getElementById('btnCloseAddModal');
-  const btnCancelAddModal = document.getElementById('btnCancelAddModal');
-  const btnSaveAddModal = document.getElementById('btnSaveAddModal');
-  const modalColorDots = document.querySelectorAll('#modalColorDots .accent-dot');
+  const bookModalAuthor = document.getElementById('bookModalAuthor');
+  const btnCloseBookDetailModal = document.getElementById('btnCloseBookDetailModal');
+  const bookModalTabsNav = document.getElementById('bookModalTabsNav');
+  const btnBookTabRead = document.getElementById('btnBookTabRead');
+  const btnBookTabEdit = document.getElementById('btnBookTabEdit');
+  const bookModalReadPanel = document.getElementById('bookModalReadPanel');
+  const bookModalEditPanel = document.getElementById('bookModalEditPanel');
 
-  // Launch & Starting Needle Modal
-  const launchModal = document.getElementById('launchModal');
-  const launchTitle = document.getElementById('launchTitle');
-  const launchAuthor = document.getElementById('launchAuthor');
+  // Read & Progress Panel Elements
   const launchTotalWords = document.getElementById('launchTotalWords');
   const launchProgressPct = document.getElementById('launchProgressPct');
   const launchEstTime = document.getElementById('launchEstTime');
   const launchProgressBar = document.getElementById('launchProgressBar');
   const needlePosLabel = document.getElementById('needlePosLabel');
   const needlePreviewBox = document.getElementById('needlePreviewBox');
-  const btnLaunchRead = document.getElementById('btnLaunchRead');
-  const btnLaunchEditBook = document.getElementById('btnLaunchEditBook');
   const btnLaunchResetProg = document.getElementById('btnLaunchResetProg');
-  const btnCloseLaunchModal = document.getElementById('btnCloseLaunchModal');
+  const btnLaunchRead = document.getElementById('btnLaunchRead');
+
+  // Edit Details Panel Elements
+  const editBookTitleInput = document.getElementById('editBookTitleInput');
+  const editBookAuthorInput = document.getElementById('editBookAuthorInput');
+  const editBookContentInput = document.getElementById('editBookContentInput');
+  const modalColorDots = document.querySelectorAll('#modalColorDots .accent-dot');
+  const btnSaveAddModal = document.getElementById('btnSaveAddModal');
 
   // About Modal & Brand Trigger
   const brandLockup = document.getElementById('brandLockup');
@@ -955,14 +957,6 @@ async function initApp() {
               </svg>
               <span class="book-ring-val">${pct}%</span>
             </div>
-            <button class="btn-book-edit" data-id="${book.id}" title="Edit book details" aria-label="Edit ${escapeHtml(book.title)}">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-              </svg>
-              <span>Edit</span>
-            </button>
-            <button class="btn-read-launch" data-id="${book.id}">Read</button>
           </div>
         </div>
       `;
@@ -1019,7 +1013,7 @@ async function initApp() {
 
       // Pointer events (PC & mouse dragging)
       cardEl.addEventListener('pointerdown', (e) => {
-        if (e.target.closest('.btn-read-launch') || e.target.closest('.btn-book-edit') || e.target.closest('button')) return;
+        if (e.target.closest('button')) return;
         handleSwipeStart(e.clientX);
         const onPointerMove = (pe) => handleSwipeMove(pe.clientX);
         const onPointerUp = () => {
@@ -1048,42 +1042,16 @@ async function initApp() {
         }, 280);
       });
 
-      // Edit book details button
-      const editBtn = cardEl.querySelector('.btn-book-edit');
-      if (editBtn) {
-        editBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (cardEl.classList.contains('swiped')) {
-            cardEl.style.transform = 'translateX(0px)';
-            cardEl.classList.remove('swiped');
-            item.classList.remove('is-swiping');
-            return;
-          }
-          openEditBookModal(book);
-        });
-      }
-
-      // Tap on Read button directly loads book into reader
-      cardEl.querySelector('.btn-read-launch').addEventListener('click', async (e) => {
-        e.stopPropagation();
+      // Tap on card opens the unified book modal (Read from here & Edit details)
+      cardEl.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-swipe-delete')) return;
         if (cardEl.classList.contains('swiped')) {
           cardEl.style.transform = 'translateX(0px)';
           cardEl.classList.remove('swiped');
           item.classList.remove('is-swiping');
           return;
         }
-        await loadBook(book.id);
-      });
-
-      // Tap on book info opens starting needle launch modal
-      cardEl.querySelector('.book-info').addEventListener('click', () => {
-        if (cardEl.classList.contains('swiped')) {
-          cardEl.style.transform = 'translateX(0px)';
-          cardEl.classList.remove('swiped');
-          item.classList.remove('is-swiping');
-          return;
-        }
-        openLaunchModal(book);
+        openBookDetailModal(book);
       });
 
       libraryGrid.appendChild(item);
@@ -1204,25 +1172,118 @@ async function initApp() {
     }, 100);
   }
 
-  async function openLaunchModal(book) {
+  // --------------------------------------------------------------------------
+  // Unified Book Details Modal (Read & Progress + Edit Tabs)
+  // --------------------------------------------------------------------------
+  function switchBookModalTab(tabName) {
+    if (tabName === 'read') {
+      btnBookTabRead.classList.add('active');
+      btnBookTabEdit.classList.remove('active');
+      bookModalReadPanel.style.display = 'flex';
+      bookModalReadPanel.classList.add('active');
+      bookModalEditPanel.style.display = 'none';
+      bookModalEditPanel.classList.remove('active');
+    } else {
+      btnBookTabEdit.classList.add('active');
+      btnBookTabRead.classList.remove('active');
+      bookModalEditPanel.style.display = 'flex';
+      bookModalEditPanel.classList.add('active');
+      bookModalReadPanel.style.display = 'none';
+      bookModalReadPanel.classList.remove('active');
+    }
+  }
+
+  if (btnBookTabRead) {
+    btnBookTabRead.addEventListener('click', () => {
+      AudioSystem.playButtonPress();
+      switchBookModalTab('read');
+    });
+  }
+
+  if (btnBookTabEdit) {
+    btnBookTabEdit.addEventListener('click', () => {
+      AudioSystem.playButtonPress();
+      switchBookModalTab('edit');
+    });
+  }
+
+  async function openBookDetailModal(book) {
     AudioSystem.playModalOpen();
     pendingLaunchDoc = book;
-    pendingNeedleIndex = book.currentIndex || 0;
 
-    launchTitle.textContent = book.title;
-    launchAuthor.textContent = book.author || 'Unknown';
-    launchTotalWords.textContent = book.totalWords.toLocaleString();
+    if (book) {
+      editingBookId = book.id;
+      pendingNeedleIndex = book.currentIndex || 0;
 
-    const wpm = state.wpm || 350;
-    const estMins = Math.max(1, Math.ceil(book.totalWords / wpm));
-    if (launchEstTime) {
-      launchEstTime.textContent = `~${estMins}m`;
+      bookModalTitle.textContent = book.title;
+      bookModalAuthor.textContent = book.author || 'Unknown';
+      bookModalAuthor.style.display = 'block';
+
+      launchTotalWords.textContent = (book.totalWords || 0).toLocaleString();
+      const wpm = state.wpm || 350;
+      const estMins = Math.max(1, Math.ceil((book.totalWords || 0) / wpm));
+      if (launchEstTime) launchEstTime.textContent = `~${estMins}m`;
+
+      updateNeedleStats();
+      await renderNeedlePreview(book);
+
+      editBookTitleInput.value = book.title || '';
+      editBookAuthorInput.value = book.author || '';
+      editBookContentInput.value = 'Loading book content...';
+
+      selectedModalColor = book.color || 'white';
+      modalColorDots.forEach(d => d.classList.toggle('active', d.dataset.color === selectedModalColor));
+      btnSaveAddModal.textContent = 'Save Changes';
+
+      bookModalTabsNav.style.display = 'flex';
+      switchBookModalTab('read');
+
+      Storage.getAllBookWords(book.id).then(words => {
+        if (editingBookId === book.id) {
+          editBookContentInput.value = words.join(' ');
+        }
+      }).catch(err => {
+        console.warn("Could not load book text for edit:", err);
+        if (editingBookId === book.id) {
+          editBookContentInput.value = '';
+        }
+      });
+    } else {
+      editingBookId = null;
+      pendingNeedleIndex = 0;
+
+      bookModalTitle.textContent = 'Add New Book';
+      bookModalAuthor.style.display = 'none';
+
+      editBookTitleInput.value = '';
+      editBookAuthorInput.value = '';
+      editBookContentInput.value = '';
+
+      selectedModalColor = 'white';
+      modalColorDots.forEach(d => d.classList.toggle('active', d.dataset.color === 'white'));
+      btnSaveAddModal.textContent = 'Add to Library';
+
+      bookModalTabsNav.style.display = 'none';
+      switchBookModalTab('edit');
     }
 
-    updateNeedleStats();
-    await renderNeedlePreview(book);
+    bookDetailModal.classList.add('active');
+  }
 
-    launchModal.classList.add('active');
+  function closeBookDetailModal() {
+    AudioSystem.playModalClose();
+    bookDetailModal.classList.remove('active');
+    pendingLaunchDoc = null;
+    editingBookId = null;
+  }
+
+  if (btnCloseBookDetailModal) {
+    btnCloseBookDetailModal.addEventListener('click', closeBookDetailModal);
+  }
+  if (bookDetailModal) {
+    bookDetailModal.addEventListener('click', (e) => {
+      if (e.target === bookDetailModal) closeBookDetailModal();
+    });
   }
 
   btnLaunchResetProg.addEventListener('click', async () => {
@@ -1246,25 +1307,9 @@ async function initApp() {
     AudioSystem.playModalClose();
     pendingLaunchDoc.currentIndex = pendingNeedleIndex;
     await Storage.updateBookProgress(pendingLaunchDoc.id, pendingNeedleIndex);
-    launchModal.classList.remove('active');
+    bookDetailModal.classList.remove('active');
     await loadBook(pendingLaunchDoc.id);
   });
-
-  btnCloseLaunchModal.addEventListener('click', () => {
-    AudioSystem.playModalClose();
-    launchModal.classList.remove('active');
-    pendingLaunchDoc = null;
-  });
-
-  if (btnLaunchEditBook) {
-    btnLaunchEditBook.addEventListener('click', async () => {
-      if (!pendingLaunchDoc) return;
-      const targetDoc = pendingLaunchDoc;
-      AudioSystem.playModalClose();
-      launchModal.classList.remove('active');
-      await openEditBookModal(targetDoc);
-    });
-  }
 
   // --------------------------------------------------------------------------
   // About Tachyon Modal
@@ -1288,41 +1333,8 @@ async function initApp() {
     });
   }
 
-  // --------------------------------------------------------------------------
-  // Add / Edit Book Modal
-  // --------------------------------------------------------------------------
-  async function openEditBookModal(book) {
-    if (!book) return;
-    AudioSystem.playModalOpen();
-    editingBookId = book.id;
-    bookModalTitle.textContent = 'Edit Book';
-    editBookTitleInput.value = book.title || '';
-    editBookAuthorInput.value = book.author || '';
-    editBookContentInput.value = 'Loading text...';
-
-    selectedModalColor = book.color || 'white';
-    modalColorDots.forEach(d => d.classList.toggle('active', d.dataset.color === selectedModalColor));
-    addBookModal.classList.add('active');
-
-    try {
-      const words = await Storage.getAllBookWords(book.id);
-      editBookContentInput.value = words.join(' ');
-    } catch (err) {
-      console.warn("Could not retrieve all book words:", err);
-      editBookContentInput.value = '';
-    }
-  }
-
   btnAddBook.addEventListener('click', () => {
-    AudioSystem.playModalOpen();
-    editingBookId = null;
-    bookModalTitle.textContent = 'Add Book';
-    editBookTitleInput.value = '';
-    editBookAuthorInput.value = '';
-    editBookContentInput.value = '';
-    selectedModalColor = 'white';
-    modalColorDots.forEach(d => d.classList.toggle('active', d.dataset.color === 'white'));
-    addBookModal.classList.add('active');
+    openBookDetailModal(null);
   });
 
   modalColorDots.forEach(dot => {
@@ -1348,27 +1360,25 @@ async function initApp() {
     const id = editingBookId || `doc_${Date.now()}`;
 
     await Storage.saveBook(id, title, author, words, selectedModalColor);
-    addBookModal.classList.remove('active');
 
-    if (currentBookMeta && currentBookMeta.id === id) {
-      await loadBook(id);
+    if (editingBookId) {
+      pendingLaunchDoc = await Storage.getBookMeta(id);
+      bookModalTitle.textContent = title;
+      bookModalAuthor.textContent = author;
+      launchTotalWords.textContent = words.length.toLocaleString();
+      updateNeedleStats();
+      await renderNeedlePreview(pendingLaunchDoc);
+      switchBookModalTab('read');
+
+      if (currentBookMeta && currentBookMeta.id === id) {
+        await loadBook(id);
+      }
+    } else {
+      closeBookDetailModal();
     }
 
     renderLibrary();
     AudioSystem.playSuccessChime();
-    editingBookId = null;
-  });
-
-  btnCancelAddModal.addEventListener('click', () => {
-    AudioSystem.playModalClose();
-    addBookModal.classList.remove('active');
-    editingBookId = null;
-  });
-
-  btnCloseAddModal.addEventListener('click', () => {
-    AudioSystem.playModalClose();
-    addBookModal.classList.remove('active');
-    editingBookId = null;
   });
 
   // --------------------------------------------------------------------------
