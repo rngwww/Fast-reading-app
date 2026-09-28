@@ -8,9 +8,11 @@ const memoryFallback = {
     isMuted: false,
     isPro: false,
     soundProfile: 'organic_pop',
-    colorPalette: 'red',
+    colorPalette: 'white',
     activeDocId: null,
     rsvpFont: 'sans',
+    fontSize: 'medium',
+    warmUpMode: false,
     uiSoundsEnabled: true,
     appTheme: 'obsidian'
   },
@@ -333,5 +335,81 @@ export const Storage = {
         resolve();
       }
     });
+  },
+
+  async getReadingStats() {
+    const defaultStats = {
+      currentStreak: 1,
+      lastReadDate: new Date().toISOString().slice(0, 10),
+      todayWords: 0,
+      todaySeconds: 0,
+      totalWordsRead: 0,
+      totalSecondsRead: 0,
+      dailyGoalMinutes: 10
+    };
+
+    try {
+      const saved = localStorage.getItem('tachyon_reading_stats');
+      if (!saved) return defaultStats;
+      const stats = JSON.parse(saved);
+
+      // Check if day has rolled over
+      const today = new Date().toISOString().slice(0, 10);
+      if (stats.lastReadDate !== today) {
+        // Calculate difference in days
+        const lastDate = new Date(stats.lastReadDate);
+        const currDate = new Date(today);
+        const diffDays = Math.round((currDate - lastDate) / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 1) {
+          // Continuous consecutive day
+        } else if (diffDays > 1) {
+          // Missed a day or more, streak reset to 0 until next session today
+          stats.currentStreak = 0;
+        }
+        stats.todayWords = 0;
+        stats.todaySeconds = 0;
+      }
+      return { ...defaultStats, ...stats };
+    } catch (e) {
+      return defaultStats;
+    }
+  },
+
+  async recordReadingSession(wordsCount, secondsCount) {
+    if (!wordsCount || wordsCount <= 0) return;
+    try {
+      const stats = await this.getReadingStats();
+      const today = new Date().toISOString().slice(0, 10);
+
+      if (stats.lastReadDate !== today) {
+        const lastDate = new Date(stats.lastReadDate);
+        const currDate = new Date(today);
+        const diffDays = Math.round((currDate - lastDate) / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 1) {
+          stats.currentStreak = (stats.currentStreak || 0) + 1;
+        } else {
+          stats.currentStreak = 1;
+        }
+        stats.todayWords = 0;
+        stats.todaySeconds = 0;
+        stats.lastReadDate = today;
+      } else {
+        if (!stats.currentStreak || stats.currentStreak === 0) {
+          stats.currentStreak = 1;
+        }
+      }
+
+      stats.todayWords = (stats.todayWords || 0) + wordsCount;
+      stats.todaySeconds = (stats.todaySeconds || 0) + secondsCount;
+      stats.totalWordsRead = (stats.totalWordsRead || 0) + wordsCount;
+      stats.totalSecondsRead = (stats.totalSecondsRead || 0) + secondsCount;
+
+      localStorage.setItem('tachyon_reading_stats', JSON.stringify(stats));
+      return stats;
+    } catch (e) {
+      console.warn('Could not record reading session:', e);
+    }
   }
 };

@@ -1,7 +1,8 @@
-import { Storage } from './storage.js?v=28';
-import { AudioSystem } from './audio.js?v=28';
-import { RSVP } from './rsvp.js?v=28';
-import { PreloadedLibrary, Quotes } from './data.js?v=28';
+import { Storage } from './storage.js?v=33';
+import { AudioSystem } from './audio.js?v=33';
+import { RSVP } from './rsvp.js?v=33';
+import { PreloadedLibrary, Quotes } from './data.js?v=33';
+import { FileImporter } from './file-importer.js?v=33';
 
 async function initApp() {
   // Main Container & Stage
@@ -43,11 +44,13 @@ async function initApp() {
   const btnSkip10 = document.getElementById('btnSkip10');
   const btnReset = document.getElementById('btnReset');
 
-  // Speed Controls
+  // Speed Controls & Warm-Up
   const speedBadgeVal = document.getElementById('speedBadgeVal');
   const btnSpeedMinus = document.getElementById('btnSpeedMinus');
   const btnSpeedPlus = document.getElementById('btnSpeedPlus');
   const speedPresetBtns = document.querySelectorAll('.speed-preset-btn');
+  const speedWarmupBadge = document.getElementById('speedWarmupBadge');
+  const warmUpToggle = document.getElementById('warmUpToggle');
 
   // Audio Controls
   const btnMute = document.getElementById('btnMute');
@@ -70,9 +73,18 @@ async function initApp() {
   const tabPanels = document.querySelectorAll('.tab-panel');
   const navSlidingPill = document.getElementById('navSlidingPill');
 
-  // Library
+  // Library & File Import
   const libraryGrid = document.getElementById('libraryGrid');
   const btnAddBook = document.getElementById('btnAddBook');
+  const btnImportFile = document.getElementById('btnImportFile');
+  const fileImportInput = document.getElementById('fileImportInput');
+  const libraryDropzone = document.getElementById('libraryDropzone');
+
+  // Reading Activity & Streak Widget
+  const activityStreakCount = document.getElementById('activityStreakCount');
+  const activityTodayTime = document.getElementById('activityTodayTime');
+  const activityTodayWords = document.getElementById('activityTodayWords');
+  const activityTotalWords = document.getElementById('activityTotalWords');
 
   // Unified Book Details Modal (Read & Progress + Edit Tabs)
   const bookDetailModal = document.getElementById('bookDetailModal');
@@ -110,13 +122,20 @@ async function initApp() {
   const aboutModal = document.getElementById('aboutModal');
   const btnCloseAboutModal = document.getElementById('btnCloseAboutModal');
 
+  // Completion Modal & Recall Check
   const completionModal = document.getElementById('completionModal');
   const statWordsRead = document.getElementById('statWordsRead');
   const statTimeSaved = document.getElementById('statTimeSaved');
   const btnCloseCompletion = document.getElementById('btnCloseCompletion');
+  const recallSectionWrap = document.getElementById('recallSectionWrap');
+  const recallSentencePreview = document.getElementById('recallSentencePreview');
+  const recallChipsWrap = document.getElementById('recallChipsWrap');
+  const btnRecallPass = document.getElementById('btnRecallPass');
+  const btnRecallReview = document.getElementById('btnRecallReview');
 
   // Settings
   const fontChoiceBtns = document.querySelectorAll('.font-choice-btn');
+  const sizeChoiceBtns = document.querySelectorAll('.size-choice-btn');
   const soundChips = document.querySelectorAll('.sound-chip');
   const themePickerCards = document.querySelectorAll('.theme-picker-card');
   const accentDots = document.querySelectorAll('#accentDots .accent-dot');
@@ -140,9 +159,15 @@ async function initApp() {
     colorPalette: 'white',
     activeDocId: null,
     rsvpFont: 'sans',
+    fontSize: 'medium',
+    warmUpMode: false,
     uiSoundsEnabled: true,
     appTheme: 'obsidian'
   };
+  let currentPlaybackWpm = 350;
+  let wordsInWarmup = 0;
+  let sessionStartTime = 0;
+  let sessionWordsRead = 0;
   let currentBookMeta = null;
   let currentChunkWords = [];
   let currentChunkIndex = 0;
@@ -243,6 +268,39 @@ async function initApp() {
     fontChoiceBtns.forEach(b => {
       b.classList.toggle('active', b.dataset.font === fontKey);
     });
+  }
+
+  function applyFontSize(sizeKey) {
+    const root = document.documentElement;
+    const validSize = ['small', 'medium', 'large', 'xlarge'].includes(sizeKey) ? sizeKey : 'medium';
+    root.setAttribute('data-font-size', validSize);
+    state.fontSize = validSize;
+    Storage.saveSettings(state);
+
+    sizeChoiceBtns.forEach(b => {
+      b.classList.toggle('active', b.dataset.size === validSize);
+    });
+  }
+
+  function applyWarmUpMode(enabled) {
+    state.warmUpMode = !!enabled;
+    if (warmUpToggle) warmUpToggle.checked = state.warmUpMode;
+    Storage.saveSettings(state);
+  }
+
+  async function updateActivityStatsUI() {
+    const stats = await Storage.getReadingStats();
+    if (activityStreakCount) activityStreakCount.textContent = stats.currentStreak || 1;
+    if (activityTodayTime) {
+      const mins = Math.round((stats.todaySeconds || 0) / 60);
+      activityTodayTime.textContent = `${mins}m`;
+    }
+    if (activityTodayWords) {
+      activityTodayWords.textContent = (stats.todayWords || 0).toLocaleString();
+    }
+    if (activityTotalWords) {
+      activityTotalWords.textContent = (stats.totalWordsRead || 0).toLocaleString();
+    }
   }
 
   function applyTierMode() {
@@ -431,10 +489,24 @@ async function initApp() {
     const indexInChunk = currentBookMeta.currentIndex % 1000;
     const currentWord = currentChunkWords[indexInChunk] || '';
 
+    // Warm-Up Pacing Acceleration
+    if (state.warmUpMode && currentPlaybackWpm < state.wpm) {
+      wordsInWarmup++;
+      if (wordsInWarmup % 3 === 0) {
+        currentPlaybackWpm = Math.min(state.wpm, currentPlaybackWpm + 25);
+        if (speedBadgeVal) speedBadgeVal.textContent = currentPlaybackWpm;
+        if (currentPlaybackWpm >= state.wpm && speedWarmupBadge) {
+          speedWarmupBadge.style.display = 'none';
+        }
+      }
+    }
+
+    const effectiveWpm = currentPlaybackWpm || state.wpm;
     displayWord(currentWord);
-    AudioSystem.playTick(state.wpm);
+    AudioSystem.playTick(effectiveWpm);
 
     currentBookMeta.currentIndex++;
+    sessionWordsRead++;
     updateScrubberAndStats();
 
     // Periodic progress save
@@ -442,7 +514,7 @@ async function initApp() {
       await Storage.updateBookProgress(currentBookMeta.id, currentBookMeta.currentIndex);
     }
 
-    const delay = RSVP.calculateDelay(currentWord, state.wpm);
+    const delay = RSVP.calculateDelay(currentWord, effectiveWpm);
     timerId = setTimeout(tick, delay);
   }
 
@@ -472,6 +544,21 @@ async function initApp() {
 
     AudioSystem.init();
     isPlaying = true;
+    sessionStartTime = Date.now();
+    sessionWordsRead = 0;
+
+    // Warm-Up Pacing setup
+    if (state.warmUpMode && state.wpm > 260) {
+      currentPlaybackWpm = Math.min(250, state.wpm);
+      wordsInWarmup = 0;
+      if (speedWarmupBadge) speedWarmupBadge.style.display = 'inline-flex';
+      if (speedBadgeVal) speedBadgeVal.textContent = currentPlaybackWpm;
+    } else {
+      currentPlaybackWpm = state.wpm;
+      if (speedWarmupBadge) speedWarmupBadge.style.display = 'none';
+      if (speedBadgeVal) speedBadgeVal.textContent = state.wpm;
+    }
+
     setPlayButtonVisual(true);
     pauseHud.classList.remove('active');
     tick();
@@ -481,6 +568,9 @@ async function initApp() {
     isPlaying = false;
     clearTimeout(timerId);
     setPlayButtonVisual(false);
+
+    if (speedWarmupBadge) speedWarmupBadge.style.display = 'none';
+    if (speedBadgeVal) speedBadgeVal.textContent = state.wpm;
 
     if (isCountingDown) {
       if (countdownIntervalId) {
@@ -493,6 +583,14 @@ async function initApp() {
 
     if (currentBookMeta) {
       await Storage.updateBookProgress(currentBookMeta.id, currentBookMeta.currentIndex);
+    }
+
+    // Save session activity
+    if (sessionWordsRead > 0) {
+      const elapsedSeconds = Math.max(1, Math.round((Date.now() - sessionStartTime) / 1000));
+      await Storage.recordReadingSession(sessionWordsRead, elapsedSeconds);
+      await updateActivityStatsUI();
+      sessionWordsRead = 0;
     }
   }
 
@@ -1547,6 +1645,104 @@ async function initApp() {
     });
   });
 
+  // Text Size Dynamic Type Controls
+  sizeChoiceBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      AudioSystem.playButtonPress();
+      applyFontSize(btn.dataset.size);
+    });
+  });
+
+  // Warm-Up Mode Toggle
+  if (warmUpToggle) {
+    warmUpToggle.addEventListener('change', () => {
+      AudioSystem.playButtonPress();
+      applyWarmUpMode(warmUpToggle.checked);
+    });
+  }
+
+  // File Import Logic (.txt & .epub)
+  if (btnImportFile && fileImportInput) {
+    btnImportFile.addEventListener('click', () => {
+      AudioSystem.playButtonPress();
+      fileImportInput.click();
+    });
+
+    fileImportInput.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      try {
+        btnImportFile.disabled = true;
+        btnImportFile.innerHTML = '<span>Importing...</span>';
+        
+        const doc = await FileImporter.importFile(file);
+        const id = `doc_${Date.now()}`;
+        await Storage.saveBook(id, doc.title, doc.author, doc.words, state.colorPalette || 'white');
+        
+        AudioSystem.playSuccessChime();
+        await renderLibrary();
+        await openBookDetailModal(id);
+      } catch (err) {
+        alert("Failed to import file: " + (err.message || err));
+      } finally {
+        btnImportFile.disabled = false;
+        btnImportFile.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          <span>Import</span>
+        `;
+        fileImportInput.value = '';
+      }
+    });
+  }
+
+  // Drag & drop file import onto library
+  if (libraryDropzone) {
+    libraryDropzone.addEventListener('click', () => {
+      if (fileImportInput) fileImportInput.click();
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      libraryDropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        libraryDropzone.classList.add('dragover');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      libraryDropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        libraryDropzone.classList.remove('dragover');
+      }, false);
+    });
+
+    libraryDropzone.addEventListener('drop', async (e) => {
+      const dt = e.dataTransfer;
+      const file = dt && dt.files && dt.files[0];
+      if (!file) return;
+
+      try {
+        libraryDropzone.innerHTML = '<span>Processing document...</span>';
+        const doc = await FileImporter.importFile(file);
+        const id = `doc_${Date.now()}`;
+        await Storage.saveBook(id, doc.title, doc.author, doc.words, state.colorPalette || 'white');
+        
+        AudioSystem.playSuccessChime();
+        await renderLibrary();
+        await openBookDetailModal(id);
+      } catch (err) {
+        alert("Could not import file: " + (err.message || err));
+      } finally {
+        libraryDropzone.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          <span>Drop a <strong>.txt</strong> or <strong>.epub</strong> file here to import</span>
+        `;
+      }
+    });
+  }
+
   btnSwitchTier.addEventListener('click', () => {
     state.isPro = !state.isPro;
     Storage.saveSettings(state);
@@ -1583,9 +1779,9 @@ async function initApp() {
   }
 
   // --------------------------------------------------------------------------
-  // Session Completion Modal
+  // Session Completion Modal & Comprehension Recall
   // --------------------------------------------------------------------------
-  function showCompletionModal() {
+  async function showCompletionModal() {
     AudioSystem.playSuccessChime();
     const wordsAbsorbed = currentBookMeta ? currentBookMeta.totalWords : 0;
     const timeSavedSeconds = Math.round(wordsAbsorbed / 3);
@@ -1593,7 +1789,57 @@ async function initApp() {
     statWordsRead.textContent = wordsAbsorbed.toLocaleString();
     statTimeSaved.textContent = `${timeSavedSeconds}s`;
 
+    if (recallSectionWrap && currentBookMeta) {
+      recallSectionWrap.style.display = 'block';
+      if (btnRecallPass) btnRecallPass.classList.remove('selected');
+      if (btnRecallReview) btnRecallReview.classList.remove('selected');
+
+      try {
+        const chunk = await Storage.getBookChunk(currentBookMeta.id, 0);
+        if (chunk && chunk.length > 0) {
+          const salientWords = chunk
+            .map(w => w.replace(/[^\w]/g, ''))
+            .filter(w => w.length >= 6 && !['should', 'before', 'through', 'always', 'without', 'because', 'between'].includes(w.toLowerCase()));
+          const uniqueKeywords = [...new Set(salientWords)].slice(0, 4);
+
+          const phraseWords = chunk.slice(Math.max(0, chunk.length - 14), chunk.length);
+          if (recallSentencePreview) {
+            recallSentencePreview.textContent = `"...${phraseWords.join(' ')}"`;
+          }
+
+          if (recallChipsWrap) {
+            recallChipsWrap.innerHTML = uniqueKeywords
+              .map(kw => `<span class="recall-chip">${escapeHtml(kw)}</span>`)
+              .join('');
+          }
+        }
+      } catch (e) {
+        recallSectionWrap.style.display = 'none';
+      }
+    }
+
     completionModal.classList.add('active');
+  }
+
+  if (btnRecallPass) {
+    btnRecallPass.addEventListener('click', () => {
+      AudioSystem.playButtonPress();
+      btnRecallPass.classList.add('selected');
+      setTimeout(() => {
+        AudioSystem.playModalClose();
+        completionModal.classList.remove('active');
+      }, 500);
+    });
+  }
+
+  if (btnRecallReview) {
+    btnRecallReview.addEventListener('click', async () => {
+      AudioSystem.playButtonPress();
+      btnRecallReview.classList.add('selected');
+      completionModal.classList.remove('active');
+      await jumpWords(-25);
+      await play();
+    });
   }
 
   btnCloseCompletion.addEventListener('click', () => {
@@ -1627,7 +1873,10 @@ async function initApp() {
   applyTierMode();
   updateUiSoundsBtn();
   applyFont(state.rsvpFont || 'sans');
+  applyFontSize(state.fontSize || 'medium');
+  applyWarmUpMode(state.warmUpMode || false);
   setWpm(state.wpm || 350);
+  await updateActivityStatsUI();
 
   // Active sound chip setup
   soundChips.forEach(c => {

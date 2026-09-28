@@ -19,12 +19,12 @@
     if ('caches' in window) {
       caches.keys().then(names => {
         for (const name of names) {
-          if (name !== 'tachyon-v32') caches.delete(name);
+          if (name !== 'tachyon-v33') caches.delete(name);
         }
       });
     }
   </script>
-  <link rel="stylesheet" href="assets/css/ios14.css?v=32">
+  <link rel="stylesheet" href="assets/css/ios14.css?v=33">
 </head>
 <body data-theme="obsidian">
 
@@ -237,6 +237,7 @@
           <div class="speed-header-row">
             <div class="speed-title-wrap">
               <span>Speed</span>
+              <span class="warmup-badge-live" id="speedWarmupBadge" style="display: none;">Warming Up</span>
             </div>
             <div class="speed-stepper-wrap">
               <button class="btn-stepper" id="btnSpeedMinus" title="Decrease speed" aria-label="Decrease speed">−</button>
@@ -251,6 +252,18 @@
             <button class="speed-preset-btn active" data-wpm="350">350</button>
             <button class="speed-preset-btn" data-wpm="500">500</button>
             <button class="speed-preset-btn" data-wpm="700">700</button>
+          </div>
+
+          <!-- Warm-Up Quick Toggle (Authentic iOS 14 Switch) -->
+          <div class="speed-warmup-row">
+            <div class="speed-warmup-info">
+              <span class="speed-warmup-title">Speed Warm-Up</span>
+              <span class="speed-warmup-sub">Start at 250 WPM & ramp up smoothly</span>
+            </div>
+            <label class="ios-switch" title="Toggle Speed Warm-Up">
+              <input type="checkbox" id="warmUpToggle">
+              <span class="ios-switch-slider"></span>
+            </label>
           </div>
         </div>
 
@@ -308,10 +321,51 @@
         <div class="library-title-group">
           <h2>Library</h2>
         </div>
-        <button class="btn-primary-pill" id="btnAddBook">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          <span>Add Book</span>
-        </button>
+        <div class="library-actions-group">
+          <input type="file" id="fileImportInput" accept=".txt,.epub,text/plain,application/epub+zip" style="display: none;">
+          <button class="btn-import-pill" id="btnImportFile" title="Import .txt or .epub document">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <span>Import</span>
+          </button>
+          <button class="btn-primary-pill" id="btnAddBook" title="Add book manually">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Add</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Reading Activity & Streak Widget (Apple Fitness Inspired) -->
+      <div class="reading-activity-card" id="readingActivityCard">
+        <div class="activity-card-header">
+          <div class="activity-card-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Reading Activity</span>
+          </div>
+          <div class="activity-streak-pill" id="activityStreakPill">
+            <span>🔥</span>
+            <strong id="activityStreakCount">1</strong> Day Streak
+          </div>
+        </div>
+        <div class="activity-metrics-row">
+          <div class="activity-tile">
+            <span class="activity-tile-val" id="activityTodayTime">0m</span>
+            <span class="activity-tile-sub">Today</span>
+          </div>
+          <div class="activity-tile">
+            <span class="activity-tile-val" id="activityTodayWords">0</span>
+            <span class="activity-tile-sub">Words Today</span>
+          </div>
+          <div class="activity-tile">
+            <span class="activity-tile-val" id="activityTotalWords">0</span>
+            <span class="activity-tile-sub">All-Time</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drag & Drop File Zone -->
+      <div class="library-dropzone-notice" id="libraryDropzone">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+        <span>Drop a <strong>.txt</strong> or <strong>.epub</strong> file here to import</span>
       </div>
 
       <div class="library-grid" id="libraryGrid">
@@ -363,6 +417,32 @@
           <button class="font-choice-btn" data-font="mono" style="font-family: var(--font-mono);">
             <strong>SF Mono</strong>
             <small>Mono</small>
+          </button>
+        </div>
+      </section>
+
+      <!-- Reading Text Size (Dynamic Type) -->
+      <section class="settings-section">
+        <div class="settings-group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+          <span>Text Size</span>
+        </div>
+        <div class="size-selector-row" id="sizeSelectorRow">
+          <button class="size-choice-btn" data-size="small">
+            <strong>Small</strong>
+            <small>34px</small>
+          </button>
+          <button class="size-choice-btn active" data-size="medium">
+            <strong>Medium</strong>
+            <small>48px</small>
+          </button>
+          <button class="size-choice-btn" data-size="large">
+            <strong>Large</strong>
+            <small>58px</small>
+          </button>
+          <button class="size-choice-btn" data-size="xlarge">
+            <strong>Extra</strong>
+            <small>68px</small>
           </button>
         </div>
       </section>
@@ -629,6 +709,24 @@
         </div>
       </div>
 
+      <!-- Quick Comprehension Recall Check -->
+      <div class="recall-section-wrap" id="recallSectionWrap">
+        <div class="recall-header">
+          <div class="recall-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+            <span>Comprehension Recall</span>
+          </div>
+        </div>
+        <div class="recall-content-box">
+          <div class="recall-sentence-preview" id="recallSentencePreview">Reviewing what you just read...</div>
+          <div class="recall-chips-wrap" id="recallChipsWrap"></div>
+        </div>
+        <div class="recall-feedback-row">
+          <button type="button" class="btn-recall-choice" id="btnRecallPass">Understood 👍</button>
+          <button type="button" class="btn-recall-choice" id="btnRecallReview">Review ↺</button>
+        </div>
+      </div>
+
       <button class="btn-save" id="btnCloseCompletion" style="width: 100%; margin-top: 18px; padding: 13px; font-size: 15px;">Done</button>
     </div>
   </div>
@@ -667,6 +765,6 @@
   </div>
 
   <!-- Main Modular Modern Application Script -->
-  <script type="module" src="assets/js/modern-app.js?v=32"></script>
+  <script type="module" src="assets/js/modern-app.js?v=33"></script>
 </body>
 </html>
