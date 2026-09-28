@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TACHYON — 3-Way Prototype Comparison Studio</title>
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --bg-studio: #09090b;
+      --bg-studio-bar: rgba(18, 18, 22, 0.88);
+      --border-studio: rgba(255, 255, 255, 0.12);
+      --accent: #0A84FF;
+      --text-main: #FFFFFF;
+      --text-muted: #8E8E93;
+      --device-width: 400px;
+      --device-height: 855px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    }
+
+    body {
+      background: var(--bg-studio);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Studio Header */
+    .studio-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: var(--bg-studio-bar);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-studio);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .studio-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .studio-logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #0A84FF, #5E5CE6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px rgba(10, 132, 255, 0.4);
+    }
+    .studio-logo svg {
+      width: 18px;
+      height: 18px;
+      fill: #fff;
+    }
+
+    .studio-title-group h1 {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .studio-title-group p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Mode Switcher Segmented Control */
+    .studio-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .view-segmented-pill {
+      display: flex;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-studio);
+      border-radius: 10px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .view-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      font-size: 12.5px;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .view-btn.active {
+      background: #FFFFFF;
+      color: #000000;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-checklist-toggle {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border-studio);
+      color: var(--text-main);
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .btn-checklist-toggle:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    /* Studio Main Arena */
+    .studio-arena {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 32px;
+      padding: 32px 20px;
+      transition: all 0.3s ease;
+    }
+
+    /* Device Card Wrapper */
+    .device-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .device-label-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 16px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-studio);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .badge-dot.current { background: #FF9F0A; box-shadow: 0 0 8px #FF9F0A; }
+    .badge-dot.hybrid { background: #0A84FF; box-shadow: 0 0 10px #0A84FF; }
+    .badge-dot.prototype { background: #34C759; box-shadow: 0 0 8px #34C759; }
+
+    .btn-frame-reload {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px 4px;
+      display: flex;
+      align-items: center;
+      border-radius: 4px;
+      transition: color 0.15s;
+    }
+    .btn-frame-reload:hover {
+      color: #FFFFFF;
+    }
+
+    /* Sleek iPhone Hardware Frame */
+    .device-bezel {
+      width: var(--device-width);
+      height: var(--device-height);
+      background: #000000;
+      border-radius: 52px;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12),
+                  0 0 0 7px #1c1c1e,
+                  0 24px 60px rgba(0, 0, 0, 0.8),
+                  0 0 40px rgba(10, 132, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .device-bezel.highlight-hybrid {
+      box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.45),
+                  0 0 0 7px #161b26,
+                  0 24px 60px rgba(0, 0, 0, 0.85),
+                  0 0 50px rgba(10, 132, 255, 0.28);
+    }
+
+    .device-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 50px;
+      background: #000;
+    }
+
+    /* Dynamic Island hardware decoration */
+    .device-bezel .hardware-notch-guide {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 125px;
+      height: 35px;
+      background: #000000;
+      border-radius: 20px;
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.15;
+    }
+
+    /* View Mode Toggles */
+    .mode-all #cardCurrent,
+    .mode-all #cardHybrid,
+    .mode-all #cardPrototype {
+      display: flex;
+    }
+
+    .mode-hybrid-only #cardCurrent,
+    .mode-hybrid-only #cardPrototype {
+      display: none !important;
+    }
+    .mode-hybrid-only #cardHybrid {
+      display: flex !important;
+    }
+
+    .mode-hybrid-vs-current #cardPrototype {
+      display: none !important;
+    }
+    .mode-hybrid-vs-current #cardHybrid,
+    .mode-hybrid-vs-current #cardCurrent {
+      display: flex !important;
+    }
+
+    .mode-current-only #cardHybrid,
+    .mode-current-only #cardPrototype {
+      display: none !important;
+    }
+    .mode-current-only #cardCurrent {
+      display: flex !important;
+    }
+
+    .mode-prototype-only #cardCurrent,
+    .mode-prototype-only #cardHybrid {
+      display: none !important;
+    }
+    .mode-prototype-only #cardPrototype {
+      display: flex !important;
+    }
+
+    /* Checklist Slide-out Panel */
+    .checklist-drawer {
+      position: fixed;
+      top: 60px;
+      right: -480px;
+      width: 460px;
+      bottom: 0;
+      background: rgba(22, 22, 26, 0.96);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border-left: 1px solid var(--border-studio);
+      padding: 24px;
+      overflow-y: auto;
+      transition: right 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+      z-index: 2000;
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    }
+    .checklist-drawer.open {
+      right: 0;
+    }
+
+    .checklist-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .checklist-header h2 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .btn-close-drawer {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .checklist-group {
+      margin-bottom: 22px;
+    }
+    .checklist-group h3 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      line-height: 1.4;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #E5E5EA;
+    }
+    .check-icon {
+      color: #34C759;
+      font-weight: bold;
+    }
+
+    @media (max-width: 900px) {
+      .studio-arena {
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+      }
+      .device-bezel {
+        width: 100vw;
+        max-width: 390px;
+        height: 820px;
+      }
+    }
+  </style>
+</head>
+<body class="mode-all" id="studioBody">
+
+  <!-- Studio Top Navigation -->
+  <header class="studio-header">
+    <div class="studio-brand">
+      <div class="studio-logo">
+        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+      </div>
+      <div class="studio-title-group">
+        <h1>TACHYON Prototype Studio</h1>
+        <p>Live Comparison • Zero Feature Loss Guarantee</p>
+      </div>
+    </div>
+
+    <!-- Center Mode Switcher -->
+    <div class="studio-controls">
+      <div class="view-segmented-pill">
+        <button class="view-btn active" id="btnModeAll" data-mode="mode-all">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="5" height="18" rx="1.5"></rect><rect x="9.5" y="3" width="5" height="18" rx="1.5"></rect><rect x="17" y="3" width="5" height="18" rx="1.5"></rect></svg>
+          <span>All 3 Visible</span>
+        </button>
+        <button class="view-btn" id="btnModeHybrid" data-mode="mode-hybrid-only">
+          <span>iOS 14-26 Hybrid</span>
+        </button>
+        <button class="view-btn" id="btnModeHybridVsCurrent" data-mode="mode-hybrid-vs-current">
+          <span>Hybrid vs iOS 14</span>
+        </button>
+        <button class="view-btn" id="btnModeCurrent" data-mode="mode-current-only">
+          <span>Classic iOS 14</span>
+        </button>
+        <button class="view-btn" id="btnModePrototype" data-mode="mode-prototype-only">
+          <span>iOS 27 Prototype</span>
+        </button>
+      </div>
+
+      <button class="btn-checklist-toggle" id="btnToggleChecklist" title="View Feature Checklist">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        <span>Feature Checklist</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Studio Arena: 3 Live Interactive Frames -->
+  <main class="studio-arena">
+    <!-- Frame 1: iOS 14-26 Hybrid (Featured Prototype) -->
+    <section class="device-card" id="cardHybrid">
+      <div class="device-label-badge" style="border-color: rgba(10, 132, 255, 0.4); background: rgba(10, 132, 255, 0.12);">
+        <span class="badge-dot hybrid"></span>
+        <span style="font-weight: 700; color: #FFFFFF;">iOS 14-26 Hybrid (New)</span>
+        <button class="btn-frame-reload" id="btnReloadHybrid" title="Reload iOS 14-26 Hybrid">↺</button>
+      </div>
+      <div class="device-bezel highlight-hybrid">
+        <div class="hardware-notch-guide"></div>
+        <iframe class="device-iframe" id="frameHybrid" src="hybrid.html" title="iOS 14-26 Hybrid Prototype"></iframe>
+      </div>
+    </section>
+
+    <!-- Frame 2: Current Build (iOS 14 / Classic Untouched Base) -->
+    <section class="device-card" id="cardCurrent">
+      <div class="device-label-badge">
+        <span class="badge-dot current"></span>
+        <span>Classic iOS 14 (Untouched Base)</span>
+        <button class="btn-frame-reload" id="btnReloadCurrent" title="Reload Classic Build">↺</button>
+      </div>
+      <div class="device-bezel">
+        <div class="hardware-notch-guide"></div>
+        <iframe class="device-iframe" id="frameCurrent" src="ios14_original.html" title="Classic Tachyon iOS 14"></iframe>
+      </div>
+    </section>
+
+    <!-- Frame 3: Prototype (iOS 27 UI Kit) -->
+    <section class="device-card" id="cardPrototype">
+      <div class="device-label-badge">
+        <span class="badge-dot prototype"></span>
+        <span>iOS 27 UI Kit Prototype</span>
+        <button class="btn-frame-reload" id="btnReloadPrototype" title="Reload iOS 27 Prototype">↺</button>
+      </div>
+      <div class="device-bezel">
+        <div class="hardware-notch-guide"></div>
+        <iframe class="device-iframe" id="framePrototype" src="ios27.html" title="iOS 27 Tachyon Prototype"></iframe>
+      </div>
+    </section>
+  </main>
+
+  <!-- Interactive Checklist Drawer -->
+  <aside class="checklist-drawer" id="checklistDrawer">
+    <div class="checklist-header">
+      <h2>Preservation Checklist</h2>
+      <button class="btn-close-drawer" id="btnCloseChecklist">&times;</button>
+    </div>
+
+    <div class="checklist-group">
+      <h3 style="color: #64D2FF;">iOS 14-26 Hybrid Specifications</h3>
+      <div class="checklist-item"><span class="check-icon">✓</span> Built directly on the rock-solid iOS 14 base (no buggy rebuilds)</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Transparent Liquid Glass Menu effect (blur 40px saturate 200%)</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> iOS 26 dynamic sliding pill menu selector with Apple spring physics</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Removed the "About" button from the top navigation header</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> 4 generated theme wallpapers applied dynamically to appearances</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Automatic wallpaper switching on Obsidian, Graphite, Parchment, Light</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> 100% feature retention: RSVP reader, audio profiles, EQ bars, scratchpad, library</div>
+    </div>
+
+    <div class="checklist-group">
+      <h3>1. Core Speed Reader</h3>
+      <div class="checklist-item"><span class="check-icon">✓</span> Optical Reticle with hairline & notches</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Exact Focal Letter Alignment algorithm</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Tap-to-play / Tap-to-pause anywhere on stage</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Double-tap gestures with floating pills (↺ -10, ↻ +10)</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Pause Overlay HUD (position, speed, progress, quick resume)</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> 3-2-1 Countdown with spinning activity blades</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Progress Scrubber slider with Restart button</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Media Controls: Rewind 10, Play/Pause Hero, Skip 10</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Speed Steppers (−/+) & Presets (250, 350, 500, 700 WPM)</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Volume slider & Mute toggle</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Scratchpad textarea, Paste, Clear, Word counter</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> 6-second quote rotation (hides on typing, shows when empty)</div>
+    </div>
+
+    <div class="checklist-group">
+      <h3>2. Audio Engine & Haptics</h3>
+      <div class="checklist-item"><span class="check-icon">✓</span> RSVP Ticking with automatic high-speed volume softening</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> 6 Sound Profiles: Haptic, Ceramic, Mechanical, Wood, Pulse, Vinyl</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Animated Equalizer (EQ) visualizer bars on active sound profile</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> UI Sound toggle with interface clicks on tabs, buttons & modals</div>
+    </div>
+
+    <div class="checklist-group">
+      <h3>3. Library & Book Manager</h3>
+      <div class="checklist-item"><span class="check-icon">✓</span> Preloaded books (Aurelius, Einstein, Holmes)</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Add Book modal (Title, Author, Content, Tag Color)</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Swipe-to-delete with red reveal, smooth collapse & persistent deletion</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Two-Tab Modal (Read & Progress + Edit Details) with sliding viewport</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Interactive Needle preview: click any word to set starting point</div>
+    </div>
+
+    <div class="checklist-group">
+      <h3>4. Themes & Contrast Guards</h3>
+      <div class="checklist-item"><span class="check-icon">✓</span> 4 Themes: Obsidian, Graphite, Parchment, Light (Vellum)</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Black Accent disabled on Dark Themes (Obsidian/Graphite)</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> White Accent disabled on Light Theme (Vellum)</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> Auto-correction of accent color when switching themes</div>
+      <div class="checklist-item"><span class="check-icon">✓</span> 3 Typography styles: Helvetica Neue, New York Serif, SF Mono</div>
+    </div>
+  </aside>
+
+  <script>
+    const studioBody = document.getElementById('studioBody');
+    const viewBtns = document.querySelectorAll('.view-btn');
+
+    const btnToggleChecklist = document.getElementById('btnToggleChecklist');
+    const checklistDrawer = document.getElementById('checklistDrawer');
+    const btnCloseChecklist = document.getElementById('btnCloseChecklist');
+
+    const frameCurrent = document.getElementById('frameCurrent');
+    const frameHybrid = document.getElementById('frameHybrid');
+    const framePrototype = document.getElementById('framePrototype');
+
+    const btnReloadCurrent = document.getElementById('btnReloadCurrent');
+    const btnReloadHybrid = document.getElementById('btnReloadHybrid');
+    const btnReloadPrototype = document.getElementById('btnReloadPrototype');
+
+    // View Mode Switcher
+    viewBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        viewBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        studioBody.className = btn.dataset.mode;
+      });
+    });
+
+    // Frame Reloads
+    if (btnReloadCurrent && frameCurrent) {
+      btnReloadCurrent.addEventListener('click', () => { frameCurrent.src = frameCurrent.src; });
+    }
+    if (btnReloadHybrid && frameHybrid) {
+      btnReloadHybrid.addEventListener('click', () => { frameHybrid.src = frameHybrid.src; });
+    }
+    if (btnReloadPrototype && framePrototype) {
+      btnReloadPrototype.addEventListener('click', () => { framePrototype.src = framePrototype.src; });
+    }
+
+    // Checklist Toggle
+    btnToggleChecklist.addEventListener('click', () => {
+      checklistDrawer.classList.toggle('open');
+    });
+    btnCloseChecklist.addEventListener('click', () => {
+      checklistDrawer.classList.remove('open');
+    });
+  </script>
+</body>
+</html>

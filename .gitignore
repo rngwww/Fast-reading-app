@@ -7,3 +7,5 @@ tachyon-video/out/
 .DS_Store
 Thumbs.db
 *.log
+*.zip
+ios27-ui-kit/

@@ -19,23 +19,14 @@
     if ('caches' in window) {
       caches.keys().then(names => {
         for (const name of names) {
-          if (name !== 'tachyon-v32') caches.delete(name);
+          if (name !== 'tachyon-v33') caches.delete(name);
         }
       });
     }
   </script>
-  <script src="assets/js/vendor/jszip.min.js"></script>
-  <link rel="stylesheet" href="assets/css/hybrid.css?v=7">
+  <link rel="stylesheet" href="assets/css/ios14.css?v=33">
 </head>
 <body data-theme="obsidian">
-
-  <!-- Ambient Blurry Wallpaper Backdrop (Smooth Crossfade Transitions) -->
-  <div class="wallpaper-backdrop" id="wallpaperBackdrop">
-    <div class="wallpaper-layer wallpaper-obsidian"></div>
-    <div class="wallpaper-layer wallpaper-graphite"></div>
-    <div class="wallpaper-layer wallpaper-parchment"></div>
-    <div class="wallpaper-layer wallpaper-vellum"></div>
-  </div>
 
   <!-- Atmospheric Ambient Liquid Glow -->
   <div class="ambient-glow">
@@ -76,28 +67,10 @@
       </div>
 
       <div class="top-bar-actions">
-        <!-- Streak Widget Pill Button (Zero Emojis, Cartoon Fire Contained Inside Border) -->
-        <button class="streak-pill-btn" id="btnStreakHeader" title="Daily Reading Streak & Goals" aria-label="Daily Reading Streak">
-          <div class="streak-flame-wrapper">
-            <svg class="cartoon-flame" viewBox="0 0 32 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path class="flame-outer" d="M16 2C16 2 22 8 22 15C22 17.5 21 19.5 19.5 21C21.5 19 22.5 16 22 13C24.5 15.5 27 19.5 27 24C27 30 22 34 16 34C10 34 5 30 5 24C5 18 9 12 13 8C13 12 15 14 16 14C16 11 16 2 16 2Z" fill="url(#flameGradOuter)"/>
-              <path class="flame-middle" d="M16 12C16 12 20 16 20 21C20 23 19 24.5 18 25.5C19 24 19.5 22 19 20C20.5 21.5 22 23.5 22 26C22 29.5 19 32 16 32C13 32 10 29.5 10 26C10 21.5 13 18 15 15C15 17 16 18 16 18C16 16 16 12 16 12Z" fill="url(#flameGradMiddle)"/>
-              <path class="flame-core" d="M16 20C16 20 18 23 18 26C18 28 17 29.5 16 30C15 29.5 14 28 14 26C14 23 16 20 16 20Z" fill="#FFFBE6"/>
-              <defs>
-                <linearGradient id="flameGradOuter" x1="16" y1="2" x2="16" y2="34" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#FF3B30"/>
-                  <stop offset="0.6" stop-color="#FF9500"/>
-                  <stop offset="1" stop-color="#FFCC00"/>
-                </linearGradient>
-                <linearGradient id="flameGradMiddle" x1="16" y1="12" x2="16" y2="32" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#FF9500"/>
-                  <stop offset="1" stop-color="#FFD60A"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-          <span class="streak-count-txt" id="headerStreakCount">1</span>
-          <span class="streak-unit-txt">DAY</span>
+        <!-- About Tachyon Info Trigger -->
+        <button class="btn-top-action" id="btnOpenAbout" title="About Tachyon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <span>About</span>
         </button>
       </div>
     </header>
@@ -135,18 +108,8 @@
       <section class="reader-stage" id="readerStage" title="Tap to Play or Pause">
         <!-- Top Toolbar: Book Title Badge (only shown when a book is active) -->
         <div class="stage-top-toolbar">
-          <div class="stage-toolbar-left">
-            <div class="stage-book-badge" id="stageBookBadge" style="display: none;">
-              <span id="stageBookTitle"></span>
-            </div>
-            <div class="warmup-live-pill" id="warmupLivePill" style="display: none;">
-              <span id="warmupLiveText">250 ➔ 350 WPM</span>
-            </div>
-          </div>
-          <div class="stage-toolbar-right">
-            <button class="stage-size-quick-btn" id="btnQuickSize" title="Cycle Word Size (Small, Medium, Large, XL)">
-              <span id="quickSizeLabel">Aa</span>
-            </button>
+          <div class="stage-book-badge" id="stageBookBadge" style="display: none;">
+            <span id="stageBookTitle"></span>
           </div>
         </div>
 
@@ -274,6 +237,7 @@
           <div class="speed-header-row">
             <div class="speed-title-wrap">
               <span>Speed</span>
+              <span class="warmup-badge-live" id="speedWarmupBadge" style="display: none;">Warming Up</span>
             </div>
             <div class="speed-stepper-wrap">
               <button class="btn-stepper" id="btnSpeedMinus" title="Decrease speed" aria-label="Decrease speed">−</button>
@@ -288,6 +252,18 @@
             <button class="speed-preset-btn active" data-wpm="350">350</button>
             <button class="speed-preset-btn" data-wpm="500">500</button>
             <button class="speed-preset-btn" data-wpm="700">700</button>
+          </div>
+
+          <!-- Warm-Up Quick Toggle (Authentic iOS 14 Switch) -->
+          <div class="speed-warmup-row">
+            <div class="speed-warmup-info">
+              <span class="speed-warmup-title">Speed Warm-Up</span>
+              <span class="speed-warmup-sub">Start at 250 WPM & ramp up smoothly</span>
+            </div>
+            <label class="ios-switch" title="Toggle Speed Warm-Up">
+              <input type="checkbox" id="warmUpToggle">
+              <span class="ios-switch-slider"></span>
+            </label>
           </div>
         </div>
 
@@ -345,10 +321,51 @@
         <div class="library-title-group">
           <h2>Library</h2>
         </div>
-        <button class="btn-primary-pill" id="btnAddBook">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          <span>Add Book</span>
-        </button>
+        <div class="library-actions-group">
+          <input type="file" id="fileImportInput" accept=".txt,.epub,text/plain,application/epub+zip" style="display: none;">
+          <button class="btn-import-pill" id="btnImportFile" title="Import .txt or .epub document">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <span>Import</span>
+          </button>
+          <button class="btn-primary-pill" id="btnAddBook" title="Add book manually">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Add</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Reading Activity & Streak Widget (Apple Fitness Inspired) -->
+      <div class="reading-activity-card" id="readingActivityCard">
+        <div class="activity-card-header">
+          <div class="activity-card-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Reading Activity</span>
+          </div>
+          <div class="activity-streak-pill" id="activityStreakPill">
+            <span>🔥</span>
+            <strong id="activityStreakCount">1</strong> Day Streak
+          </div>
+        </div>
+        <div class="activity-metrics-row">
+          <div class="activity-tile">
+            <span class="activity-tile-val" id="activityTodayTime">0m</span>
+            <span class="activity-tile-sub">Today</span>
+          </div>
+          <div class="activity-tile">
+            <span class="activity-tile-val" id="activityTodayWords">0</span>
+            <span class="activity-tile-sub">Words Today</span>
+          </div>
+          <div class="activity-tile">
+            <span class="activity-tile-val" id="activityTotalWords">0</span>
+            <span class="activity-tile-sub">All-Time</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drag & Drop File Zone -->
+      <div class="library-dropzone-notice" id="libraryDropzone">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+        <span>Drop a <strong>.txt</strong> or <strong>.epub</strong> file here to import</span>
       </div>
 
       <div class="library-grid" id="libraryGrid">
@@ -402,27 +419,31 @@
             <small>Mono</small>
           </button>
         </div>
+      </section>
 
-        <!-- Dynamic Word Size (Small, Medium, Large, Extra Large) -->
-        <div style="margin-top: 10px;">
-          <div class="font-size-segmented-row" id="fontSizeSegmented">
-            <button class="font-size-btn" data-size="sm" title="Small (38px)">
-              <span class="font-size-glyph" style="font-size: 13px;">A</span>
-              <span class="font-size-label">Small</span>
-            </button>
-            <button class="font-size-btn active" data-size="md" title="Medium (48px)">
-              <span class="font-size-glyph" style="font-size: 16px;">Aa</span>
-              <span class="font-size-label">Medium</span>
-            </button>
-            <button class="font-size-btn" data-size="lg" title="Large (60px)">
-              <span class="font-size-glyph" style="font-size: 20px;">Aa</span>
-              <span class="font-size-label">Large</span>
-            </button>
-            <button class="font-size-btn" data-size="xl" title="Extra Large (74px)">
-              <span class="font-size-glyph" style="font-size: 24px;">AA</span>
-              <span class="font-size-label">Extra</span>
-            </button>
-          </div>
+      <!-- Reading Text Size (Dynamic Type) -->
+      <section class="settings-section">
+        <div class="settings-group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+          <span>Text Size</span>
+        </div>
+        <div class="size-selector-row" id="sizeSelectorRow">
+          <button class="size-choice-btn" data-size="small">
+            <strong>Small</strong>
+            <small>34px</small>
+          </button>
+          <button class="size-choice-btn active" data-size="medium">
+            <strong>Medium</strong>
+            <small>48px</small>
+          </button>
+          <button class="size-choice-btn" data-size="large">
+            <strong>Large</strong>
+            <small>58px</small>
+          </button>
+          <button class="size-choice-btn" data-size="xlarge">
+            <strong>Extra</strong>
+            <small>68px</small>
+          </button>
         </div>
       </section>
 
@@ -622,7 +643,7 @@
             <div class="needle-editor-wrap">
               <div class="needle-header-row">
                 <div class="needle-pos-info">
-                  <span class="needle-pos-label-text">Start Position:</span>
+                  <span style="color: var(--accent); font-weight: 700;">📍 Start Position:</span>
                   <strong id="needlePosLabel" style="color: var(--text-primary); font-variant-numeric: tabular-nums;">Word 0 (0%)</strong>
                 </div>
                 <button class="btn-mini-reset" id="btnLaunchResetProg" title="Reset needle to start">
@@ -635,66 +656,26 @@
               </div>
             </div>
 
-            <button class="btn-save" id="btnLaunchRead" style="width: 100%; margin-top: 4px; padding: 14px; font-size: 16px; font-weight: 400; border-radius: 14px;">Read</button>
+            <button class="btn-save" id="btnLaunchRead" style="width: 100%; margin-top: 14px; padding: 13px; font-size: 15px;">Read</button>
           </div>
 
           <!-- Tab 2: Edit Details Panel -->
           <div class="modal-tab-panel" id="bookModalEditPanel" style="gap: 12px;">
-            <!-- Document File Import Drop Zone (.txt & .epub) -->
-            <div class="file-import-dropzone" id="fileImportDropzone" title="Tap or drag & drop a .txt or .epub file">
-              <input type="file" id="bookFileInput" accept=".txt,.epub,text/plain,application/epub+zip" style="display: none;">
-              <div class="dropzone-content" id="dropzoneContent">
-                <div class="dropzone-icon-wrap">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="12" y1="18" x2="12" y2="12"></line>
-                    <line x1="9" y1="15" x2="15" y2="15"></line>
-                  </svg>
-                </div>
-                <div class="dropzone-text-group">
-                  <strong class="dropzone-title">Import Document</strong>
-                  <span class="dropzone-sub">Tap or drop <strong>.epub</strong> or <strong>.txt</strong> file</span>
-                </div>
-              </div>
-              <div class="dropzone-loading" id="dropzoneLoading" style="display: none;">
-                <div class="ios-activity-spinner" style="width: 26px; height: 26px; position: relative;">
-                  <div class="ios-spinner-blade"></div>
-                  <div class="ios-spinner-blade"></div>
-                  <div class="ios-spinner-blade"></div>
-                  <div class="ios-spinner-blade"></div>
-                  <div class="ios-spinner-blade"></div>
-                  <div class="ios-spinner-blade"></div>
-                  <div class="ios-spinner-blade"></div>
-                  <div class="ios-spinner-blade"></div>
-                  <div class="ios-spinner-blade"></div>
-                  <div class="ios-spinner-blade"></div>
-                  <div class="ios-spinner-blade"></div>
-                  <div class="ios-spinner-blade"></div>
-                </div>
-                <span id="dropzoneLoadingText">Extracting text &amp; chapters...</span>
-              </div>
-            </div>
-
-            <div class="modal-section-divider">
-              <span>or enter details</span>
-            </div>
-
             <input type="text" class="modern-textarea" id="editBookTitleInput" placeholder="Title" style="height: 44px; padding: 10px 14px;">
             <input type="text" class="modern-textarea" id="editBookAuthorInput" placeholder="Author (optional)" style="height: 44px; padding: 10px 14px;">
-            <textarea class="modern-textarea" id="editBookContentInput" placeholder="Paste or edit content here..." style="height: 140px;"></textarea>
+            <textarea class="modern-textarea" id="editBookContentInput" placeholder="Paste or edit content here..." style="height: 150px;"></textarea>
 
             <div>
               <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 8px; text-align: center;">Tag Color:</label>
               <div class="accent-swatches-wrap" id="modalColorDots">
-                <div class="accent-dot active" data-color="white" style="background: var(--palette-white); --swatch-color: var(--palette-white);"></div>
-                <div class="accent-dot" data-color="red" style="background: var(--palette-red); --swatch-color: var(--palette-red);"></div>
-                <div class="accent-dot" data-color="pink" style="background: var(--palette-pink); --swatch-color: var(--palette-pink);"></div>
-                <div class="accent-dot" data-color="purple" style="background: var(--palette-purple); --swatch-color: var(--palette-purple);"></div>
-                <div class="accent-dot" data-color="blue" style="background: var(--palette-blue); --swatch-color: var(--palette-blue);"></div>
-                <div class="accent-dot" data-color="green" style="background: var(--palette-green); --swatch-color: var(--palette-green);"></div>
-                <div class="accent-dot" data-color="yellow" style="background: var(--palette-yellow); --swatch-color: var(--palette-yellow);"></div>
-                <div class="accent-dot" data-color="orange" style="background: var(--palette-orange); --swatch-color: var(--palette-orange);"></div>
+                <div class="accent-dot active" data-color="white" style="background: var(--palette-white);"></div>
+                <div class="accent-dot" data-color="red" style="background: var(--palette-red);"></div>
+                <div class="accent-dot" data-color="pink" style="background: var(--palette-pink);"></div>
+                <div class="accent-dot" data-color="purple" style="background: var(--palette-purple);"></div>
+                <div class="accent-dot" data-color="blue" style="background: var(--palette-blue);"></div>
+                <div class="accent-dot" data-color="green" style="background: var(--palette-green);"></div>
+                <div class="accent-dot" data-color="yellow" style="background: var(--palette-yellow);"></div>
+                <div class="accent-dot" data-color="orange" style="background: var(--palette-orange);"></div>
               </div>
             </div>
 
@@ -725,6 +706,24 @@
         <div class="completion-metric-group">
           <div class="completion-metric-val" id="statTimeSaved">0s</div>
           <div class="completion-metric-sub">time saved</div>
+        </div>
+      </div>
+
+      <!-- Quick Comprehension Recall Check -->
+      <div class="recall-section-wrap" id="recallSectionWrap">
+        <div class="recall-header">
+          <div class="recall-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+            <span>Comprehension Recall</span>
+          </div>
+        </div>
+        <div class="recall-content-box">
+          <div class="recall-sentence-preview" id="recallSentencePreview">Reviewing what you just read...</div>
+          <div class="recall-chips-wrap" id="recallChipsWrap"></div>
+        </div>
+        <div class="recall-feedback-row">
+          <button type="button" class="btn-recall-choice" id="btnRecallPass">Understood 👍</button>
+          <button type="button" class="btn-recall-choice" id="btnRecallReview">Review ↺</button>
         </div>
       </div>
 
@@ -765,134 +764,7 @@
     </div>
   </div>
 
-  <!-- Daily Streak & Goal Hub Modal -->
-  <div class="modern-modal-backdrop" id="streakModal">
-    <div class="modern-dialog streak-dialog" style="text-align: center; max-width: 390px;">
-      <div class="streak-hero-flame-container">
-        <svg class="cartoon-flame-hero" viewBox="0 0 48 54" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path class="flame-outer" d="M24 3C24 3 33 12 33 22.5C33 26.2 31.5 29.2 29.2 31.5C32.2 28.5 33.7 24 33 19.5C36.7 23.2 40.5 29.2 40.5 36C40.5 45 33 51 24 51C15 51 7.5 45 7.5 36C7.5 27 13.5 18 19.5 12C19.5 18 22.5 21 24 21C24 16.5 24 3 24 3Z" fill="url(#heroFlameGradOuter)"/>
-          <path class="flame-middle" d="M24 18C24 18 30 24 30 31.5C30 34.5 28.5 36.7 27 38.2C28.5 36 29.2 33 28.5 30C30.7 32.2 33 35.2 33 39C33 44.2 28.5 48 24 48C19.5 48 15 44.2 15 39C15 32.2 19.5 27 22.5 22.5C22.5 25.5 24 27 24 27C24 24 24 18 24 18Z" fill="url(#heroFlameGradMiddle)"/>
-          <path class="flame-core" d="M24 30C24 30 27 34.5 27 39C27 42 25.5 44.2 24 45C22.5 44.2 21 42 21 39C21 34.5 24 30 24 30Z" fill="#FFFBE6"/>
-          <defs>
-            <linearGradient id="heroFlameGradOuter" x1="24" y1="3" x2="24" y2="51" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#FF3B30"/>
-              <stop offset="0.5" stop-color="#FF9500"/>
-              <stop offset="1" stop-color="#FFCC00"/>
-            </linearGradient>
-            <linearGradient id="heroFlameGradMiddle" x1="24" y1="18" x2="24" y2="48" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#FF9500"/>
-              <stop offset="1" stop-color="#FFD60A"/>
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
-
-      <div class="streak-hero-days" id="modalStreakDays">1</div>
-      <div class="streak-hero-label">DAY STREAK</div>
-      <div class="streak-hero-motto" id="modalStreakMotto">Your daily reading habit is active. Keep the flame glowing!</div>
-
-      <!-- Weekly Progress Circles (Mon to Sun) -->
-      <div class="streak-week-grid" id="streakWeekGrid">
-        <div class="week-day-col" data-day="1"><span class="day-label">M</span><div class="day-dot"><svg class="dot-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="week-day-col" data-day="2"><span class="day-label">T</span><div class="day-dot"><svg class="dot-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="week-day-col" data-day="3"><span class="day-label">W</span><div class="day-dot"><svg class="dot-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="week-day-col" data-day="4"><span class="day-label">T</span><div class="day-dot"><svg class="dot-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="week-day-col" data-day="5"><span class="day-label">F</span><div class="day-dot"><svg class="dot-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="week-day-col" data-day="6"><span class="day-label">S</span><div class="day-dot"><svg class="dot-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-        <div class="week-day-col" data-day="0"><span class="day-label">S</span><div class="day-dot"><svg class="dot-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-      </div>
-
-      <!-- Daily Goal Target -->
-      <div class="streak-goal-card">
-        <div class="goal-header-row">
-          <span>Today's Target</span>
-          <strong id="modalGoalTimeTxt">0m / 15m</strong>
-        </div>
-        <div class="goal-bar-track">
-          <div class="goal-bar-fill" id="modalGoalBarFill" style="width: 10%;"></div>
-        </div>
-      </div>
-
-      <!-- Milestone Metrics -->
-      <div class="streak-stats-row">
-        <div class="streak-stat-box">
-          <span class="streak-stat-val" id="modalBestStreak">1</span>
-          <span class="streak-stat-lbl">BEST STREAK</span>
-        </div>
-        <div class="streak-stat-box">
-          <span class="streak-stat-val" id="modalTotalSessions">1</span>
-          <span class="streak-stat-lbl">SESSIONS</span>
-        </div>
-        <div class="streak-stat-box">
-          <span class="streak-stat-val" id="modalTotalMinutes">0m</span>
-          <span class="streak-stat-lbl">TOTAL TIME</span>
-        </div>
-      </div>
-
-      <button class="btn-save" id="btnCloseStreakModal" style="width: 100%; margin-top: 20px; padding: 13px; font-size: 15px;">Done</button>
-    </div>
-  </div>
-
-  <!-- Session Comprehension Recall Check Modal -->
-  <div class="modern-modal-backdrop" id="comprehensionModal">
-    <div class="modern-dialog comprehension-dialog" style="text-align: center; max-width: 390px;">
-      <div class="comprehension-header">
-        <div class="comprehension-badge">RSVP RETENTION</div>
-        <h2 class="comprehension-title">Comprehension Check</h2>
-        <p class="comprehension-sub">How much did you absorb from this reading sprint?</p>
-      </div>
-
-      <div class="comprehension-metric-pill">
-        <div class="comp-metric-col">
-          <span class="comp-metric-num" id="recallSessionWords">0</span>
-          <span class="comp-metric-lbl">WORDS READ</span>
-        </div>
-        <div class="comp-metric-sep">•</div>
-        <div class="comp-metric-col">
-          <span class="comp-metric-num" id="recallSessionSpeed">350</span>
-          <span class="comp-metric-lbl">AVG WPM</span>
-        </div>
-      </div>
-
-      <div class="comprehension-options">
-        <button class="comprehension-opt-btn haze" data-rating="hazy">
-          <div class="comp-btn-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-          </div>
-          <div class="comp-btn-info">
-            <div class="comp-btn-title">Hazy (&lt; 50%)</div>
-            <div class="comp-btn-desc">Fast pace; missed key nuances</div>
-          </div>
-        </button>
-
-        <button class="comprehension-opt-btn good" data-rating="good">
-          <div class="comp-btn-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-          </div>
-          <div class="comp-btn-info">
-            <div class="comp-btn-title">Good (~75%)</div>
-            <div class="comp-btn-desc">Comfortable grasp of the concepts</div>
-          </div>
-        </button>
-
-        <button class="comprehension-opt-btn master" data-rating="master">
-          <div class="comp-btn-icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </div>
-          <div class="comp-btn-info">
-            <div class="comp-btn-title">Total Recall (100%)</div>
-            <div class="comp-btn-desc">Crystal clear comprehension</div>
-          </div>
-        </button>
-      </div>
-
-      <div class="comprehension-footer">
-        <button class="btn-comp-skip" id="btnSkipComprehension">Skip for now</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Modular Hybrid Application Script -->
-  <script type="module" src="assets/js/hybrid-app.js?v=5"></script>
+  <!-- Main Modular Modern Application Script -->
+  <script type="module" src="assets/js/modern-app.js?v=33"></script>
 </body>
 </html>

@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <title>TACHYON — iOS 27 Redesign</title>
+  <link rel="stylesheet" href="assets/css/ios27.css?v=28">
+</head>
+<body data-theme="obsidian">
+
+  <!-- Atmospheric Ambient Liquid Glow -->
+  <div class="ambient-glow">
+    <div class="ambient-circle-1"></div>
+    <div class="ambient-circle-2"></div>
+  </div>
+
+  <main class="modern-app" id="modernApp">
+    <!-- iOS 27 Status Bar with Dynamic Island -->
+    <div class="ios27-status-bar" id="iosStatusBar">
+      <div class="ios-status-time" id="iosStatusTime">9:41</div>
+
+      <!-- Dynamic Island from iOS 27 Kit -->
+      <div class="dynamic-island" id="dynamicIsland" title="Dynamic Island • Tap to Play / Pause">
+        <div class="island-compact-content">
+          <div class="island-camera-dot"></div>
+          <div class="island-sensor-dot"></div>
+        </div>
+        <div class="island-expanded-content">
+          <div class="island-wave">
+            <div class="island-wave-bar"></div>
+            <div class="island-wave-bar"></div>
+            <div class="island-wave-bar"></div>
+          </div>
+          <div class="island-title" id="islandTitle">TACHYON</div>
+          <div class="island-wpm-pill" id="islandWpm">350 WPM</div>
+        </div>
+      </div>
+
+      <div class="ios-status-icons">
+        <svg class="ios-signal-icon" viewBox="0 0 17 11" width="17" height="11">
+          <rect x="0" y="8" width="3" height="3" rx="0.8" fill="currentColor"/>
+          <rect x="4.5" y="5.5" width="3" height="5.5" rx="0.8" fill="currentColor"/>
+          <rect x="9" y="3" width="3" height="8" rx="0.8" fill="currentColor"/>
+          <rect x="13.5" y="0.5" width="3" height="10.5" rx="0.8" fill="currentColor"/>
+        </svg>
+        <svg class="ios-wifi-icon" viewBox="0 0 16 12" width="16" height="12" fill="currentColor">
+          <path d="M8 9.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm-4.24-2.83a6 6 0 0 1 8.48 0l-1.41 1.41a4 4 0 0 0-5.66 0L3.76 6.67zm-2.83-2.83a10 10 0 0 1 14.14 0l-1.41 1.41a8 8 0 0 0-11.32 0L.93 3.84z"/>
+        </svg>
+        <div class="ios-battery-icon">
+          <div class="ios-battery-pill">
+            <div class="ios-battery-level"></div>
+          </div>
+          <div class="ios-battery-nipple"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Header Bar -->
+    <header class="top-bar">
+      <div class="brand-lockup" id="brandLockup" title="About TACHYON">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
+        <div class="brand-title">TACHYON <span style="font-size: 10px; opacity: 0.6; font-weight: 500; margin-left: 6px; border: 0.5px solid var(--border-subtle); padding: 2px 7px; border-radius: 8px;">iOS 27</span></div>
+      </div>
+
+      <div class="top-bar-actions">
+        <!-- About Tachyon Info Trigger -->
+        <button class="btn-top-action" id="btnOpenAbout" title="About Tachyon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <span>About</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- TAB 1: READER (MAIN STAGE) -->
+    <div class="tab-panel active" id="tabReader">
+      <!-- Optical Reticle RSVP Glass Visor Stage -->
+      <section class="reader-stage" id="readerStage" title="Tap to Play or Pause">
+        <!-- Top Toolbar: Book Title Badge -->
+        <div class="stage-top-toolbar">
+          <div class="stage-book-badge" id="stageBookBadge" style="display: none;">
+            <span id="stageBookTitle"></span>
+          </div>
+        </div>
+
+        <!-- Optical Reticle Guides -->
+        <div class="optical-reticle">
+          <div class="reticle-mark-top"></div>
+          <div class="reticle-hairline"></div>
+          <div class="reticle-mark-bottom"></div>
+        </div>
+
+        <!-- RSVP Word Frame -->
+        <div class="rsvp-word-frame" id="rsvpWordFrame">
+          <span class="word-pre" id="wordPre"></span>
+          <span class="word-focal" id="wordFocal">—</span>
+          <span class="word-post" id="wordPost"></span>
+        </div>
+
+        <!-- Gesture Feedback Floating Pills -->
+        <div class="gesture-feedback left" id="gestureFeedbackLeft">↺ -10</div>
+        <div class="gesture-feedback right" id="gestureFeedbackRight">↻ +10</div>
+
+        <!-- Pause HUD Overlay -->
+        <div class="overlay-hud" id="pauseHud">
+          <div class="hud-title">Paused</div>
+          <div class="hud-stats-grid">
+            <div class="hud-stat-cell">
+              <span class="hud-stat-label">Position</span>
+              <span class="hud-stat-val"><span id="hudWordPos">0</span> / <span id="hudWordTotal">0</span></span>
+            </div>
+            <div class="hud-stat-cell">
+              <span class="hud-stat-label">Speed</span>
+              <span class="hud-stat-val"><span id="hudWpm">350</span> WPM</span>
+            </div>
+            <div class="hud-stat-cell">
+              <span class="hud-stat-label">Progress</span>
+              <span class="hud-stat-val" id="hudProgress">0%</span>
+            </div>
+          </div>
+          <div class="hud-actions">
+            <button class="btn-media-circle" id="hudJumpBackBtn" title="Rewind 10 words" aria-label="Rewind 10 words">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                <text x="12" y="15.5" font-size="7" font-weight="900" text-anchor="middle" fill="currentColor">10</text>
+              </svg>
+            </button>
+            <button class="btn-media-hero" id="hudResumeBtn" title="Resume reading" aria-label="Resume reading" style="width: 52px; height: 52px;">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Resume Countdown Overlay with 12-Blade Activity Spinner -->
+        <div class="overlay-hud" id="countdownHud">
+          <div class="resume-loader-box">
+            <div class="countdown-dial-wrap">
+              <div class="ios-activity-spinner" aria-label="Loading">
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+              </div>
+              <div class="countdown-number" id="countdownNumber">3</div>
+            </div>
+            <div class="resume-affirmation" id="countdownAffirmation">Get Ready...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lock Screen Activity Ring Widgets from Kit -->
+      <section class="ios27-widgets-row">
+        <!-- Widget 1: Progress Dial -->
+        <div class="ios27-widget-card">
+          <div class="widget-gauge-wrap">
+            <svg class="widget-gauge-svg" viewBox="0 0 46 46">
+              <circle class="widget-gauge-track" cx="23" cy="23" r="20"></circle>
+              <circle class="widget-gauge-fill" id="widgetGaugeProgressFill" cx="23" cy="23" r="20"></circle>
+            </svg>
+            <div class="widget-gauge-label" id="widgetGaugeProgressLabel">0%</div>
+          </div>
+          <span class="widget-name">Progress</span>
+        </div>
+
+        <!-- Widget 2: Speed Gauge -->
+        <div class="ios27-widget-card">
+          <div class="widget-gauge-wrap">
+            <svg class="widget-gauge-svg" viewBox="0 0 46 46">
+              <circle class="widget-gauge-track" cx="23" cy="23" r="20"></circle>
+              <circle class="widget-gauge-fill" id="widgetGaugeSpeedFill" cx="23" cy="23" r="20" style="stroke-dashoffset: 40;"></circle>
+            </svg>
+            <div class="widget-gauge-label" id="widgetGaugeSpeedVal">350</div>
+          </div>
+          <span class="widget-name">Velocity</span>
+        </div>
+
+        <!-- Widget 3: Words Counter -->
+        <div class="ios27-widget-card">
+          <div class="widget-gauge-wrap">
+            <svg class="widget-gauge-svg" viewBox="0 0 46 46">
+              <circle class="widget-gauge-track" cx="23" cy="23" r="20"></circle>
+              <circle class="widget-gauge-fill" id="widgetGaugeWordFill" cx="23" cy="23" r="20" style="stroke-dashoffset: 70;"></circle>
+            </svg>
+            <div class="widget-gauge-label" id="widgetGaugeWordVal">0</div>
+          </div>
+          <span class="widget-name">Words</span>
+        </div>
+      </section>
+
+      <!-- Interactive Progress Scrubber -->
+      <section class="scrubber-card">
+        <div class="scrubber-meta">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn-mini-reset" id="btnReset" title="Restart from beginning" aria-label="Restart from beginning">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              </svg>
+              <span>Restart</span>
+            </button>
+            <span>Word <strong id="scrubberWordPos" style="color: var(--text-primary);">0</strong> of <span id="scrubberWordTotal">0</span></span>
+          </div>
+          <span id="scrubberPct" style="color: var(--text-primary); font-weight: 700;">0%</span>
+        </div>
+        <div class="scrubber-track-wrap">
+          <input type="range" class="scrubber-slider" id="progressScrubber" min="0" max="100" step="0.1" value="0" aria-label="Reading progress scrubber">
+        </div>
+      </section>
+
+      <!-- Control Center Media Controls Deck -->
+      <section class="controls-deck">
+        <div class="primary-media-row">
+          <!-- Rewind 10 Words -->
+          <button class="btn-media-circle" id="btnRewind10" title="Rewind 10 words" aria-label="Rewind 10 words">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+              <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+              <text x="12" y="15.5" font-size="7" font-weight="900" text-anchor="middle" fill="currentColor">10</text>
+            </svg>
+          </button>
+
+          <!-- Main Hero Play/Pause Button -->
+          <button class="btn-media-hero" id="btnPlayHero" title="Play or Pause" aria-label="Play or Pause">
+            <svg id="btnPlayHeroIcon" viewBox="0 0 24 24" width="30" height="30" fill="currentColor">
+              <polygon points="7 4 20 12 7 20 7 4"></polygon>
+            </svg>
+          </button>
+
+          <!-- Skip Forward 10 Words -->
+          <button class="btn-media-circle" id="btnSkip10" title="Skip forward 10 words" aria-label="Skip forward 10 words">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+              <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/>
+              <text x="12" y="15.5" font-size="7" font-weight="900" text-anchor="middle" fill="currentColor">10</text>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Speed Presets & Steppers -->
+        <div class="speed-control-section">
+          <div class="speed-header-row">
+            <div class="speed-title-wrap">
+              <span>Reading Velocity</span>
+            </div>
+            <div class="speed-stepper-wrap">
+              <button class="btn-stepper" id="btnSpeedMinus" title="Decrease speed" aria-label="Decrease speed">−</button>
+              <div class="speed-badge"><span id="speedBadgeVal">350</span><small>WPM</small></div>
+              <button class="btn-stepper" id="btnSpeedPlus" title="Increase speed" aria-label="Increase speed">+</button>
+            </div>
+          </div>
+
+          <!-- Speed Presets -->
+          <div class="speed-presets-row">
+            <button class="speed-preset-btn" data-wpm="250">250 WPM</button>
+            <button class="speed-preset-btn active" data-wpm="350">350 WPM</button>
+            <button class="speed-preset-btn" data-wpm="500">500 WPM</button>
+            <button class="speed-preset-btn" data-wpm="700">700 WPM</button>
+          </div>
+        </div>
+
+        <!-- Volume & Audio Toggle Strip -->
+        <div class="audio-strip">
+          <button class="btn-icon-mute" id="btnMute" title="Toggle audio mute" aria-label="Toggle mute">
+            <svg id="volIconSvg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          </button>
+          <div class="vol-slider-wrap">
+            <input type="range" class="vol-slider" id="volSlider" min="0" max="1" step="0.01" value="0.3" aria-label="Audio volume">
+          </div>
+        </div>
+      </section>
+
+      <!-- Scratchpad with Floating Accessory Bar & Predictions -->
+      <section class="input-panel">
+        <div class="input-header" id="inputHeader">
+          <div class="ios27-accessory-bar" id="scratchAccessoryBar">
+            <div class="ios27-accessory-pill">
+              <button class="ios27-accessory-btn" id="btnOpenColorsModal" title="iOS 27 Color Sheet">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20"></path></svg>
+              </button>
+              <button class="ios27-accessory-btn" id="btnPasteClipboard" title="Paste text from clipboard">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+              </button>
+              <button class="ios27-accessory-btn" id="btnClearText" title="Clear text">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- QuickType Predictive Speed Bar -->
+        <div class="ios27-predictive-bar">
+          <div class="predictive-chip" data-wpm="250">"250 WPM"</div>
+          <div class="predictive-chip" data-wpm="350">"350 WPM"</div>
+          <div class="predictive-chip" data-wpm="500">"500 WPM"</div>
+          <div class="predictive-chip" data-wpm="700">"700 WPM"</div>
+        </div>
+
+        <div id="returnScratchBtnWrap" style="display: none;">
+          <button class="btn-save" id="returnScratchBtn" style="width: 100%; padding: 12px; font-size: 14px;">
+            Return to Scratchpad
+          </button>
+        </div>
+
+        <div class="text-box-wrap" id="scratchpadWrap">
+          <div class="scratchpad-quote-overlay" id="quoteOverlay" aria-hidden="true">
+            <div class="quote-text" id="quoteText">The more that you read, the more things you will know.</div>
+          </div>
+          <textarea class="modern-textarea" id="textInput" placeholder="" aria-label="Input text for reading"></textarea>
+        </div>
+
+        <div class="input-footer" id="inputFooter">
+          <div class="reading-estimate">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span id="readingEstimate">0 words</span>
+          </div>
+          <span id="tierWordLimitLabel">Free Starter</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB 2: LIBRARY -->
+    <div class="tab-panel" id="tabLibrary">
+      <div class="library-header">
+        <div class="library-title-group">
+          <h2>Library</h2>
+        </div>
+        <button class="btn-primary-pill" id="btnAddBook">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>Add Book</span>
+        </button>
+      </div>
+
+      <div class="library-grid" id="libraryGrid">
+        <!-- Populated dynamically via modern-app.js with iOS swipe-to-delete -->
+      </div>
+    </div>
+
+    <!-- TAB 3: PRIME / PREMIUM -->
+    <div class="tab-panel" id="tabPrime">
+      <div class="settings-section" style="text-align: center; align-items: center; padding: 32px 20px;">
+        <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; background: var(--accent); color: #000; padding: 4px 10px; border-radius: 12px;">Prime</span>
+        <h2 style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin-top: 10px;">Unlimited Reading</h2>
+        <p style="font-size: 13px; color: var(--text-secondary); max-width: 280px; margin-top: 4px;">Unlock books of any length, offline library storage, and custom themes.</p>
+
+        <div style="display: flex; gap: 12px; margin: 20px 0; width: 100%;">
+          <div class="plan-card" style="flex: 1; padding: 14px; border-radius: 18px; background: rgba(255,255,255,0.06); border: 0.5px solid var(--border-subtle); cursor: pointer;">
+            <strong style="display: block; font-size: 18px;">$4.99</strong>
+            <span style="font-size: 12px; color: var(--text-secondary);">Monthly</span>
+          </div>
+          <div class="plan-card selected" style="flex: 1; padding: 14px; border-radius: 18px; background: rgba(255,255,255,0.12); border: 1.5px solid var(--accent); cursor: pointer;">
+            <strong style="display: block; font-size: 18px; color: var(--accent);">$39.99</strong>
+            <span style="font-size: 12px; color: var(--text-primary);">Annual</span>
+          </div>
+        </div>
+
+        <button class="btn-save" id="btnStartTrial" style="width: 100%; max-width: 320px; padding: 14px; font-size: 15px;">
+          Start Free Trial
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 4: SETTINGS -->
+    <div class="tab-panel" id="tabSettings">
+      <!-- Reading Font Selector -->
+      <section class="settings-section">
+        <div class="settings-group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+          <span>Typography</span>
+        </div>
+        <div class="font-selector-row">
+          <button class="font-choice-btn active" data-font="sans" style="font-family: var(--font-main);">
+            <strong style="font-size: 14px;">Helvetica Neue</strong>
+            <small style="font-size: 10px; color: var(--text-secondary);">Ultra Light</small>
+          </button>
+          <button class="font-choice-btn" data-font="serif" style="font-family: var(--font-serif);">
+            <strong style="font-size: 14px;">New York</strong>
+            <small style="font-size: 10px; color: var(--text-secondary);">Serif</small>
+          </button>
+          <button class="font-choice-btn" data-font="mono" style="font-family: var(--font-mono);">
+            <strong style="font-size: 14px;">SF Mono</strong>
+            <small style="font-size: 10px; color: var(--text-secondary);">Mono</small>
+          </button>
+        </div>
+      </section>
+
+      <!-- Audio Feedback Settings -->
+      <section class="settings-section">
+        <div class="settings-group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          <span>Sound Profile</span>
+        </div>
+        <div class="sound-chips-grid">
+          <div class="sound-chip active" data-profile="organic_pop">
+            <span style="font-weight: 700; font-size: 13px;">Haptic</span>
+            <small style="font-size: 10px; color: var(--text-secondary);">Click</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+          <div class="sound-chip" data-profile="crystal_drop">
+            <span style="font-weight: 700; font-size: 13px;">Ceramic</span>
+            <small style="font-size: 10px; color: var(--text-secondary);">Tap</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+          <div class="sound-chip" data-profile="mechanical_click">
+            <span style="font-weight: 700; font-size: 13px;">Mechanical</span>
+            <small style="font-size: 10px; color: var(--text-secondary);">Snap</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+          <div class="sound-chip" data-profile="soft_marimba">
+            <span style="font-weight: 700; font-size: 13px;">Wood</span>
+            <small style="font-size: 10px; color: var(--text-secondary);">Block</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+          <div class="sound-chip" data-profile="deep_focus">
+            <span style="font-weight: 700; font-size: 13px;">Pulse</span>
+            <small style="font-size: 10px; color: var(--text-secondary);">Pulse</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+          <div class="sound-chip" data-profile="warm_vinyl">
+            <span style="font-weight: 700; font-size: 13px;">Vinyl</span>
+            <small style="font-size: 10px; color: var(--text-secondary);">Analog</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- UI Audio Feedback Toggle -->
+      <section class="settings-section">
+        <div class="tier-toggle-row">
+          <div>
+            <div style="font-size: 14px; font-weight: 700;">Interface Sounds</div>
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Audio feedback on tabs, buttons & gestures</div>
+          </div>
+          <button class="btn-tier-switch" id="btnToggleUiSounds">Enabled</button>
+        </div>
+      </section>
+
+      <!-- Appearance: Themes -->
+      <section class="settings-section">
+        <div class="settings-group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20"></path></svg>
+          <span>Appearance</span>
+        </div>
+        <div class="themes-grid">
+          <div class="theme-picker-card active" data-theme="obsidian">
+            <div class="theme-swatch-box" style="background: #000000; color: #fff;">Aa</div>
+            <div class="theme-title">Obsidian</div>
+          </div>
+          <div class="theme-picker-card" data-theme="graphite">
+            <div class="theme-swatch-box" style="background: #141416; color: #fff;">Aa</div>
+            <div class="theme-title">Graphite</div>
+          </div>
+          <div class="theme-picker-card" data-theme="parchment">
+            <div class="theme-swatch-box" style="background: #F5EEDB; color: #342718;">Aa</div>
+            <div class="theme-title">Parchment</div>
+          </div>
+          <div class="theme-picker-card" data-theme="vellum">
+            <div class="theme-swatch-box" style="background: #F8F9FA; color: #111827;">Aa</div>
+            <div class="theme-title">Light</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Appearance: Focal Accent Color with iOS 27 Sheet Trigger -->
+      <section class="settings-section">
+        <div class="settings-group-title" style="justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+            <span>Focal Color</span>
+          </div>
+          <button class="btn-mini-reset" id="btnTriggerColorSheet" style="font-size: 11px; padding: 4px 10px;">
+            Color Sheet
+          </button>
+        </div>
+        <div class="accent-swatches-wrap" id="accentDots">
+          <div class="accent-dot active" data-color="white" style="background: var(--palette-white); --swatch-color: var(--palette-white);" title="White"></div>
+          <div class="accent-dot" data-color="black" style="background: var(--palette-black); --swatch-color: var(--palette-black);" title="Black"></div>
+          <div class="accent-dot" data-color="red" style="background: var(--palette-red); --swatch-color: var(--palette-red);" title="Crimson"></div>
+          <div class="accent-dot" data-color="pink" style="background: var(--palette-pink); --swatch-color: var(--palette-pink);" title="Pink"></div>
+          <div class="accent-dot" data-color="purple" style="background: var(--palette-purple); --swatch-color: var(--palette-purple);" title="Purple"></div>
+          <div class="accent-dot" data-color="blue" style="background: var(--palette-blue); --swatch-color: var(--palette-blue);" title="Cyan"></div>
+          <div class="accent-dot" data-color="green" style="background: var(--palette-green); --swatch-color: var(--palette-green);" title="Green"></div>
+          <div class="accent-dot" data-color="yellow" style="background: var(--palette-yellow); --swatch-color: var(--palette-yellow);" title="Yellow"></div>
+          <div class="accent-dot" data-color="orange" style="background: var(--palette-orange); --swatch-color: var(--palette-orange);" title="Orange"></div>
+        </div>
+      </section>
+
+      <!-- Membership Status -->
+      <section class="settings-section">
+        <div class="tier-toggle-row">
+          <div>
+            <div style="font-size: 14px; font-weight: 700;">Membership</div>
+            <div class="tier-badge" id="tierStatusBadge" style="color: var(--text-secondary); margin-top: 2px;">Free Starter</div>
+          </div>
+          <button class="btn-tier-switch" id="btnSwitchTier">Toggle Prime</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB 5: GUIDE / WALKTHROUGH -->
+    <div class="tab-panel" id="tabGuide">
+      <div class="guide-card">
+        <h2 style="font-size: 20px; font-weight: 800; letter-spacing: -0.5px;">How It Works</h2>
+        <div class="guide-step">
+          <div class="step-number">1</div>
+          <div class="step-text">
+            <h3>Focus on the Highlighted Letter</h3>
+            <p>Every word aligns its focal letter with the reticle guide. Keeping your eyes steady eliminates scanning fatigue.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="step-number">2</div>
+          <div class="step-text">
+            <h3>Direct Visual Processing</h3>
+            <p>At 350+ words per minute, inner verbal pronunciation fades and words are comprehended directly.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="step-number">3</div>
+          <div class="step-text">
+            <h3>Intuitive Controls</h3>
+            <p>Tap the screen or Dynamic Island to play or pause. Double-tap to rewind or skip words. Slide the progress bar to navigate anywhere.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Liquid Navigation Dock -->
+    <nav class="floating-nav">
+      <div class="nav-pill-container">
+        <div class="nav-sliding-pill" id="navSlidingPill"></div>
+        <button class="nav-tab-btn active" data-target="tabReader" aria-label="Reader">
+          <svg viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+          <span>Reader</span>
+        </button>
+        <button class="nav-tab-btn" data-target="tabLibrary" aria-label="Library">
+          <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <span>Library</span>
+        </button>
+        <button class="nav-tab-btn" data-target="tabPrime" aria-label="Prime">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span>Prime</span>
+        </button>
+        <button class="nav-tab-btn" data-target="tabSettings" aria-label="Settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Settings</span>
+        </button>
+        <button class="nav-tab-btn" data-target="tabGuide" aria-label="Guide">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <span>Guide</span>
+        </button>
+      </div>
+    </nav>
+  </main>
+
+  <!-- ========================================================================
+       MODALS
+       ======================================================================== -->
+
+  <!-- iOS 27 Design Kit Color Picker Modal -->
+  <div class="modern-modal-backdrop" id="colorPickerModal">
+    <div class="modern-dialog" style="max-width: 440px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l4 4-9 9-4 1 1-4 8-8z"></path><path d="M18 6l2-2"></path></svg>
+          <span class="modal-title">Colors</span>
+        </div>
+        <button class="btn-close-modal" id="btnCloseColorPicker">&times;</button>
+      </div>
+
+      <div class="color-picker-segmented">
+        <button class="color-segmented-btn active" data-view="grid">Grid</button>
+        <button class="color-segmented-btn" data-view="spectrum">Spectrum</button>
+        <button class="color-segmented-btn" data-view="sliders">Sliders</button>
+      </div>
+
+      <!-- Color Grid containing all 9 Tachyon Focal Colors with Contrast Guards -->
+      <div class="ios27-swatches-grid" id="pickerSwatchesGrid">
+        <div class="ios27-swatch-cell active" data-color="white" style="background: var(--palette-white);" title="White"></div>
+        <div class="ios27-swatch-cell" data-color="black" style="background: var(--palette-black);" title="Black"></div>
+        <div class="ios27-swatch-cell" data-color="red" style="background: var(--palette-red);" title="Crimson"></div>
+        <div class="ios27-swatch-cell" data-color="pink" style="background: var(--palette-pink);" title="Pink"></div>
+        <div class="ios27-swatch-cell" data-color="purple" style="background: var(--palette-purple);" title="Purple"></div>
+        <div class="ios27-swatch-cell" data-color="blue" style="background: var(--palette-blue);" title="Cyan"></div>
+        <div class="ios27-swatch-cell" data-color="green" style="background: var(--palette-green);" title="Green"></div>
+        <div class="ios27-swatch-cell" data-color="yellow" style="background: var(--palette-yellow);" title="Yellow"></div>
+        <div class="ios27-swatch-cell" data-color="orange" style="background: var(--palette-orange);" title="Orange"></div>
+      </div>
+
+      <!-- Opacity Bar from kit -->
+      <div class="ios27-opacity-strip">
+        <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Opacity</span>
+        <div class="ios27-opacity-track">
+          <div class="ios27-opacity-gradient"></div>
+        </div>
+        <span style="font-size: 12px; font-weight: 700; color: var(--text-primary);">100%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unified Book Details Modal (Read & Progress + Edit Tabs) -->
+  <div class="modern-modal-backdrop" id="bookDetailModal">
+    <div class="modern-dialog" style="max-width: 480px;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="bookModalTitle">Book Details</h3>
+          <p id="bookModalAuthor" style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">Author</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseBookDetailModal">&times;</button>
+      </div>
+
+      <!-- Segmented Tab Navigation -->
+      <div class="modal-tabs-nav" id="bookModalTabsNav">
+        <button class="modal-tab-btn active" id="btnBookTabRead" data-tab="read">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+          <span>Read & Progress</span>
+        </button>
+        <button class="modal-tab-btn" id="btnBookTabEdit" data-tab="edit">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          <span>Edit Details</span>
+        </button>
+      </div>
+
+      <!-- Sliding Tab Viewport for Smooth Transitions -->
+      <div class="modal-tabs-viewport">
+        <div class="modal-tabs-slider" id="bookModalTabsSlider">
+          <!-- Tab 1: Read & Progress Panel -->
+          <div class="modal-tab-panel" id="bookModalReadPanel">
+            <!-- Modern Telemetry Grid -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+              <div style="background: rgba(255,255,255,0.06); padding: 8px; border-radius: 12px; text-align: center;">
+                <span style="font-size: 10px; color: var(--text-secondary); display: block;">Total Words</span>
+                <span style="font-size: 15px; font-weight: 800;" id="launchTotalWords">0</span>
+              </div>
+              <div style="background: rgba(255,255,255,0.06); padding: 8px; border-radius: 12px; text-align: center;">
+                <span style="font-size: 10px; color: var(--text-secondary); display: block;">Progress</span>
+                <span style="font-size: 15px; font-weight: 800;" id="launchProgressPct">0%</span>
+              </div>
+              <div style="background: rgba(255,255,255,0.06); padding: 8px; border-radius: 12px; text-align: center;">
+                <span style="font-size: 10px; color: var(--text-secondary); display: block;">Est. Time</span>
+                <span style="font-size: 15px; font-weight: 800;" id="launchEstTime">0m</span>
+              </div>
+            </div>
+
+            <!-- Glowing Liquid Progress Track -->
+            <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-top: 4px;">
+              <div id="launchProgressBar" style="width: 0%; height: 100%; background: var(--accent); transition: width 0.3s ease;"></div>
+            </div>
+
+            <!-- Starting Needle Text Selector -->
+            <div class="needle-editor-wrap">
+              <div class="needle-header-row">
+                <div class="needle-pos-info">
+                  <span style="color: var(--accent); font-weight: 700;">📍 Start Position:</span>
+                  <strong id="needlePosLabel" style="color: var(--text-primary); font-variant-numeric: tabular-nums;">Word 0 (0%)</strong>
+                </div>
+                <button class="btn-mini-reset" id="btnLaunchResetProg" title="Reset needle to start">
+                  <span>Reset to Start</span>
+                </button>
+              </div>
+              <p style="font-size: 12px; color: var(--text-secondary); margin: 2px 0 6px;">Tap any word below to place your needle:</p>
+              <div class="needle-preview-box" id="needlePreviewBox">
+                <!-- Dynamically populated interactive word spans -->
+              </div>
+            </div>
+
+            <button class="btn-save" id="btnLaunchRead" style="width: 100%; margin-top: 6px; padding: 13px; font-size: 15px;">Read</button>
+          </div>
+
+          <!-- Tab 2: Edit Details Panel -->
+          <div class="modal-tab-panel" id="bookModalEditPanel" style="gap: 12px;">
+            <input type="text" class="modern-textarea" id="editBookTitleInput" placeholder="Title" style="height: 44px; padding: 10px 14px;">
+            <input type="text" class="modern-textarea" id="editBookAuthorInput" placeholder="Author (optional)" style="height: 44px; padding: 10px 14px;">
+            <textarea class="modern-textarea" id="editBookContentInput" placeholder="Paste or edit content here..." style="height: 140px;"></textarea>
+
+            <div>
+              <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 8px; text-align: center;">Tag Color:</label>
+              <div class="accent-swatches-wrap" id="modalColorDots">
+                <div class="accent-dot active" data-color="white" style="background: var(--palette-white);"></div>
+                <div class="accent-dot" data-color="red" style="background: var(--palette-red);"></div>
+                <div class="accent-dot" data-color="pink" style="background: var(--palette-pink);"></div>
+                <div class="accent-dot" data-color="purple" style="background: var(--palette-purple);"></div>
+                <div class="accent-dot" data-color="blue" style="background: var(--palette-blue);"></div>
+                <div class="accent-dot" data-color="green" style="background: var(--palette-green);"></div>
+                <div class="accent-dot" data-color="yellow" style="background: var(--palette-yellow);"></div>
+                <div class="accent-dot" data-color="orange" style="background: var(--palette-orange);"></div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <button class="btn-save" id="btnSaveAddModal" style="flex: 2; padding: 13px; font-size: 15px;">Save Changes</button>
+              <button type="button" class="btn-delete-book-modal" id="btnDeleteCurrentBook" title="Delete this book">Delete Book</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session Completion Modal -->
+  <div class="modern-modal-backdrop" id="completionModal">
+    <div class="modern-dialog" style="text-align: center; align-items: center; max-width: 380px;">
+      <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; box-shadow: 0 0 20px var(--accent-glow);">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <h2 style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">Reading Finished</h2>
+
+      <div class="completion-metrics-center">
+        <div>
+          <div class="completion-metric-val" id="statWordsRead">0</div>
+          <div class="completion-metric-sub">words read</div>
+        </div>
+        <div style="opacity: 0.3; font-size: 24px;">•</div>
+        <div>
+          <div class="completion-metric-val" id="statTimeSaved">0s</div>
+          <div class="completion-metric-sub">time saved</div>
+        </div>
+      </div>
+
+      <button class="btn-save" id="btnCloseCompletion" style="width: 100%; margin-top: 14px; padding: 13px; font-size: 15px;">Done</button>
+    </div>
+  </div>
+
+  <!-- About Tachyon Modal -->
+  <div class="modern-modal-backdrop" id="aboutModal">
+    <div class="modern-dialog" style="text-align: center; max-width: 380px;">
+      <div style="width: 60px; height: 60px; border-radius: 18px; background: var(--bg-glass-card); border: 0.5px solid var(--border-specular); display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+        <svg viewBox="0 0 24 24" width="34" height="34" fill="var(--accent)"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+      </div>
+      <h2 style="font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin: 12px 0 2px;">TACHYON</h2>
+      <div style="font-size: 12px; font-weight: 600; color: var(--accent);">iOS 27 Spatial Glass Edition</div>
+      <p style="font-size: 13px; color: var(--text-secondary); margin: 12px 0 16px; line-height: 1.5;">
+        Rapid Serial Visual Presentation speed reader. Read faster than thought with optical anchoring, tactile haptic feedback, Dynamic Island Live Activities, and liquid silk materials.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; text-align: left; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 16px; font-size: 12px;">
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-secondary);">Engine</span>
+          <strong>RSVP Visor 3.0</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-secondary);">Hardware</span>
+          <strong>Dynamic Island Activity</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-secondary);">Audio</span>
+          <strong>Console Synthesis Engine</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-secondary);">Storage</span>
+          <strong>Offline IndexedDB</strong>
+        </div>
+      </div>
+
+      <button class="btn-save" id="btnCloseAboutModal" style="width: 100%; margin-top: 18px; padding: 12px; font-size: 14px;">Done</button>
+    </div>
+  </div>
+
+  <!-- iOS 27 App Script -->
+  <script type="module" src="assets/js/ios27-app.js?v=28"></script>
+</body>
+</html>
