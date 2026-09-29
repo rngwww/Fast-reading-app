@@ -21,12 +21,25 @@ export const RSVP = {
   },
 
   parseText(text, defaultText) {
-    const content = text.trim() || defaultText;
+    const content = (text && text.trim()) || defaultText;
+    if (!content) return [];
+
+    // Support CJK text without spaces using native Intl.Segmenter if available
+    const hasCJK = /[\u4e00-\u9fa5\u3040-\u30ff]/.test(content);
+    if (hasCJK && typeof Intl !== 'undefined' && Intl.Segmenter) {
+      const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' });
+      const segments = Array.from(segmenter.segment(content));
+      return segments
+        .map(s => s.segment.trim())
+        .filter(w => w.length > 0 && !/^[\s\p{P}]+$/u.test(w));
+    }
+
     return content.split(/\s+/).filter(w => w.length > 0);
   },
 
   formatWord(word) {
-    const cleanWord = word.replace(/^[^\w]+|[^\w]+$/g, '');
+    // Unicode-aware punctuation stripping to protect accents in Spanish, German, French, Chinese, etc.
+    const cleanWord = word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
     const searchWord = cleanWord.length > 0 ? cleanWord : word;
     let orpIndex = this.getOptimalRecognitionPoint(searchWord);
     

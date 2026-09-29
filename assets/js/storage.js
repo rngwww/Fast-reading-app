@@ -14,7 +14,8 @@ const memoryFallback = {
     fontSize: 'medium',
     warmUpMode: false,
     uiSoundsEnabled: true,
-    appTheme: 'obsidian'
+    appTheme: 'obsidian',
+    language: 'en'
   },
   booksMeta: {},
   booksChunks: {}

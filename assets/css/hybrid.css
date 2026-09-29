@@ -3265,3 +3265,83 @@ body[data-theme="vellum"] .comprehension-metric-pill {
 .btn-comp-skip:hover {
   color: var(--text-primary);
 }
+
+/* ==========================================================================
+   iOS Language Picker Section (Compact iOS Grouped List)
+   ========================================================================== */
+.ios-lang-list {
+  background: var(--bg-surface);
+  backdrop-filter: var(--ios-blur);
+  -webkit-backdrop-filter: var(--ios-blur);
+  border: 0.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ios-lang-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 0.5px solid var(--border-subtle);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.ios-lang-row:last-child {
+  border-bottom: none;
+}
+
+.ios-lang-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ios-lang-row:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ios-lang-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ios-lang-native {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+}
+
+.ios-lang-sub {
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--text-secondary);
+}
+
+.ios-lang-check {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+  opacity: 0;
+  transform: scale(0.7);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ios-lang-row.active .ios-lang-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ios-lang-row.active .ios-lang-native {
+  color: var(--accent);
+}
+

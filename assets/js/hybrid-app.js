@@ -2,6 +2,7 @@ import { Storage } from './storage.js?v=28';
 import { AudioSystem } from './audio.js?v=28';
 import { RSVP } from './rsvp.js?v=28';
 import { PreloadedLibrary, Quotes } from './data.js?v=28';
+import { applyLanguage, t, SUPPORTED_LANGUAGES, getCurrentLanguage, getRandomQuote, onLanguageChange } from './i18n.js?v=1';
 
 async function initApp() {
   // Main Container & Stage
@@ -147,6 +148,9 @@ async function initApp() {
   const tierStatusBadge = document.getElementById('tierStatusBadge');
   const btnSwitchTier = document.getElementById('btnSwitchTier');
   const btnToggleUiSounds = document.getElementById('btnToggleUiSounds');
+  const iosLangRows = document.querySelectorAll('.ios-lang-row');
+  const headerStreakUnit = document.getElementById('headerStreakUnit');
+  const modalStreakHeroUnit = document.getElementById('modalStreakHeroUnit');
 
   // Prime
   const btnStartTrial = document.getElementById('btnStartTrial');
@@ -167,7 +171,8 @@ async function initApp() {
     fontSize: 'md',
     warmUpEnabled: true,
     uiSoundsEnabled: true,
-    appTheme: 'obsidian'
+    appTheme: 'obsidian',
+    language: 'en'
   };
   let currentBookMeta = null;
   let currentChunkWords = [];
@@ -330,18 +335,18 @@ async function initApp() {
     if (state.isPro) {
       tierStatusBadge.textContent = 'TACHYON PRIME';
       tierStatusBadge.style.color = '#FFFFFF';
-      if (tierWordLimitLabel) tierWordLimitLabel.textContent = 'Unlimited (Prime)';
+      if (tierWordLimitLabel) tierWordLimitLabel.textContent = t('reader.unlimitedPrime');
       if (btnStartTrial) {
-        btnStartTrial.textContent = 'Prime Member Active';
+        btnStartTrial.textContent = t('prime.activeMember');
         btnStartTrial.style.opacity = '0.6';
         btnStartTrial.style.pointerEvents = 'none';
       }
     } else {
-      tierStatusBadge.textContent = 'Free Starter';
+      tierStatusBadge.textContent = t('reader.freeStarter');
       tierStatusBadge.style.color = 'var(--text-secondary)';
-      if (tierWordLimitLabel) tierWordLimitLabel.textContent = 'Free Starter';
+      if (tierWordLimitLabel) tierWordLimitLabel.textContent = t('reader.freeStarter');
       if (btnStartTrial) {
-        btnStartTrial.textContent = 'Start Free Trial';
+        btnStartTrial.textContent = t('prime.startTrial');
         btnStartTrial.style.opacity = '1';
         btnStartTrial.style.pointerEvents = 'auto';
       }
@@ -352,7 +357,7 @@ async function initApp() {
     if (!btnToggleUiSounds) return;
     const enabled = state.uiSoundsEnabled !== false;
     AudioSystem.uiSoundsEnabled = enabled;
-    btnToggleUiSounds.textContent = enabled ? 'Enabled' : 'Muted';
+    btnToggleUiSounds.textContent = enabled ? t('settings.enabled') : t('settings.muted');
     btnToggleUiSounds.style.color = enabled ? 'var(--text-primary)' : 'var(--text-secondary)';
   }
 
@@ -463,8 +468,16 @@ async function initApp() {
     const total = currentBookMeta.totalWords || 1;
     const pct = Math.min(100, Math.max(0, ((currentPos / total) * 100)));
 
-    scrubberWordPos.textContent = currentPos.toLocaleString();
-    scrubberWordTotal.textContent = total.toLocaleString();
+    const scrubberWordLabel = document.getElementById('scrubberWordLabel');
+    if (scrubberWordLabel) {
+      scrubberWordLabel.innerHTML = t('reader.wordOfScrubber', {
+        current: `<strong id="scrubberWordPos" style="color: var(--text-primary);">${currentPos.toLocaleString()}</strong>`,
+        total: `<span id="scrubberWordTotal">${total.toLocaleString()}</span>`
+      });
+    } else {
+      if (scrubberWordPos) scrubberWordPos.textContent = currentPos.toLocaleString();
+      if (scrubberWordTotal) scrubberWordTotal.textContent = total.toLocaleString();
+    }
     scrubberPct.textContent = `${pct.toFixed(0)}%`;
     progressScrubber.value = pct;
     progressScrubber.style.setProperty('--scrub-pct', `${pct}%`);
@@ -643,9 +656,9 @@ async function initApp() {
         countdownNumber.classList.add('pulse');
       }
       if (countdownAffirmation) {
-        if (step === 3) countdownAffirmation.textContent = 'Ready...';
-        else if (step === 2) countdownAffirmation.textContent = 'Focus...';
-        else if (step === 1) countdownAffirmation.textContent = 'Read!';
+        if (step === 3) countdownAffirmation.textContent = t('reader.readyCountdown');
+        else if (step === 2) countdownAffirmation.textContent = t('reader.focusCountdown');
+        else if (step === 1) countdownAffirmation.textContent = t('reader.readCountdown');
       }
       AudioSystem.playCountdownBeep(step === 1);
     };
@@ -901,21 +914,19 @@ async function initApp() {
   function updateReadingEstimate() {
     const text = textInput.value.trim();
     if (!text) {
-      readingEstimate.textContent = '0 words';
+      readingEstimate.textContent = t('reader.wordsEstimate', { count: '0' });
       return;
     }
-    const wordsCount = text.split(/\s+/).filter(w => w.length > 0).length;
+    const wordsCount = RSVP.parseText(text).length;
     const wpm = state.wpm || 350;
     const totalSeconds = Math.ceil((wordsCount / wpm) * 60);
 
-    let timeStr = `${totalSeconds}s`;
-    if (totalSeconds >= 60) {
-      const mins = Math.floor(totalSeconds / 60);
-      const secs = totalSeconds % 60;
-      timeStr = `${mins}m ${secs}s`;
+    if (totalSeconds < 60) {
+      readingEstimate.textContent = t('reader.wordsEstimate', { count: wordsCount.toLocaleString() });
+    } else {
+      const mins = Math.max(1, Math.round(totalSeconds / 60));
+      readingEstimate.textContent = t('reader.wordsEstimateMin', { count: wordsCount.toLocaleString(), min: mins });
     }
-
-    readingEstimate.textContent = `${wordsCount.toLocaleString()} words • ~${timeStr}`;
   }
 
   async function prepareScratchpad() {
@@ -943,11 +954,11 @@ async function initApp() {
     const isFocused = document.activeElement === textInput;
 
     if (isScratchpad && isEmpty && !isFocused) {
-      const quoteList = Quotes && Quotes.emptyState ? Quotes.emptyState : [];
-      if (quoteList.length === 0) return;
+      const localizedQuote = getRandomQuote(state.language);
+      if (!localizedQuote) return;
 
       if (immediate) {
-        quoteText.textContent = quoteList[quoteIndex % quoteList.length];
+        quoteText.textContent = localizedQuote;
         quoteOverlay.classList.remove('hidden');
         quoteOverlay.style.display = 'flex';
         quoteOverlay.style.opacity = '1';
@@ -956,8 +967,7 @@ async function initApp() {
         setTimeout(() => {
           const stillScratchpad = !state.activeDocId || state.activeDocId === 'scratchpad';
           if (stillScratchpad && textInput.value.trim() === '' && document.activeElement !== textInput) {
-            quoteIndex = (quoteIndex + 1) % quoteList.length;
-            quoteText.textContent = quoteList[quoteIndex % quoteList.length];
+            quoteText.textContent = getRandomQuote(state.language);
             quoteOverlay.classList.remove('hidden');
             quoteOverlay.style.display = 'flex';
             quoteOverlay.style.opacity = '1';
@@ -1125,8 +1135,8 @@ async function initApp() {
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
           </svg>
-          <div style="font-size: 16px; font-weight: 300; margin-bottom: 4px; color: var(--text-primary);">Your Library is Empty</div>
-          <div style="font-size: 13px; font-weight: 200;">Tap "+ Add Book" above to import or paste text.</div>
+          <div style="font-size: 16px; font-weight: 300; margin-bottom: 4px; color: var(--text-primary);">${t('library.emptyTitle')}</div>
+          <div style="font-size: 13px; font-weight: 200;">${t('library.emptySub')}</div>
         </div>
       `;
       return;
@@ -1143,12 +1153,12 @@ async function initApp() {
 
       item.innerHTML = `
         <div class="book-swipe-delete-bg">
-          <button class="btn-swipe-delete" data-id="${book.id}" aria-label="Delete ${escapeHtml(book.title)}">
+          <button class="btn-swipe-delete" data-id="${book.id}" aria-label="${t('library.delete')} ${escapeHtml(book.title)}">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <polyline points="3 6 5 6 21 6"></polyline>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
             </svg>
-            <span>Delete</span>
+            <span>${t('library.delete')}</span>
           </button>
         </div>
         <div class="book-card" style="--card-color: var(--palette-${book.color || 'blue'}); border-left: 4px solid var(--palette-${book.color || 'blue'});">
@@ -1158,11 +1168,11 @@ async function initApp() {
               <span class="book-tag-pill" style="--tag-color: var(--palette-${book.color || 'blue'});">${escapeHtml(book.color || 'blue')}</span>
             </div>
             <div class="book-meta">
-              <span>${escapeHtml(book.author || 'Unknown')}</span>
+              <span>${escapeHtml(book.author || t('library.unknownAuthor'))}</span>
               <span>•</span>
-              <span>${book.totalWords.toLocaleString()} words</span>
+              <span>${t('library.wordsCount', { count: book.totalWords.toLocaleString() })}</span>
               <span>•</span>
-              <span style="color: var(--text-primary); font-weight: 700;">${isComplete ? 'Finished' : `${pct}%`}</span>
+              <span style="color: var(--text-primary); font-weight: 700;">${isComplete ? t('modal.completion.title') : `${pct}%`}</span>
             </div>
           </div>
           <div class="book-actions-group">
@@ -1886,6 +1896,36 @@ async function initApp() {
     });
   });
 
+  // Language Selector Interactions (Compact iOS List)
+  function updateLangUi(lang) {
+    iosLangRows.forEach(row => {
+      row.classList.toggle('active', row.dataset.lang === lang);
+    });
+  }
+
+  iosLangRows.forEach(row => {
+    row.addEventListener('click', () => {
+      const chosenLang = row.dataset.lang;
+      if (!chosenLang || chosenLang === state.language) return;
+      AudioSystem.playButtonPress();
+      state.language = chosenLang;
+      Storage.saveSettings(state);
+      applyLanguage(chosenLang);
+      updateLangUi(chosenLang);
+      applyTierMode();
+      updateUiSoundsBtn();
+      updateScrubberAndStats();
+      updateReadingEstimate();
+      updateQuoteDisplay(true);
+      if (typeof StreakSystem !== 'undefined' && StreakSystem.render) {
+        StreakSystem.render();
+      }
+      if (document.getElementById('tabLibrary').classList.contains('active')) {
+        renderLibrary();
+      }
+    });
+  });
+
   btnSwitchTier.addEventListener('click', () => {
     state.isPro = !state.isPro;
     Storage.saveSettings(state);
@@ -2053,6 +2093,12 @@ async function initApp() {
       const pct = Math.min(100, Math.round((todayMins / goalMins) * 100));
 
       if (headerStreakCount) headerStreakCount.textContent = streak;
+      if (headerStreakUnit) {
+        headerStreakUnit.textContent = streak <= 1 ? t('header.dayUnit') : t('header.daysUnit');
+      }
+      if (modalStreakHeroUnit) {
+        modalStreakHeroUnit.textContent = t('modal.streak.title');
+      }
 
       const bannerStreakDays = document.getElementById('bannerStreakDays');
       const bannerGoalTime = document.getElementById('bannerGoalTime');
@@ -2075,18 +2121,17 @@ async function initApp() {
       if (modalTotalMinutes) modalTotalMinutes.textContent = `${Math.floor((this.state.totalSeconds || 0) / 60)}m`;
 
       if (modalStreakMotto) {
-        if (pct >= 100) {
-          modalStreakMotto.textContent = "Goal reached! Your daily reading habit is unstoppable.";
-        } else if (todayMins > 0) {
-          modalStreakMotto.textContent = `${goalMins - todayMins}m left to complete today's goal. Keep it up!`;
-        } else {
-          modalStreakMotto.textContent = "Your daily habit is lit. Read today to feed the flame!";
-        }
+        modalStreakMotto.textContent = t('modal.streak.motto');
       }
 
+      const weekDays = t('modal.streak.weekDays');
       const currentDayOfWeek = new Date().getDay();
-      document.querySelectorAll('#streakWeekGrid .week-day-col').forEach(col => {
+      document.querySelectorAll('#streakWeekGrid .week-day-col').forEach((col, idx) => {
         const dayIdx = parseInt(col.dataset.day, 10);
+        const dayLabelEl = col.querySelector('.day-label');
+        if (dayLabelEl && Array.isArray(weekDays) && weekDays[idx]) {
+          dayLabelEl.textContent = weekDays[idx];
+        }
         col.classList.toggle('today', dayIdx === currentDayOfWeek);
         if (dayIdx === currentDayOfWeek && todayMins > 0) {
           col.classList.add('completed');
@@ -2178,8 +2223,14 @@ async function initApp() {
     if (saved) {
       state = { ...state, ...saved };
     }
+    state.language = state.language || 'en';
+    applyLanguage(state.language);
+    updateLangUi(state.language);
   } catch (err) {
     console.warn("Storage settings load failed, continuing with defaults:", err);
+    state.language = state.language || 'en';
+    applyLanguage(state.language);
+    updateLangUi(state.language);
   }
 
   // Audio setup after settings loaded
