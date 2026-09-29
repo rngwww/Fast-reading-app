@@ -3267,20 +3267,117 @@ body[data-theme="vellum"] .comprehension-metric-pill {
 }
 
 /* ==========================================================================
-   iOS Language Picker Section (Compact iOS Grouped List)
+   iOS Language Picker Section (Animated Collapsible Dropdown)
    ========================================================================== */
-.ios-lang-list {
+.ios-lang-dropdown {
+  position: relative;
   background: var(--bg-surface);
   backdrop-filter: var(--ios-blur);
   -webkit-backdrop-filter: var(--ios-blur);
   border: 0.5px solid var(--border-subtle);
   border-radius: var(--radius-md);
   overflow: hidden;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.ios-lang-dropdown.open {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.ios-lang-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease;
+}
+
+.ios-lang-trigger:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ios-lang-trigger:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ios-lang-trigger-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ios-lang-trigger-globe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: color 0.2s ease, transform 0.25s ease;
+}
+
+.ios-lang-dropdown.open .ios-lang-trigger-globe {
+  color: var(--accent);
+  transform: rotate(15deg);
+}
+
+.ios-lang-current {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+}
+
+.ios-lang-trigger-right {
+  display: flex;
+  align-items: center;
+}
+
+.ios-lang-chevron {
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
+}
+
+.ios-lang-dropdown.open .ios-lang-chevron {
+  transform: rotate(180deg);
+  color: var(--text-primary);
+}
+
+/* Fluid CSS Grid 0fr -> 1fr Collapse Animation */
+.ios-lang-collapse-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  opacity: 0;
+  border-top: 0.5px solid transparent;
+}
+
+.ios-lang-dropdown.open .ios-lang-collapse-wrapper {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  border-top-color: var(--border-subtle);
+}
+
+.ios-lang-collapse-inner {
+  overflow: hidden;
+}
+
+.ios-lang-options-list {
   display: flex;
   flex-direction: column;
 }
 
-.ios-lang-row {
+.ios-lang-option {
   width: 100%;
   display: flex;
   align-items: center;
@@ -3288,60 +3385,56 @@ body[data-theme="vellum"] .comprehension-metric-pill {
   padding: 12px 16px;
   background: transparent;
   border: none;
-  border-bottom: 0.5px solid var(--border-subtle);
-  color: var(--text-primary);
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
   cursor: pointer;
   text-align: left;
   font-family: inherit;
-  transition: background 0.15s ease;
+  font-size: 14px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease, color 0.15s ease, padding-left 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.ios-lang-row:last-child {
+.ios-lang-option:last-child {
   border-bottom: none;
 }
 
-.ios-lang-row:hover {
+.ios-lang-option:hover {
   background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  padding-left: 20px;
 }
 
-.ios-lang-row:active {
+.ios-lang-option:active {
   background: rgba(255, 255, 255, 0.08);
 }
 
-.ios-lang-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.ios-lang-native {
-  font-size: 14px;
+.ios-lang-name {
   font-weight: 500;
-  color: var(--text-primary);
   letter-spacing: -0.2px;
 }
 
-.ios-lang-sub {
-  font-size: 12px;
-  font-weight: 300;
-  color: var(--text-secondary);
+.ios-lang-option.active {
+  color: var(--accent);
+}
+
+.ios-lang-option.active .ios-lang-name {
+  font-weight: 600;
+  color: var(--accent);
 }
 
 .ios-lang-check {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   color: var(--accent);
   opacity: 0;
-  transform: scale(0.7);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(0.6);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease;
 }
 
-.ios-lang-row.active .ios-lang-check {
+.ios-lang-option.active .ios-lang-check {
   opacity: 1;
   transform: scale(1);
-}
-
-.ios-lang-row.active .ios-lang-native {
-  color: var(--accent);
 }
 

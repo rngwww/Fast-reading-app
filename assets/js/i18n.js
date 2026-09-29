@@ -115,6 +115,13 @@ export const translations = {
       togglePrime: 'Toggle Prime',
       language: 'Language'
     },
+    languages: {
+      en: 'English',
+      zh: 'Chinese',
+      es: 'Spanish',
+      de: 'German',
+      fr: 'French'
+    },
     guide: {
       title: 'How It Works',
       step1Title: 'Focus on the Highlighted Letter',
@@ -298,6 +305,13 @@ export const translations = {
       membership: '会员计划',
       togglePrime: '切换 Prime',
       language: '界面语言'
+    },
+    languages: {
+      en: '英语',
+      zh: '中文',
+      es: '西班牙语',
+      de: '德语',
+      fr: '法语'
     },
     guide: {
       title: '工作原理',
@@ -483,6 +497,13 @@ export const translations = {
       togglePrime: 'Alternar Prime',
       language: 'Idioma'
     },
+    languages: {
+      en: 'Inglés',
+      zh: 'Chino',
+      es: 'Español',
+      de: 'Alemán',
+      fr: 'Francés'
+    },
     guide: {
       title: 'Cómo Funciona',
       step1Title: 'Enfócate en la letra resaltada',
@@ -667,6 +688,13 @@ export const translations = {
       togglePrime: 'Prime umschalten',
       language: 'Sprache'
     },
+    languages: {
+      en: 'Englisch',
+      zh: 'Chinesisch',
+      es: 'Spanisch',
+      de: 'Deutsch',
+      fr: 'Französisch'
+    },
     guide: {
       title: 'So funktioniert es',
       step1Title: 'Fokussiere den markierten Buchstaben',
@@ -850,6 +878,13 @@ export const translations = {
       membership: 'Abonnement',
       togglePrime: 'Basculer Prime',
       language: 'Langue'
+    },
+    languages: {
+      en: 'Anglais',
+      zh: 'Chinois',
+      es: 'Espagnol',
+      de: 'Allemand',
+      fr: 'Français'
     },
     guide: {
       title: 'Comment ça fonctionne',

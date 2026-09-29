@@ -25,7 +25,7 @@
     }
   </script>
   <script src="assets/js/vendor/jszip.min.js"></script>
-  <link rel="stylesheet" href="assets/css/hybrid.css?v=9">
+  <link rel="stylesheet" href="assets/css/hybrid.css?v=10">
 </head>
 <body data-theme="obsidian">
 
@@ -360,48 +360,56 @@
 
     <!-- TAB 4: SETTINGS -->
     <div class="tab-panel" id="tabSettings">
-      <!-- Language Selector (Compact iOS Grouped List) -->
+      <!-- Language Selector (Animated Collapsible Dropdown) -->
       <section class="settings-section">
         <div class="settings-group-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path></svg>
           <span data-i18n="settings.language">Language</span>
         </div>
-        <div class="ios-lang-list" id="iosLangList">
-          <button class="ios-lang-row active" data-lang="en">
-            <div class="ios-lang-info">
-              <span class="ios-lang-native">English</span>
-              <span class="ios-lang-sub" data-i18n="settings.langEn">English</span>
+        <div class="ios-lang-dropdown" id="langDropdown">
+          <button type="button" class="ios-lang-trigger" id="langDropdownTrigger" aria-haspopup="listbox" aria-expanded="false">
+            <div class="ios-lang-trigger-left">
+              <span class="ios-lang-trigger-globe">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+              </span>
+              <span class="ios-lang-current" id="currentLangLabel">English</span>
             </div>
-            <svg class="ios-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          </button>
-          <button class="ios-lang-row" data-lang="zh">
-            <div class="ios-lang-info">
-              <span class="ios-lang-native">简体中文</span>
-              <span class="ios-lang-sub" data-i18n="settings.langZh">Chinese (Simplified)</span>
+            <div class="ios-lang-trigger-right">
+              <svg class="ios-lang-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
             </div>
-            <svg class="ios-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </button>
-          <button class="ios-lang-row" data-lang="es">
-            <div class="ios-lang-info">
-              <span class="ios-lang-native">Español</span>
-              <span class="ios-lang-sub" data-i18n="settings.langEs">Spanish</span>
+          <div class="ios-lang-collapse-wrapper" id="langCollapseWrapper">
+            <div class="ios-lang-collapse-inner">
+              <div class="ios-lang-options-list" role="listbox">
+                <button type="button" class="ios-lang-option active" data-lang="en" role="option" aria-selected="true">
+                  <span class="ios-lang-name" data-i18n="languages.en">English</span>
+                  <svg class="ios-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+                <button type="button" class="ios-lang-option" data-lang="zh" role="option" aria-selected="false">
+                  <span class="ios-lang-name" data-i18n="languages.zh">Chinese</span>
+                  <svg class="ios-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+                <button type="button" class="ios-lang-option" data-lang="es" role="option" aria-selected="false">
+                  <span class="ios-lang-name" data-i18n="languages.es">Spanish</span>
+                  <svg class="ios-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+                <button type="button" class="ios-lang-option" data-lang="de" role="option" aria-selected="false">
+                  <span class="ios-lang-name" data-i18n="languages.de">German</span>
+                  <svg class="ios-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+                <button type="button" class="ios-lang-option" data-lang="fr" role="option" aria-selected="false">
+                  <span class="ios-lang-name" data-i18n="languages.fr">French</span>
+                  <svg class="ios-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+              </div>
             </div>
-            <svg class="ios-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          </button>
-          <button class="ios-lang-row" data-lang="de">
-            <div class="ios-lang-info">
-              <span class="ios-lang-native">Deutsch</span>
-              <span class="ios-lang-sub" data-i18n="settings.langDe">German</span>
-            </div>
-            <svg class="ios-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          </button>
-          <button class="ios-lang-row" data-lang="fr">
-            <div class="ios-lang-info">
-              <span class="ios-lang-native">Français</span>
-              <span class="ios-lang-sub" data-i18n="settings.langFr">French</span>
-            </div>
-            <svg class="ios-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          </button>
+          </div>
         </div>
       </section>
 
@@ -916,6 +924,6 @@
   </div>
 
   <!-- Main Modular Hybrid Application Script -->
-  <script type="module" src="assets/js/hybrid-app.js?v=7"></script>
+  <script type="module" src="assets/js/hybrid-app.js?v=8"></script>
 </body>
 </html>

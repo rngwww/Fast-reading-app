@@ -2,7 +2,7 @@ import { Storage } from './storage.js?v=28';
 import { AudioSystem } from './audio.js?v=28';
 import { RSVP } from './rsvp.js?v=28';
 import { PreloadedLibrary, Quotes } from './data.js?v=28';
-import { applyLanguage, t, SUPPORTED_LANGUAGES, getCurrentLanguage, getRandomQuote, onLanguageChange } from './i18n.js?v=1';
+import { applyLanguage, t, SUPPORTED_LANGUAGES, getCurrentLanguage, getRandomQuote, onLanguageChange } from './i18n.js?v=2';
 
 async function initApp() {
   // Main Container & Stage
@@ -148,7 +148,10 @@ async function initApp() {
   const tierStatusBadge = document.getElementById('tierStatusBadge');
   const btnSwitchTier = document.getElementById('btnSwitchTier');
   const btnToggleUiSounds = document.getElementById('btnToggleUiSounds');
-  const iosLangRows = document.querySelectorAll('.ios-lang-row');
+  const langDropdown = document.getElementById('langDropdown');
+  const langDropdownTrigger = document.getElementById('langDropdownTrigger');
+  const currentLangLabel = document.getElementById('currentLangLabel');
+  const iosLangOptions = document.querySelectorAll('.ios-lang-option');
   const headerStreakUnit = document.getElementById('headerStreakUnit');
   const modalStreakHeroUnit = document.getElementById('modalStreakHeroUnit');
 
@@ -1896,18 +1899,61 @@ async function initApp() {
     });
   });
 
-  // Language Selector Interactions (Compact iOS List)
+  // Language Selector Interactions (Animated Collapsible Dropdown)
   function updateLangUi(lang) {
-    iosLangRows.forEach(row => {
-      row.classList.toggle('active', row.dataset.lang === lang);
+    if (currentLangLabel) {
+      currentLangLabel.textContent = t('languages.' + lang);
+    }
+    iosLangOptions.forEach(opt => {
+      const isActive = opt.dataset.lang === lang;
+      opt.classList.toggle('active', isActive);
+      opt.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
   }
 
-  iosLangRows.forEach(row => {
-    row.addEventListener('click', () => {
-      const chosenLang = row.dataset.lang;
-      if (!chosenLang || chosenLang === state.language) return;
+  if (langDropdownTrigger && langDropdown) {
+    langDropdownTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = langDropdown.classList.toggle('open');
+      langDropdownTrigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      AudioSystem.playTapSound();
+    });
+
+    // Close on click outside
+    document.addEventListener('click', (e) => {
+      if (langDropdown.classList.contains('open') && !langDropdown.contains(e.target)) {
+        langDropdown.classList.remove('open');
+        langDropdownTrigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && langDropdown.classList.contains('open')) {
+        langDropdown.classList.remove('open');
+        langDropdownTrigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  iosLangOptions.forEach(opt => {
+    opt.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const chosenLang = opt.dataset.lang;
+      if (!chosenLang) return;
+
       AudioSystem.playButtonPress();
+
+      // Smoothly close dropdown
+      if (langDropdown) {
+        langDropdown.classList.remove('open');
+        if (langDropdownTrigger) {
+          langDropdownTrigger.setAttribute('aria-expanded', 'false');
+        }
+      }
+
+      if (chosenLang === state.language) return;
+
       state.language = chosenLang;
       Storage.saveSettings(state);
       applyLanguage(chosenLang);
