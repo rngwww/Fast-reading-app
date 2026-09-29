@@ -1,7 +1,10 @@
-const CACHE_NAME = 'tachyon-v33';
+const CACHE_NAME = 'tachyon-v34';
 const ASSETS = [
   './',
   './index.html',
+  './hybrid.html',
+  './assets/css/hybrid.css?v=8',
+  './assets/js/hybrid-app.js?v=6',
   './assets/css/ios14.css?v=33',
   './assets/css/modern.css?v=28',
   './assets/js/modern-app.js?v=33',

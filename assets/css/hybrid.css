@@ -353,7 +353,7 @@ button:active {
   z-index: 1;
   max-width: 680px;
   margin: 0 auto;
-  padding-top: calc(8px + env(safe-area-inset-top, 0px));
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
   padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   padding-left: calc(16px + env(safe-area-inset-left, 0px));
   padding-right: calc(16px + env(safe-area-inset-right, 0px));
@@ -365,17 +365,10 @@ button:active {
 }
 
 /* --------------------------------------------------------------------------
-   6. iOS 14 Status Bar
+   6. iOS 14 Status Bar (Removed from UI)
    -------------------------------------------------------------------------- */
 .ios-status-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 6px 10px 6px;
-  font-size: 14px;
-  font-weight: 300;
-  color: var(--text-primary);
-  user-select: none;
+  display: none !important;
 }
 .ios-status-time {
   font-size: 14px;

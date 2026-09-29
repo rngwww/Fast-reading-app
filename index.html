@@ -19,13 +19,13 @@
     if ('caches' in window) {
       caches.keys().then(names => {
         for (const name of names) {
-          if (name !== 'tachyon-v32') caches.delete(name);
+          if (name !== 'tachyon-v34') caches.delete(name);
         }
       });
     }
   </script>
   <script src="assets/js/vendor/jszip.min.js"></script>
-  <link rel="stylesheet" href="assets/css/hybrid.css?v=7">
+  <link rel="stylesheet" href="assets/css/hybrid.css?v=8">
 </head>
 <body data-theme="obsidian">
 
@@ -44,28 +44,6 @@
   </div>
 
   <main class="modern-app" id="modernApp">
-    <!-- iOS 14 Status Bar -->
-    <div class="ios-status-bar" id="iosStatusBar">
-      <div class="ios-status-time" id="iosStatusTime">9:41</div>
-      <div class="ios-status-icons">
-        <svg class="ios-signal-icon" viewBox="0 0 17 11" width="17" height="11">
-          <rect x="0" y="8" width="3" height="3" rx="0.8" fill="currentColor"/>
-          <rect x="4.5" y="5.5" width="3" height="5.5" rx="0.8" fill="currentColor"/>
-          <rect x="9" y="3" width="3" height="8" rx="0.8" fill="currentColor"/>
-          <rect x="13.5" y="0.5" width="3" height="10.5" rx="0.8" fill="currentColor"/>
-        </svg>
-        <svg class="ios-wifi-icon" viewBox="0 0 16 12" width="16" height="12" fill="currentColor">
-          <path d="M8 9.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm-4.24-2.83a6 6 0 0 1 8.48 0l-1.41 1.41a4 4 0 0 0-5.66 0L3.76 6.67zm-2.83-2.83a10 10 0 0 1 14.14 0l-1.41 1.41a8 8 0 0 0-11.32 0L.93 3.84z"/>
-        </svg>
-        <div class="ios-battery-icon">
-          <div class="ios-battery-pill">
-            <div class="ios-battery-level"></div>
-          </div>
-          <div class="ios-battery-nipple"></div>
-        </div>
-      </div>
-    </div>
-
     <!-- Top Header Bar -->
     <header class="top-bar">
       <div class="brand-lockup" id="brandLockup" title="About TACHYON">
@@ -893,6 +871,6 @@
   </div>
 
   <!-- Main Modular Hybrid Application Script -->
-  <script type="module" src="assets/js/hybrid-app.js?v=5"></script>
+  <script type="module" src="assets/js/hybrid-app.js?v=6"></script>
 </body>
 </html>
