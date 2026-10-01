@@ -1624,6 +1624,13 @@ async function initApp() {
         const cleaned = text.replace(/\s+/g, ' ').trim();
         if (cleaned.length > 0) {
           fullTextParts.push(cleaned);
+          // Memory safety: For free preview, stop extracting once we have enough words
+          if (!state.isPro) {
+            const approxWords = fullTextParts.reduce((acc, part) => acc + part.split(/\s+/).length, 0);
+            if (approxWords >= 700) {
+              break;
+            }
+          }
         }
       } catch (err) {
         console.warn("Failed extracting chapter from EPUB:", filePath, err);
