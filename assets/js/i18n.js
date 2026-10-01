@@ -113,6 +113,9 @@ export const translations = {
       focalColor: 'Focal Color',
       membership: 'Membership',
       togglePrime: 'Toggle Prime',
+      appUpdate: 'App Update',
+      appUpdateDesc: 'Clear cache and load latest version',
+      forceUpdate: 'Update',
       language: 'Language'
     },
     languages: {
@@ -304,6 +307,9 @@ export const translations = {
       focalColor: '视线焦点色',
       membership: '会员计划',
       togglePrime: '切换 Prime',
+      appUpdate: '应用更新',
+      appUpdateDesc: '清除缓存并加载最新版本',
+      forceUpdate: '立即更新',
       language: '界面语言'
     },
     languages: {
@@ -495,6 +501,9 @@ export const translations = {
       focalColor: 'Color Focal',
       membership: 'Membresía',
       togglePrime: 'Alternar Prime',
+      appUpdate: 'Actualización',
+      appUpdateDesc: 'Limpiar caché y cargar última versión',
+      forceUpdate: 'Actualizar',
       language: 'Idioma'
     },
     languages: {
@@ -686,6 +695,9 @@ export const translations = {
       focalColor: 'Fokusfarbe',
       membership: 'Mitgliedschaft',
       togglePrime: 'Prime umschalten',
+      appUpdate: 'App-Aktualisierung',
+      appUpdateDesc: 'Cache leeren und neueste Version laden',
+      forceUpdate: 'Aktualisieren',
       language: 'Sprache'
     },
     languages: {
@@ -877,6 +889,9 @@ export const translations = {
       focalColor: 'Couleur Focale',
       membership: 'Abonnement',
       togglePrime: 'Basculer Prime',
+      appUpdate: 'Mise à jour',
+      appUpdateDesc: "Vider le cache et recharger la dernière version de l'application",
+      forceUpdate: 'Mettre à jour',
       language: 'Langue'
     },
     languages: {

@@ -167,7 +167,7 @@ async function initApp() {
     masterVolume: 0.3,
     isMuted: false,
     isPro: false,
-    soundProfile: 'organic_pop',
+    soundProfile: 'haptic',
     colorPalette: 'white',
     activeDocId: null,
     rsvpFont: 'sans',
@@ -239,40 +239,12 @@ async function initApp() {
   // Theming, Font & Accent System
   // --------------------------------------------------------------------------
   function updateFocalColorAvailability() {
-    const theme = state.appTheme || 'obsidian';
-    const isDarkTheme = (theme === 'obsidian' || theme === 'graphite');
-    const isLightTheme = (theme === 'vellum');
-
-    // Rule: Cannot select black focal color with obsidian or graphite
-    // Rule: Cannot select white focal color with Light mode (vellum)
     accentDots.forEach(dot => {
+      dot.classList.remove('disabled');
+      dot.removeAttribute('aria-disabled');
       const color = dot.dataset.color;
-      let disabled = false;
-
-      if (color === 'black' && isDarkTheme) {
-        disabled = true;
-      } else if (color === 'white' && isLightTheme) {
-        disabled = true;
-      }
-
-      dot.classList.toggle('disabled', disabled);
-      if (disabled) {
-        dot.setAttribute('aria-disabled', 'true');
-        dot.setAttribute('title', color === 'black' ? 'Black unavailable in dark themes' : 'White unavailable in light theme');
-      } else {
-        dot.removeAttribute('aria-disabled');
-        dot.setAttribute('title', color.charAt(0).toUpperCase() + color.slice(1));
-      }
+      dot.setAttribute('title', color ? color.charAt(0).toUpperCase() + color.slice(1) : '');
     });
-
-    // Auto-adjust if the user's active color clashes with the newly chosen theme
-    if (state.colorPalette === 'black' && isDarkTheme) {
-      state.colorPalette = 'white';
-      Storage.saveSettings(state);
-    } else if (state.colorPalette === 'white' && isLightTheme) {
-      state.colorPalette = 'black';
-      Storage.saveSettings(state);
-    }
   }
 
   function applyTheme() {
@@ -297,19 +269,12 @@ async function initApp() {
     });
   }
 
-  function applyFont(fontKey) {
+  function applyFont(_fontKey) {
     const root = document.documentElement;
-    let selectedFont = 'var(--font-main)';
-    if (fontKey === 'serif') selectedFont = 'var(--font-serif)';
-    if (fontKey === 'mono') selectedFont = 'var(--font-mono)';
-
-    root.style.setProperty('--rsvp-font', selectedFont);
-    state.rsvpFont = fontKey;
+    // Always lock reading font to Helvetica Neue (system sans-serif)
+    root.style.setProperty('--rsvp-font', 'var(--font-main)');
+    state.rsvpFont = 'sans';
     Storage.saveSettings(state);
-
-    fontChoiceBtns.forEach(b => {
-      b.classList.toggle('active', b.dataset.font === fontKey);
-    });
   }
 
   function applyFontSize(sizeKey) {
@@ -663,7 +628,7 @@ async function initApp() {
         else if (step === 2) countdownAffirmation.textContent = t('reader.focusCountdown');
         else if (step === 1) countdownAffirmation.textContent = t('reader.readCountdown');
       }
-      AudioSystem.playCountdownBeep(step === 1);
+      AudioSystem.playCountdownStep(step);
     };
 
     updateCountdownView(3);
@@ -675,6 +640,7 @@ async function initApp() {
       } else {
         clearInterval(countdownIntervalId);
         countdownIntervalId = null;
+        AudioSystem.playCountdownLaunch();
         setTimeout(() => {
           isCountingDown = false;
           countdownHud.classList.remove('active');
@@ -1019,6 +985,10 @@ async function initApp() {
     });
   }
 
+  textInput.addEventListener('keydown', (e) => {
+    AudioSystem.playKey(e);
+  });
+
   textInput.addEventListener('input', async () => {
     updateReadingEstimate();
     if (textInput.value.trim() !== '') {
@@ -1312,6 +1282,7 @@ async function initApp() {
     }
 
     if (bookId !== 'scratchpad') {
+      AudioSystem.playBookLoad();
       textInput.style.display = 'none';
       if (scratchpadWrap) scratchpadWrap.style.display = 'none';
       stopQuoteRotation();
@@ -1871,8 +1842,9 @@ async function initApp() {
 
   themePickerCards.forEach(card => {
     card.addEventListener('click', () => {
-      AudioSystem.playButtonPress();
-      state.appTheme = card.dataset.theme;
+      const theme = card.dataset.theme;
+      AudioSystem.playThemeSound(theme);
+      state.appTheme = theme;
       Storage.saveSettings(state);
       applyTheme();
     });
@@ -1881,23 +1853,42 @@ async function initApp() {
   accentDots.forEach(dot => {
     dot.addEventListener('click', () => {
       const color = dot.dataset.color;
-      const theme = state.appTheme || 'obsidian';
-      const isDarkTheme = (theme === 'obsidian' || theme === 'graphite');
-      const isLightTheme = (theme === 'vellum');
-
-      if (color === 'black' && isDarkTheme) {
-        return; // Prohibited: black with dark theme
-      }
-      if (color === 'white' && isLightTheme) {
-        return; // Prohibited: white with Light mode
-      }
-
-      AudioSystem.playButtonPress();
+      AudioSystem.playSelectionSound();
       state.colorPalette = color;
       Storage.saveSettings(state);
       applyTheme();
     });
   });
+
+  // Force App Update (Unregister Service Worker, Clear Caches, Hard Reload)
+  const btnForceUpdate = document.getElementById('btnForceUpdate');
+  if (btnForceUpdate) {
+    btnForceUpdate.addEventListener('click', async () => {
+      AudioSystem.playTapSound();
+      btnForceUpdate.textContent = '...';
+      btnForceUpdate.style.opacity = '0.7';
+      btnForceUpdate.style.pointerEvents = 'none';
+
+      try {
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (const reg of registrations) {
+            await reg.unregister();
+          }
+        }
+        if ('caches' in window) {
+          const cacheKeys = await caches.keys();
+          for (const key of cacheKeys) {
+            await caches.delete(key);
+          }
+        }
+      } catch (err) {
+        console.warn('Force update cache clear error:', err);
+      }
+
+      window.location.href = window.location.pathname + '?v=' + Date.now();
+    });
+  }
 
   // Language Selector Interactions (Animated Collapsible Dropdown)
   function updateLangUi(lang) {
@@ -2280,7 +2271,17 @@ async function initApp() {
   }
 
   // Audio setup after settings loaded
-  AudioSystem.profile = state.soundProfile || 'organic_pop';
+  const normProfile = (p) => {
+    if (p === 'organic_pop') return 'haptic';
+    if (p === 'crystal_drop') return 'ceramic';
+    if (p === 'mechanical_click') return 'mechanical';
+    if (p === 'soft_marimba') return 'wood';
+    if (p === 'deep_focus') return 'pulse';
+    if (p === 'warm_vinyl') return 'vinyl';
+    return p || 'haptic';
+  };
+  state.soundProfile = normProfile(state.soundProfile);
+  AudioSystem.profile = state.soundProfile;
   AudioSystem.volume = state.masterVolume !== undefined ? state.masterVolume : 0.3;
   AudioSystem.isMuted = state.isMuted || false;
   AudioSystem.uiSoundsEnabled = state.uiSoundsEnabled !== false;
@@ -2296,7 +2297,7 @@ async function initApp() {
 
   // Active sound chip setup
   soundChips.forEach(c => {
-    c.classList.toggle('active', c.dataset.profile === (state.soundProfile || 'organic_pop'));
+    c.classList.toggle('active', c.dataset.profile === state.soundProfile);
   });
 
   // Initial nav pill positioning

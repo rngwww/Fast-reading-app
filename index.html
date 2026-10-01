@@ -413,50 +413,6 @@
         </div>
       </section>
 
-      <!-- Reading Font Selector -->
-      <section class="settings-section">
-        <div class="settings-group-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
-          <span data-i18n="settings.typography">Typography</span>
-        </div>
-        <div class="font-selector-row">
-          <button class="font-choice-btn active" data-font="sans" style="font-family: var(--font-main);">
-            <strong data-i18n="settings.fontSans">Helvetica Neue</strong>
-            <small data-i18n="settings.fontSansSub">Ultra Light</small>
-          </button>
-          <button class="font-choice-btn" data-font="serif" style="font-family: var(--font-serif);">
-            <strong data-i18n="settings.fontSerif">New York</strong>
-            <small data-i18n="settings.fontSerifSub">Serif</small>
-          </button>
-          <button class="font-choice-btn" data-font="mono" style="font-family: var(--font-mono);">
-            <strong data-i18n="settings.fontMono">SF Mono</strong>
-            <small data-i18n="settings.fontMonoSub">Mono</small>
-          </button>
-        </div>
-
-        <!-- Dynamic Word Size (Small, Medium, Large, Extra Large) -->
-        <div style="margin-top: 10px;">
-          <div class="font-size-segmented-row" id="fontSizeSegmented">
-            <button class="font-size-btn" data-size="sm" title="Small (38px)">
-              <span class="font-size-glyph" style="font-size: 13px;">A</span>
-              <span class="font-size-label" data-i18n="settings.sizeSmall">Small</span>
-            </button>
-            <button class="font-size-btn active" data-size="md" title="Medium (48px)">
-              <span class="font-size-glyph" style="font-size: 16px;">Aa</span>
-              <span class="font-size-label" data-i18n="settings.sizeMedium">Medium</span>
-            </button>
-            <button class="font-size-btn" data-size="lg" title="Large (60px)">
-              <span class="font-size-glyph" style="font-size: 20px;">Aa</span>
-              <span class="font-size-label" data-i18n="settings.sizeLarge">Large</span>
-            </button>
-            <button class="font-size-btn" data-size="xl" title="Extra Large (74px)">
-              <span class="font-size-glyph" style="font-size: 24px;">AA</span>
-              <span class="font-size-label" data-i18n="settings.sizeExtra">Extra</span>
-            </button>
-          </div>
-        </div>
-      </section>
-
       <!-- Audio Feedback Settings -->
       <section class="settings-section">
         <div class="settings-group-title">
@@ -464,34 +420,28 @@
           <span data-i18n="settings.soundProfile">Sound Profile</span>
         </div>
         <div class="sound-chips-grid">
-          <div class="sound-chip active" data-profile="organic_pop">
+          <div class="sound-chip active" data-profile="haptic">
             <span data-i18n="settings.soundHaptic">Haptic</span>
-            <small data-i18n="settings.soundHapticSub">Click</small>
             <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
           </div>
-          <div class="sound-chip" data-profile="crystal_drop">
+          <div class="sound-chip" data-profile="ceramic">
             <span data-i18n="settings.soundCeramic">Ceramic</span>
-            <small data-i18n="settings.soundCeramicSub">Tap</small>
             <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
           </div>
-          <div class="sound-chip" data-profile="mechanical_click">
+          <div class="sound-chip" data-profile="mechanical">
             <span data-i18n="settings.soundMechanical">Mechanical</span>
-            <small data-i18n="settings.soundMechanicalSub">Snap</small>
             <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
           </div>
-          <div class="sound-chip" data-profile="soft_marimba">
+          <div class="sound-chip" data-profile="wood">
             <span data-i18n="settings.soundWood">Wood</span>
-            <small data-i18n="settings.soundWoodSub">Block</small>
             <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
           </div>
-          <div class="sound-chip" data-profile="deep_focus">
+          <div class="sound-chip" data-profile="pulse">
             <span data-i18n="settings.soundPulse">Pulse</span>
-            <small data-i18n="settings.soundPulseSub">Pulse</small>
             <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
           </div>
-          <div class="sound-chip" data-profile="warm_vinyl">
+          <div class="sound-chip" data-profile="vinyl">
             <span data-i18n="settings.soundVinyl">Vinyl</span>
-            <small data-i18n="settings.soundVinylSub">Analog</small>
             <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
           </div>
         </div>
@@ -508,28 +458,24 @@
         </div>
       </section>
 
-      <!-- Appearance: Themes -->
+      <!-- Appearance: Themes (Horizontal Slideable Menu) -->
       <section class="settings-section">
         <div class="settings-group-title">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20"></path></svg>
           <span data-i18n="settings.appearance">Appearance</span>
         </div>
-        <div class="themes-grid">
+        <div class="themes-grid" id="themesGrid">
           <div class="theme-picker-card active" data-theme="obsidian">
-            <div class="theme-swatch-box" style="background: #000000; color: #fff;">Aa</div>
-            <div class="theme-title" data-i18n="settings.themeObsidian">Obsidian</div>
+            <span class="theme-title" data-i18n="settings.themeObsidian">Obsidian</span>
           </div>
           <div class="theme-picker-card" data-theme="graphite">
-            <div class="theme-swatch-box" style="background: #141416; color: #fff;">Aa</div>
-            <div class="theme-title" data-i18n="settings.themeGraphite">Graphite</div>
+            <span class="theme-title" data-i18n="settings.themeGraphite">Graphite</span>
           </div>
           <div class="theme-picker-card" data-theme="parchment">
-            <div class="theme-swatch-box" style="background: #F5EEDB; color: #342718;">Aa</div>
-            <div class="theme-title" data-i18n="settings.themeParchment">Parchment</div>
+            <span class="theme-title" data-i18n="settings.themeParchment">Parchment</span>
           </div>
           <div class="theme-picker-card" data-theme="vellum">
-            <div class="theme-swatch-box" style="background: #F8F9FA; color: #111827;">Aa</div>
-            <div class="theme-title" data-i18n="settings.themeLight">Light</div>
+            <span class="theme-title" data-i18n="settings.themeLight">Light</span>
           </div>
         </div>
       </section>
@@ -561,6 +507,17 @@
             <div class="tier-badge" id="tierStatusBadge" style="color: var(--text-secondary); margin-top: 2px;">Free Starter</div>
           </div>
           <button class="btn-tier-switch" id="btnSwitchTier" data-i18n="settings.togglePrime">Toggle Prime</button>
+        </div>
+      </section>
+
+      <!-- App Updates -->
+      <section class="settings-section">
+        <div class="tier-toggle-row">
+          <div>
+            <div style="font-size: 14px; font-weight: 700;" data-i18n="settings.appUpdate">App Update</div>
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;" data-i18n="settings.appUpdateDesc">Refresh caches and load latest version</div>
+          </div>
+          <button class="btn-tier-switch" id="btnForceUpdate" data-i18n="settings.forceUpdate">Update</button>
         </div>
       </section>
     </div>
