@@ -54,7 +54,7 @@ export const translations = {
       wordsEstimate: '{count} words',
       wordsEstimateMin: '{count} words (~{min} min read)',
       wordOfScrubber: 'Word {current} of {total}',
-      placeholder: 'Paste or type any text to read at superhuman speeds...'
+      placeholder: ''
     },
     library: {
       title: 'Library',
@@ -249,7 +249,7 @@ export const translations = {
       wordsEstimate: '{count} 个词',
       wordsEstimateMin: '{count} 个词（约 {min} 分钟）',
       wordOfScrubber: '第 {current} 词 / 共 {total} 词',
-      placeholder: '在此粘贴或输入任何文字，体验超越思维的飞速阅读...'
+      placeholder: ''
     },
     library: {
       title: '书库',
@@ -444,7 +444,7 @@ export const translations = {
       wordsEstimate: '{count} palabras',
       wordsEstimateMin: '{count} palabras (~{min} min lectura)',
       wordOfScrubber: 'Palabra {current} de {total}',
-      placeholder: 'Pega o escribe cualquier texto para leer a velocidad sobrehumana...'
+      placeholder: ''
     },
     library: {
       title: 'Biblioteca',
@@ -639,7 +639,7 @@ export const translations = {
       wordsEstimate: '{count} Wörter',
       wordsEstimateMin: '{count} Wörter (~{min} Min. Lesezeit)',
       wordOfScrubber: 'Wort {current} von {total}',
-      placeholder: 'Text hier einfügen oder tippen, um blitzschnell zu lesen...'
+      placeholder: ''
     },
     library: {
       title: 'Bibliothek',
@@ -834,7 +834,7 @@ export const translations = {
       wordsEstimate: '{count} mots',
       wordsEstimateMin: '{count} mots (~{min} min de lecture)',
       wordOfScrubber: 'Mot {current} sur {total}',
-      placeholder: 'Collez ou écrivez du texte ici pour lire à une vitesse foudroyante...'
+      placeholder: ''
     },
     library: {
       title: 'Bibliothèque',

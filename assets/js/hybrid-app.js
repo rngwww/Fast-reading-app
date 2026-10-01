@@ -81,6 +81,7 @@ async function initApp() {
 
   // Text Input Panel & Motivational Quotes Overlay
   const textInput = document.getElementById('textInput');
+  if (textInput) textInput.placeholder = '';
   const quoteOverlay = document.getElementById('quoteOverlay');
   const quoteText = document.getElementById('quoteText');
   const btnPasteClipboard = document.getElementById('btnPasteClipboard');
@@ -363,10 +364,15 @@ async function initApp() {
   }
 
   function applyTierMode() {
+    const primeUpgradeView = document.getElementById('primeUpgradeView');
+    const primeActiveView = document.getElementById('primeActiveView');
+
     if (state.isPro) {
       tierStatusBadge.textContent = 'TACHYON PRIME';
       tierStatusBadge.style.color = '#FFFFFF';
       if (tierWordLimitLabel) tierWordLimitLabel.textContent = 'Unlimited (Prime)';
+      if (primeUpgradeView) primeUpgradeView.style.display = 'none';
+      if (primeActiveView) primeActiveView.style.display = 'flex';
       if (btnStartTrial) {
         btnStartTrial.textContent = t('prime.activeMember');
         btnStartTrial.style.opacity = '0.6';
@@ -376,6 +382,8 @@ async function initApp() {
       tierStatusBadge.textContent = 'Free Starter';
       tierStatusBadge.style.color = 'var(--text-secondary)';
       if (tierWordLimitLabel) tierWordLimitLabel.textContent = '600 Word Limit (Free)';
+      if (primeUpgradeView) primeUpgradeView.style.display = 'flex';
+      if (primeActiveView) primeActiveView.style.display = 'none';
       if (btnStartTrial) {
         btnStartTrial.textContent = t('prime.startTrial');
         btnStartTrial.style.opacity = '1';
@@ -1247,7 +1255,6 @@ async function initApp() {
           <div class="book-info">
             <div class="book-title-row">
               <span class="book-title">${escapeHtml(book.title)}</span>
-              <span class="book-tag-pill" style="--tag-color: var(--palette-${book.color || 'blue'});">${escapeHtml(book.color || 'blue')}</span>
               ${recallBadgeHtml}
             </div>
             <div class="book-meta">
@@ -2079,22 +2086,45 @@ async function initApp() {
 
       try {
         if ('serviceWorker' in navigator) {
-          const registrations = await navigator.serviceWorker.getRegistrations();
+          const registrations = await Promise.race([
+            navigator.serviceWorker.getRegistrations(),
+            new Promise(resolve => setTimeout(() => resolve([]), 1200))
+          ]);
           for (const reg of registrations) {
-            await reg.unregister();
+            try {
+              await reg.unregister();
+            } catch (e) {
+              console.warn('SW unregister error:', e);
+            }
           }
         }
         if ('caches' in window) {
-          const cacheKeys = await caches.keys();
+          const cacheKeys = await Promise.race([
+            caches.keys(),
+            new Promise(resolve => setTimeout(() => resolve([]), 1200))
+          ]);
           for (const key of cacheKeys) {
-            await caches.delete(key);
+            try {
+              await caches.delete(key);
+            } catch (e) {
+              console.warn('Cache delete error:', e);
+            }
           }
         }
       } catch (err) {
         console.warn('Force update cache clear error:', err);
       }
 
-      window.location.href = window.location.pathname + '?v=' + Date.now();
+      // Hard reload with cache busting
+      setTimeout(() => {
+        try {
+          const url = new URL(window.location.href);
+          url.searchParams.set('v', Date.now().toString());
+          window.location.replace(url.toString());
+        } catch {
+          window.location.reload();
+        }
+      }, 200);
     });
   }
 
@@ -2203,6 +2233,15 @@ async function initApp() {
         const readerTab = document.querySelector('[data-target="tabReader"]');
         if (readerTab) readerTab.click();
       }, 800);
+    });
+  }
+
+  const btnManagePrime = document.getElementById('btnManagePrime');
+  if (btnManagePrime) {
+    btnManagePrime.addEventListener('click', () => {
+      AudioSystem.playTapSound();
+      const readerTab = document.querySelector('[data-target="tabReader"]');
+      if (readerTab) readerTab.click();
     });
   }
 

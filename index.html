@@ -304,7 +304,7 @@
           <div class="scratchpad-quote-overlay" id="quoteOverlay" aria-hidden="true">
             <div class="quote-text" id="quoteText">The more that you read, the more things you will know.</div>
           </div>
-          <textarea class="modern-textarea" id="textInput" placeholder="" aria-label="Input text for reading" data-i18n-placeholder="reader.placeholder"></textarea>
+          <textarea class="modern-textarea" id="textInput" placeholder="" aria-label="Input text for reading"></textarea>
         </div>
 
         <div class="input-footer" id="inputFooter">
@@ -336,7 +336,8 @@
 
     <!-- TAB 3: PRIME / PREMIUM -->
     <div class="tab-panel" id="tabPrime">
-      <div class="prime-card-hero">
+      <!-- Upgrade View (Visible when on Free Plan) -->
+      <div class="prime-card-hero" id="primeUpgradeView">
         <span class="prime-badge" data-i18n="prime.badge">Prime</span>
         <h2 data-i18n="prime.title">Unlimited Reading</h2>
         <p data-i18n="prime.subtitle">Unlock books of any length, offline library storage, and custom themes.</p>
@@ -354,6 +355,82 @@
 
         <button class="btn-save" id="btnStartTrial" style="width: 100%; max-width: 320px; padding: 14px; font-size: 15px;" data-i18n="prime.startTrial">
           Start Free Trial
+        </button>
+      </div>
+
+      <!-- Active Prime Benefits Showcase (Visible when Prime is unlocked) -->
+      <div class="prime-card-hero" id="primeActiveView" style="display: none;">
+        <div class="prime-active-badge">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span>TACHYON PRIME ACTIVE</span>
+        </div>
+        <h2>All Features Unlocked</h2>
+        <p>You have full, unrestricted access to the complete TACHYON speed-reading suite.</p>
+
+        <div class="prime-features-grid">
+          <div class="prime-feature-item">
+            <div class="prime-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            </div>
+            <div class="prime-feature-text">
+              <strong>Unlimited Book & Text Length</strong>
+              <span>Import full novels, essays, and documents of any size with zero word limits.</span>
+            </div>
+          </div>
+
+          <div class="prime-feature-item">
+            <div class="prime-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+            </div>
+            <div class="prime-feature-text">
+              <strong>All 9 Focal Accent Colors</strong>
+              <span>Full color customization for maximum focal contrast and reading comfort.</span>
+            </div>
+          </div>
+
+          <div class="prime-feature-item">
+            <div class="prime-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20"></path></svg>
+            </div>
+            <div class="prime-feature-text">
+              <strong>All 4 Cinematic Themes</strong>
+              <span>Dark, Light, Graphite, and Parchment themes with ambient glass glow.</span>
+            </div>
+          </div>
+
+          <div class="prime-feature-item">
+            <div class="prime-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            </div>
+            <div class="prime-feature-text">
+              <strong>All Synthetic Sound Profiles</strong>
+              <span>Organic, Mechanical, Wood, Pulse, and Vinyl clicks for sensory rhythm.</span>
+            </div>
+          </div>
+
+          <div class="prime-feature-item">
+            <div class="prime-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+            </div>
+            <div class="prime-feature-text">
+              <strong>Unlimited Library Capacity</strong>
+              <span>Save and manage your entire reading catalog with zero book count limits.</span>
+            </div>
+          </div>
+
+          <div class="prime-feature-item">
+            <div class="prime-feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </div>
+            <div class="prime-feature-text">
+              <strong>Retention & Streak Tracking</strong>
+              <span>Track recall ratings and daily reading habits across all your books.</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-save" id="btnManagePrime" style="width: 100%; max-width: 320px; padding: 13px; font-size: 14px; margin-top: 6px; opacity: 0.85;">
+          Prime Membership Active
         </button>
       </div>
     </div>
@@ -430,22 +507,18 @@
           </div>
           <div class="sound-chip" data-profile="mechanical">
             <span data-i18n="settings.soundMechanical">Mechanical</span>
-            <span class="sound-lock-badge">PRIME</span>
             <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
           </div>
           <div class="sound-chip" data-profile="wood">
             <span data-i18n="settings.soundWood">Wood</span>
-            <span class="sound-lock-badge">PRIME</span>
             <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
           </div>
           <div class="sound-chip" data-profile="pulse">
             <span data-i18n="settings.soundPulse">Pulse</span>
-            <span class="sound-lock-badge">PRIME</span>
             <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
           </div>
           <div class="sound-chip" data-profile="vinyl">
             <span data-i18n="settings.soundVinyl">Vinyl</span>
-            <span class="sound-lock-badge">PRIME</span>
             <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
           </div>
         </div>
@@ -474,11 +547,9 @@
           </div>
           <div class="theme-picker-card" data-theme="graphite">
             <span class="theme-title" data-i18n="settings.themeGraphite">Graphite</span>
-            <span class="theme-lock-badge">PRIME</span>
           </div>
           <div class="theme-picker-card" data-theme="parchment">
             <span class="theme-title" data-i18n="settings.themeParchment">Parchment</span>
-            <span class="theme-lock-badge">PRIME</span>
           </div>
           <div class="theme-picker-card" data-theme="vellum">
             <span class="theme-title" data-i18n="settings.themeLight">Light</span>
