@@ -238,13 +238,60 @@ async function initApp() {
   // --------------------------------------------------------------------------
   // Theming, Font & Accent System
   // --------------------------------------------------------------------------
+  // Theming, Font & Accent System
+  // --------------------------------------------------------------------------
   function updateFocalColorAvailability() {
+    const theme = state.appTheme || 'obsidian';
+    const isLight = (theme === 'vellum' || theme === 'parchment');
+    const isDark = (theme === 'obsidian' || theme === 'graphite');
+
     accentDots.forEach(dot => {
-      dot.classList.remove('disabled');
+      dot.classList.remove('disabled', 'locked');
       dot.removeAttribute('aria-disabled');
       const color = dot.dataset.color;
-      dot.setAttribute('title', color ? color.charAt(0).toUpperCase() + color.slice(1) : '');
+
+      // Free plan: Only red is available
+      if (!state.isPro) {
+        if (color !== 'red') {
+          dot.classList.add('locked');
+          dot.setAttribute('title', `${color.charAt(0).toUpperCase() + color.slice(1)} (Prime Only)`);
+        } else {
+          dot.setAttribute('title', 'Red (Default)');
+        }
+        return;
+      }
+
+      // Prime plan: Contrast Guard
+      if (isLight && color === 'white') {
+        dot.classList.add('disabled');
+        dot.setAttribute('aria-disabled', 'true');
+        dot.setAttribute('title', 'White disabled in Light themes for readability');
+      } else if (isDark && color === 'black') {
+        dot.classList.add('disabled');
+        dot.setAttribute('aria-disabled', 'true');
+        dot.setAttribute('title', 'Black disabled in Dark themes for readability');
+      } else {
+        dot.setAttribute('title', color ? color.charAt(0).toUpperCase() + color.slice(1) : '');
+      }
     });
+
+    // Enforce active palette rules
+    if (!state.isPro) {
+      if (state.colorPalette !== 'red') {
+        state.colorPalette = 'red';
+        Storage.saveSettings(state);
+      }
+    } else {
+      if (isLight && state.colorPalette === 'white') {
+        state.colorPalette = 'red';
+        Storage.saveSettings(state);
+        triggerGestureFeedback('right', 'Focal color set to Red for contrast');
+      } else if (isDark && state.colorPalette === 'black') {
+        state.colorPalette = 'red';
+        Storage.saveSettings(state);
+        triggerGestureFeedback('right', 'Focal color set to Red for contrast');
+      }
+    }
   }
 
   function applyTheme() {
@@ -253,7 +300,7 @@ async function initApp() {
 
     updateFocalColorAvailability();
 
-    const accent = state.colorPalette || (theme === 'vellum' ? 'black' : 'white');
+    const accent = state.colorPalette || 'red';
 
     document.body.setAttribute('data-theme', theme);
     root.style.setProperty('--accent', `var(--palette-${accent})`);
@@ -261,11 +308,27 @@ async function initApp() {
     root.style.setProperty('--accent-soft', `color-mix(in srgb, var(--palette-${accent}) 14%, transparent)`);
 
     themePickerCards.forEach(card => {
-      card.classList.toggle('active', card.dataset.theme === theme);
+      const cardTheme = card.dataset.theme;
+      card.classList.toggle('active', cardTheme === theme);
+      if (!state.isPro && (cardTheme === 'graphite' || cardTheme === 'parchment')) {
+        card.classList.add('locked');
+      } else {
+        card.classList.remove('locked');
+      }
     });
 
     accentDots.forEach(dot => {
       dot.classList.toggle('active', dot.dataset.color === accent);
+    });
+
+    soundChips.forEach(chip => {
+      const prof = chip.dataset.profile;
+      chip.classList.toggle('active', prof === state.soundProfile);
+      if (!state.isPro && prof !== 'organic_pop') {
+        chip.classList.add('locked');
+      } else {
+        chip.classList.remove('locked');
+      }
     });
   }
 
@@ -303,22 +366,39 @@ async function initApp() {
     if (state.isPro) {
       tierStatusBadge.textContent = 'TACHYON PRIME';
       tierStatusBadge.style.color = '#FFFFFF';
-      if (tierWordLimitLabel) tierWordLimitLabel.textContent = t('reader.unlimitedPrime');
+      if (tierWordLimitLabel) tierWordLimitLabel.textContent = 'Unlimited (Prime)';
       if (btnStartTrial) {
         btnStartTrial.textContent = t('prime.activeMember');
         btnStartTrial.style.opacity = '0.6';
         btnStartTrial.style.pointerEvents = 'none';
       }
     } else {
-      tierStatusBadge.textContent = t('reader.freeStarter');
+      tierStatusBadge.textContent = 'Free Starter';
       tierStatusBadge.style.color = 'var(--text-secondary)';
-      if (tierWordLimitLabel) tierWordLimitLabel.textContent = t('reader.freeStarter');
+      if (tierWordLimitLabel) tierWordLimitLabel.textContent = '600 Word Limit (Free)';
       if (btnStartTrial) {
         btnStartTrial.textContent = t('prime.startTrial');
         btnStartTrial.style.opacity = '1';
         btnStartTrial.style.pointerEvents = 'auto';
       }
+
+      // Enforce Free Tier restrictions
+      if (state.colorPalette !== 'red') {
+        state.colorPalette = 'red';
+        Storage.saveSettings(state);
+      }
+      if (state.appTheme === 'graphite' || state.appTheme === 'parchment') {
+        state.appTheme = 'obsidian';
+        Storage.saveSettings(state);
+      }
+      if (state.soundProfile !== 'organic_pop') {
+        state.soundProfile = 'organic_pop';
+        AudioSystem.profile = 'organic_pop';
+        Storage.saveSettings(state);
+      }
     }
+    updateFocalColorAvailability();
+    applyTheme();
   }
 
   function updateUiSoundsBtn() {
@@ -479,7 +559,7 @@ async function initApp() {
     if (!isPlaying || !currentBookMeta) return;
 
     if (currentBookMeta.currentIndex >= currentBookMeta.totalWords) {
-      await stop();
+      await stop({ skipComprehension: true });
       showCompletionModal();
       return;
     }
@@ -575,7 +655,7 @@ async function initApp() {
     tick();
   }
 
-  async function stop() {
+  async function stop(options = {}) {
     isPlaying = false;
     isWarmingUp = false;
     clearTimeout(timerId);
@@ -599,8 +679,8 @@ async function initApp() {
       await Storage.updateBookProgress(currentBookMeta.id, currentBookMeta.currentIndex);
     }
 
-    // Trigger Comprehension Check if user read at least 40 words
-    if (wordsReadThisSprint >= 40 && (!completionModal || !completionModal.classList.contains('active'))) {
+    // Trigger Comprehension Check if user read at least 40 words and not skipping (e.g. completion modal will show it)
+    if (!options.skipComprehension && wordsReadThisSprint >= 40 && (!completionModal || !completionModal.classList.contains('active'))) {
       setTimeout(() => {
         openComprehensionModal(wordsReadThisSprint, state.wpm);
       }, 400);
@@ -887,21 +967,26 @@ async function initApp() {
       return;
     }
     const wordsCount = RSVP.parseText(text).length;
+    const effectiveCount = (!state.isPro && wordsCount > 600) ? 600 : wordsCount;
     const wpm = state.wpm || 350;
-    const totalSeconds = Math.ceil((wordsCount / wpm) * 60);
+    const totalSeconds = Math.ceil((effectiveCount / wpm) * 60);
+    const suffix = (!state.isPro && wordsCount > 600) ? ' (600 max - Free)' : '';
 
     if (totalSeconds < 60) {
-      readingEstimate.textContent = t('reader.wordsEstimate', { count: wordsCount.toLocaleString() });
+      readingEstimate.textContent = `${effectiveCount.toLocaleString()} words${suffix}`;
     } else {
       const mins = Math.max(1, Math.round(totalSeconds / 60));
-      readingEstimate.textContent = t('reader.wordsEstimateMin', { count: wordsCount.toLocaleString(), min: mins });
+      readingEstimate.textContent = `${effectiveCount.toLocaleString()} words (~${mins}m)${suffix}`;
     }
   }
 
   async function prepareScratchpad() {
     const text = textInput.value.trim() || defaultWelcomeText;
-    const words = RSVP.parseText(text, defaultWelcomeText);
-    await Storage.saveBook('scratchpad', 'Scratchpad', 'User Input', words, state.colorPalette || 'white');
+    let words = RSVP.parseText(text, defaultWelcomeText);
+    if (!state.isPro && words.length > 600) {
+      words = words.slice(0, 600);
+    }
+    await Storage.saveBook('scratchpad', 'Scratchpad', 'User Input', words, state.colorPalette || 'red');
     currentBookMeta = await Storage.getBookMeta('scratchpad');
     currentChunkIndex = 0;
     currentChunkWords = await Storage.getBookChunk('scratchpad', 0);
@@ -1124,6 +1209,30 @@ async function initApp() {
       const isComplete = pct >= 100;
       const ringOffset = 100.5 - (100.5 * (pct / 100));
 
+      let recallBadgeHtml = '';
+      if (book.lastRecallRating === 'master') {
+        recallBadgeHtml = `
+          <span class="book-recall-pill master" title="Latest Retention: Total Recall (100%)">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span>100%</span>
+          </span>
+        `;
+      } else if (book.lastRecallRating === 'good') {
+        recallBadgeHtml = `
+          <span class="book-recall-pill good" title="Latest Retention: Good (~75%)">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>
+            <span>75%</span>
+          </span>
+        `;
+      } else if (book.lastRecallRating === 'hazy') {
+        recallBadgeHtml = `
+          <span class="book-recall-pill hazy" title="Latest Retention: Hazy (<50%)">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/></svg>
+            <span>&lt;50%</span>
+          </span>
+        `;
+      }
+
       item.innerHTML = `
         <div class="book-swipe-delete-bg">
           <button class="btn-swipe-delete" data-id="${book.id}" aria-label="${t('library.delete')} ${escapeHtml(book.title)}">
@@ -1139,6 +1248,7 @@ async function initApp() {
             <div class="book-title-row">
               <span class="book-title">${escapeHtml(book.title)}</span>
               <span class="book-tag-pill" style="--tag-color: var(--palette-${book.color || 'blue'});">${escapeHtml(book.color || 'blue')}</span>
+              ${recallBadgeHtml}
             </div>
             <div class="book-meta">
               <span>${escapeHtml(book.author || t('library.unknownAuthor'))}</span>
@@ -1547,6 +1657,18 @@ async function initApp() {
       return;
     }
 
+    if (!state.isPro && !editingBookId) {
+      const metaList = await Storage.getLibraryMeta();
+      const userBooks = metaList.filter(b => b.id !== 'scratchpad');
+      if (userBooks.length >= 3) {
+        AudioSystem.playButtonPress();
+        triggerGestureFeedback('right', 'Library limit reached (Max 3 books on Free Starter)');
+        const primeTab = document.querySelector('[data-target="tabPrime"]');
+        if (primeTab) primeTab.click();
+        return;
+      }
+    }
+
     if (dropzoneContent) dropzoneContent.style.display = 'none';
     if (dropzoneLoading) dropzoneLoading.style.display = 'flex';
     if (dropzoneLoadingText) dropzoneLoadingText.textContent = `Extracting ${file.name}...`;
@@ -1557,6 +1679,15 @@ async function initApp() {
         result = await parseEpubFile(file);
       } else {
         result = await parseTxtFile(file);
+      }
+
+      if (!state.isPro) {
+        let words = RSVP.parseText(result.content, '');
+        if (words.length > 600) {
+          words = words.slice(0, 600);
+          result.content = words.map(w => w.text).join(' ');
+          triggerGestureFeedback('right', 'Preview limited to first 600 words (Free Starter)');
+        }
       }
 
       editBookTitleInput.value = result.title;
@@ -1711,7 +1842,18 @@ async function initApp() {
     });
   }
 
-  btnAddBook.addEventListener('click', () => {
+  btnAddBook.addEventListener('click', async () => {
+    if (!state.isPro) {
+      const metaList = await Storage.getLibraryMeta();
+      const userBooks = metaList.filter(b => b.id !== 'scratchpad');
+      if (userBooks.length >= 3) {
+        AudioSystem.playButtonPress();
+        triggerGestureFeedback('right', 'Library limit reached (Max 3 books on Free Starter)');
+        const primeTab = document.querySelector('[data-target="tabPrime"]');
+        if (primeTab) primeTab.click();
+        return;
+      }
+    }
     openBookDetailModal(null);
   });
 
@@ -1734,7 +1876,24 @@ async function initApp() {
       return;
     }
 
-    const words = RSVP.parseText(content, '');
+    if (!state.isPro && !editingBookId) {
+      const metaList = await Storage.getLibraryMeta();
+      const userBooks = metaList.filter(b => b.id !== 'scratchpad');
+      if (userBooks.length >= 3) {
+        AudioSystem.playButtonPress();
+        triggerGestureFeedback('right', 'Library limit reached (Max 3 books on Free Starter)');
+        closeBookDetailModal();
+        const primeTab = document.querySelector('[data-target="tabPrime"]');
+        if (primeTab) primeTab.click();
+        return;
+      }
+    }
+
+    let words = RSVP.parseText(content, '');
+    if (!state.isPro && words.length > 600) {
+      words = words.slice(0, 600);
+      triggerGestureFeedback('right', 'Book saved with first 600 words (Free Starter)');
+    }
     const id = editingBookId || `doc_${Date.now()}`;
 
     await Storage.saveBook(id, title, author, words, selectedModalColor);
@@ -1827,10 +1986,18 @@ async function initApp() {
 
   soundChips.forEach(chip => {
     chip.addEventListener('click', () => {
+      const profile = chip.dataset.profile;
+      if (!state.isPro && profile !== 'organic_pop') {
+        AudioSystem.playButtonPress();
+        triggerGestureFeedback('right', 'Custom sound profiles require Prime');
+        const primeTab = document.querySelector('[data-target="tabPrime"]');
+        if (primeTab) primeTab.click();
+        return;
+      }
+
       soundChips.forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
 
-      const profile = chip.dataset.profile;
       state.soundProfile = profile;
       AudioSystem.profile = profile;
       Storage.saveSettings(state);
@@ -1843,6 +2010,14 @@ async function initApp() {
   themePickerCards.forEach(card => {
     card.addEventListener('click', () => {
       const theme = card.dataset.theme;
+      if (!state.isPro && (theme === 'graphite' || theme === 'parchment')) {
+        AudioSystem.playButtonPress();
+        triggerGestureFeedback('right', 'Graphite & Parchment require Prime');
+        const primeTab = document.querySelector('[data-target="tabPrime"]');
+        if (primeTab) primeTab.click();
+        return;
+      }
+
       AudioSystem.playThemeSound(theme);
       state.appTheme = theme;
       Storage.saveSettings(state);
@@ -1853,6 +2028,31 @@ async function initApp() {
   accentDots.forEach(dot => {
     dot.addEventListener('click', () => {
       const color = dot.dataset.color;
+
+      if (!state.isPro) {
+        if (color !== 'red') {
+          AudioSystem.playButtonPress();
+          triggerGestureFeedback('right', 'Unlock all 9 focal colors with Prime');
+          const primeTab = document.querySelector('[data-target="tabPrime"]');
+          if (primeTab) primeTab.click();
+          return;
+        }
+      } else {
+        const theme = state.appTheme || 'obsidian';
+        const isLight = (theme === 'vellum' || theme === 'parchment');
+        const isDark = (theme === 'obsidian' || theme === 'graphite');
+        if (isLight && color === 'white') {
+          AudioSystem.playButtonPress();
+          triggerGestureFeedback('left', 'White not readable in Light themes');
+          return;
+        }
+        if (isDark && color === 'black') {
+          AudioSystem.playButtonPress();
+          triggerGestureFeedback('left', 'Black not readable in Dark themes');
+          return;
+        }
+      }
+
       try {
         if (typeof AudioSystem.playSelectionSound === 'function') {
           AudioSystem.playSelectionSound();
@@ -2212,9 +2412,15 @@ async function initApp() {
   // --------------------------------------------------------------------------
   function openComprehensionModal(wordsRead, avgWpm) {
     if (!comprehensionModal) return;
+    if (comprehensionModal.classList.contains('active')) return;
     AudioSystem.playModalOpen();
     if (recallSessionWords) recallSessionWords.textContent = wordsRead.toLocaleString();
     if (recallSessionSpeed) recallSessionSpeed.textContent = avgWpm;
+    const dialog = comprehensionModal.querySelector('.modern-dialog');
+    if (dialog) {
+      dialog.style.transform = '';
+      dialog.style.transition = '';
+    }
     comprehensionModal.classList.add('active');
   }
 
@@ -2233,7 +2439,7 @@ async function initApp() {
   }
 
   document.querySelectorAll('.comprehension-opt-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const rating = btn.dataset.rating;
       AudioSystem.playSuccessChime();
       closeComprehensionModal();
@@ -2243,11 +2449,20 @@ async function initApp() {
         master: 'Retention: Total Recall (100%)'
       };
       triggerGestureFeedback('right', labels[rating] || 'Saved');
+
+      // Update current book recall rating in memory & database, then re-render library
+      if (currentBookMeta && currentBookMeta.id && currentBookMeta.id !== 'scratchpad') {
+        currentBookMeta.lastRecallRating = rating;
+        await Storage.updateBookRecallRating(currentBookMeta.id, rating);
+        renderLibrary();
+      }
+
       try {
         const logs = JSON.parse(localStorage.getItem('tachyon_comprehension_logs') || '[]');
         logs.push({
           date: new Date().toISOString(),
           rating,
+          bookId: currentBookMeta ? currentBookMeta.id : 'scratchpad',
           wpm: state.wpm,
           words: parseInt(recallSessionWords ? recallSessionWords.textContent.replace(/,/g, '') : '0', 10)
         });
@@ -2331,6 +2546,118 @@ async function initApp() {
   } catch (err) {
     console.warn("Could not load book/scratchpad, showing welcome text:", err);
     displayWord("READY");
+  }
+
+  // --------------------------------------------------------------------------
+  // Interactive Swipeable Bottom Sheet Gestures
+  // --------------------------------------------------------------------------
+  function enableBottomSheetGestures(backdropEl, dialogEl, onClose) {
+    if (!backdropEl || !dialogEl) return;
+
+    let startY = 0;
+    let currentY = 0;
+    let isDragging = false;
+    let isTouch = false;
+
+    const notch = dialogEl.querySelector('.modal-notch-handle');
+    const header = dialogEl.querySelector('.modal-header') || dialogEl.querySelector('.comprehension-header') || dialogEl.querySelector('.streak-hero-flame-container');
+
+    const canStartDrag = (target) => {
+      if (target.closest('button, input, textarea, select, [contenteditable="true"], .modal-tabs-nav, .needle-preview-box, .comprehension-opt-btn, .btn-swipe-delete')) {
+        return false;
+      }
+      const isNotch = notch && notch.contains(target);
+      const isHeader = header && header.contains(target);
+      if (isNotch || isHeader) return true;
+      return dialogEl.scrollTop <= 2;
+    };
+
+    const startDrag = (clientY, target) => {
+      if (!canStartDrag(target)) return;
+      isDragging = true;
+      startY = clientY;
+      currentY = clientY;
+      dialogEl.style.transition = 'none';
+    };
+
+    const moveDrag = (clientY, e) => {
+      if (!isDragging) return;
+      const deltaY = clientY - startY;
+      if (deltaY > 0) {
+        if (e && e.cancelable) e.preventDefault();
+        dialogEl.style.transform = `translateY(${deltaY}px)`;
+      } else {
+        const damped = deltaY * 0.22;
+        dialogEl.style.transform = `translateY(${damped}px)`;
+      }
+      currentY = clientY;
+    };
+
+    const endDrag = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      const deltaY = currentY - startY;
+
+      dialogEl.style.transition = 'transform 0.32s var(--spring-bouncy)';
+      if (deltaY > 100) {
+        dialogEl.style.transform = 'translateY(100%)';
+        setTimeout(() => {
+          if (onClose) onClose();
+          dialogEl.style.transform = '';
+          dialogEl.style.transition = '';
+        }, 180);
+      } else {
+        dialogEl.style.transform = 'translateY(0)';
+        setTimeout(() => {
+          dialogEl.style.transition = '';
+        }, 320);
+      }
+    };
+
+    dialogEl.addEventListener('touchstart', (e) => {
+      isTouch = true;
+      if (e.touches.length > 0) startDrag(e.touches[0].clientY, e.target);
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (isDragging && isTouch && e.touches.length > 0) {
+        moveDrag(e.touches[0].clientY, e);
+      }
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => {
+      if (isTouch) endDrag();
+    });
+
+    window.addEventListener('touchcancel', () => {
+      if (isTouch) endDrag();
+    });
+
+    dialogEl.addEventListener('mousedown', (e) => {
+      if (isTouch) return;
+      startDrag(e.clientY, e.target);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging && !isTouch) {
+        moveDrag(e.clientY, e);
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!isTouch && isDragging) endDrag();
+    });
+  }
+
+  // Attach interactive swipe gestures to bottom sheet modals
+  if (bookDetailModal) {
+    enableBottomSheetGestures(bookDetailModal, bookDetailModal.querySelector('.modern-dialog'), closeBookDetailModal);
+  }
+  if (streakModal) {
+    enableBottomSheetGestures(streakModal, streakModal.querySelector('.modern-dialog'), closeStreakModal);
+  }
+  if (comprehensionModal) {
+    enableBottomSheetGestures(comprehensionModal, comprehensionModal.querySelector('.modern-dialog'), closeComprehensionModal);
   }
 
   updateReadingEstimate();

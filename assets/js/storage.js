@@ -8,7 +8,7 @@ const memoryFallback = {
     isMuted: false,
     isPro: false,
     soundProfile: 'organic_pop',
-    colorPalette: 'white',
+    colorPalette: 'red',
     activeDocId: null,
     rsvpFont: 'sans',
     fontSize: 'medium',
@@ -188,6 +188,7 @@ export const Storage = {
       color: color || 'red',
       dateAdded: existing ? existing.dateAdded : timestamp,
       currentIndex,
+      lastRecallRating: existing ? existing.lastRecallRating : undefined,
       timestamp
     };
     memoryFallback.booksMeta[id] = metaObj;
@@ -220,6 +221,7 @@ export const Storage = {
             color: color || 'red',
             dateAdded: dbExisting ? dbExisting.dateAdded : timestamp,
             currentIndex: dbCurrentIndex,
+            lastRecallRating: dbExisting ? dbExisting.lastRecallRating : (existing ? existing.lastRecallRating : undefined),
             timestamp
           });
 
@@ -262,6 +264,34 @@ export const Storage = {
           if (req.result) {
             req.result.currentIndex = currentIndex;
             req.result.timestamp = Date.now();
+            store.put(req.result);
+          }
+          resolve();
+        };
+        req.onerror = () => resolve();
+      } catch (err) {
+        resolve();
+      }
+    });
+  },
+
+  async updateBookRecallRating(id, recallRating) {
+    if (memoryFallback.booksMeta[id]) {
+      memoryFallback.booksMeta[id].lastRecallRating = recallRating;
+      memoryFallback.booksMeta[id].lastRecallTimestamp = Date.now();
+    }
+
+    if (!this.db) return;
+
+    return new Promise((resolve) => {
+      try {
+        const tx = this.db.transaction('books_meta', 'readwrite');
+        const store = tx.objectStore('books_meta');
+        const req = store.get(id);
+        req.onsuccess = () => {
+          if (req.result) {
+            req.result.lastRecallRating = recallRating;
+            req.result.lastRecallTimestamp = Date.now();
             store.put(req.result);
           }
           resolve();

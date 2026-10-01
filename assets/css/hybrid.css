@@ -2230,7 +2230,7 @@ body[data-theme="parchment"] .modern-dialog {
   box-shadow: 0 -12px 45px rgba(68, 52, 34, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-/* iOS Sheet Grabber Handle Pill */
+/* iOS Sheet Grabber Handle Pill (Fallback pseudo-element) */
 .modern-dialog::before {
   content: '';
   width: 38px;
@@ -2240,9 +2240,123 @@ body[data-theme="parchment"] .modern-dialog {
   margin: -8px auto 6px auto;
   align-self: center;
 }
+.modern-dialog:has(.modal-notch-handle)::before {
+  display: none !important;
+}
 body[data-theme="vellum"] .modern-dialog::before {
   background: rgba(0, 0, 0, 0.25);
 }
+
+/* Explicit Interactive Swipeable Notch Handle */
+.modal-notch-handle {
+  width: 44px;
+  height: 5px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.35);
+  margin: -8px auto 10px auto;
+  cursor: grab;
+  touch-action: none;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.modal-notch-handle:hover,
+.modal-notch-handle:active {
+  background: rgba(255, 255, 255, 0.7);
+  transform: scaleY(1.2);
+}
+body[data-theme="vellum"] .modal-notch-handle,
+body[data-theme="parchment"] .modal-notch-handle {
+  background: rgba(0, 0, 0, 0.25);
+}
+body[data-theme="vellum"] .modal-notch-handle:hover,
+body[data-theme="parchment"] .modal-notch-handle:hover {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* Library Book Recall Level Badges */
+.book-recall-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1.5px 6px;
+  border-radius: 12px;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+  line-height: 1.2;
+}
+.book-recall-pill.master {
+  background: rgba(255, 215, 0, 0.15);
+  color: #FFD700;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+}
+.book-recall-pill.good {
+  background: rgba(52, 199, 89, 0.15);
+  color: #34C759;
+  border: 1px solid rgba(52, 199, 89, 0.4);
+}
+.book-recall-pill.hazy {
+  background: rgba(255, 149, 0, 0.15);
+  color: #FF9500;
+  border: 1px solid rgba(255, 149, 0, 0.4);
+}
+
+/* Freemium Lock Badges */
+.theme-lock-badge,
+.sound-lock-badge {
+  font-size: 8px;
+  font-weight: 800;
+  padding: 1.5px 5px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+body[data-theme="vellum"] .theme-lock-badge,
+body[data-theme="vellum"] .sound-lock-badge,
+body[data-theme="parchment"] .theme-lock-badge,
+body[data-theme="parchment"] .sound-lock-badge {
+  background: rgba(0, 0, 0, 0.09);
+  color: var(--text-secondary);
+}
+
+/* Focal Swatch Contrast Guard & Lock States */
+.accent-dot.disabled {
+  opacity: 0.22;
+  cursor: not-allowed;
+  position: relative;
+}
+.accent-dot.disabled::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  right: 2px;
+  height: 2px;
+  background: #FF3B30;
+  transform: rotate(-45deg);
+  border-radius: 2px;
+}
+.accent-dot.locked {
+  position: relative;
+  opacity: 0.45;
+}
+.accent-dot.locked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  transform: translate(-50%, -50%);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Crect x='3' y='11' width='18' height='11' rx='2' ry='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
 
 /* Centered Alert Dialogs for Completion & About */
 #completionModal, #aboutModal {
