@@ -81,7 +81,6 @@ async function initApp() {
 
   // Text Input Panel & Motivational Quotes Overlay
   const textInput = document.getElementById('textInput');
-  if (textInput) textInput.placeholder = '';
   const quoteOverlay = document.getElementById('quoteOverlay');
   const quoteText = document.getElementById('quoteText');
   const btnPasteClipboard = document.getElementById('btnPasteClipboard');
@@ -969,32 +968,28 @@ async function initApp() {
   // Text Input & Clipboard
   // --------------------------------------------------------------------------
   function updateReadingEstimate() {
+    if (!readingEstimate) return;
     const text = textInput.value.trim();
     if (!text) {
-      readingEstimate.textContent = t('reader.wordsEstimate', { count: '0' });
+      readingEstimate.textContent = t('reader.wordsEstimate', { count: 0 });
       return;
     }
     const wordsCount = RSVP.parseText(text).length;
-    const effectiveCount = (!state.isPro && wordsCount > 600) ? 600 : wordsCount;
     const wpm = state.wpm || 350;
-    const totalSeconds = Math.ceil((effectiveCount / wpm) * 60);
-    const suffix = (!state.isPro && wordsCount > 600) ? ' (600 max - Free)' : '';
+    const totalSeconds = Math.ceil((wordsCount / wpm) * 60);
 
     if (totalSeconds < 60) {
-      readingEstimate.textContent = `${effectiveCount.toLocaleString()} words${suffix}`;
+      readingEstimate.textContent = t('reader.wordsEstimate', { count: wordsCount.toLocaleString() });
     } else {
       const mins = Math.max(1, Math.round(totalSeconds / 60));
-      readingEstimate.textContent = `${effectiveCount.toLocaleString()} words (~${mins}m)${suffix}`;
+      readingEstimate.textContent = t('reader.wordsEstimateMin', { count: wordsCount.toLocaleString(), min: mins });
     }
   }
 
   async function prepareScratchpad() {
     const text = textInput.value.trim() || defaultWelcomeText;
-    let words = RSVP.parseText(text, defaultWelcomeText);
-    if (!state.isPro && words.length > 600) {
-      words = words.slice(0, 600);
-    }
-    await Storage.saveBook('scratchpad', 'Scratchpad', 'User Input', words, state.colorPalette || 'red');
+    const words = RSVP.parseText(text, defaultWelcomeText);
+    await Storage.saveBook('scratchpad', 'Scratchpad', 'User Input', words, state.colorPalette || 'white');
     currentBookMeta = await Storage.getBookMeta('scratchpad');
     currentChunkIndex = 0;
     currentChunkWords = await Storage.getBookChunk('scratchpad', 0);
