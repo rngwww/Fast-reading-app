@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <title>TACHYON — iOS 14-26 Hybrid</title>
+  <script>
+    // Force update service worker and clean stale caches immediately
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        for (const r of regs) r.update();
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        for (const name of names) {
+          if (name !== 'tachyon-v35') caches.delete(name);
+        }
+      });
+    }
+  </script>
+  <script src="assets/js/vendor/jszip.min.js"></script>
+  <link rel="stylesheet" href="assets/css/hybrid.css?v=10">
+</head>
+<body data-theme="obsidian">
+
+  <!-- Ambient Blurry Wallpaper Backdrop (Smooth Crossfade Transitions) -->
+  <div class="wallpaper-backdrop" id="wallpaperBackdrop">
+    <div class="wallpaper-layer wallpaper-obsidian"></div>
+    <div class="wallpaper-layer wallpaper-graphite"></div>
+    <div class="wallpaper-layer wallpaper-parchment"></div>
+    <div class="wallpaper-layer wallpaper-vellum"></div>
+  </div>
+
+  <!-- Atmospheric Ambient Liquid Glow -->
+  <div class="ambient-glow">
+    <div class="ambient-circle-1"></div>
+    <div class="ambient-circle-2"></div>
+  </div>
+
+  <main class="modern-app" id="modernApp">
+    <!-- Top Header Bar -->
+    <header class="top-bar">
+      <div class="brand-lockup" id="brandLockup" title="About TACHYON">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
+        <div class="brand-title">TACHYON</div>
+      </div>
+
+      <div class="top-bar-actions">
+        <!-- Streak Widget Pill Button (Zero Emojis, Cartoon Fire Contained Inside Border) -->
+        <button class="streak-pill-btn" id="btnStreakHeader" title="Daily Reading Streak & Goals" aria-label="Daily Reading Streak" data-i18n-title="header.streakTitle" data-i18n-aria="header.streakAria">
+          <div class="streak-flame-wrapper">
+            <svg class="cartoon-flame" viewBox="0 0 32 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path class="flame-outer" d="M16 2C16 2 22 8 22 15C22 17.5 21 19.5 19.5 21C21.5 19 22.5 16 22 13C24.5 15.5 27 19.5 27 24C27 30 22 34 16 34C10 34 5 30 5 24C5 18 9 12 13 8C13 12 15 14 16 14C16 11 16 2 16 2Z" fill="url(#flameGradOuter)"/>
+              <path class="flame-middle" d="M16 12C16 12 20 16 20 21C20 23 19 24.5 18 25.5C19 24 19.5 22 19 20C20.5 21.5 22 23.5 22 26C22 29.5 19 32 16 32C13 32 10 29.5 10 26C10 21.5 13 18 15 15C15 17 16 18 16 18C16 16 16 12 16 12Z" fill="url(#flameGradMiddle)"/>
+              <path class="flame-core" d="M16 20C16 20 18 23 18 26C18 28 17 29.5 16 30C15 29.5 14 28 14 26C14 23 16 20 16 20Z" fill="#FFFBE6"/>
+              <defs>
+                <linearGradient id="flameGradOuter" x1="16" y1="2" x2="16" y2="34" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#FF3B30"/>
+                  <stop offset="0.6" stop-color="#FF9500"/>
+                  <stop offset="1" stop-color="#FFCC00"/>
+                </linearGradient>
+                <linearGradient id="flameGradMiddle" x1="16" y1="12" x2="16" y2="32" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#FF9500"/>
+                  <stop offset="1" stop-color="#FFD60A"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <span class="streak-count-txt" id="headerStreakCount">1</span>
+          <span class="streak-unit-txt" id="headerStreakUnit" data-i18n="header.dayUnit">DAY</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Floating Liquid Navigation Pill -->
+    <nav class="floating-nav">
+      <div class="nav-pill-container">
+        <div class="nav-sliding-pill" id="navSlidingPill"></div>
+        <button class="nav-tab-btn active" data-target="tabReader" aria-label="Reader" data-i18n-aria="nav.reader">
+          <svg viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+          <span data-i18n="nav.reader">Reader</span>
+        </button>
+        <button class="nav-tab-btn" data-target="tabLibrary" aria-label="Library" data-i18n-aria="nav.library">
+          <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <span data-i18n="nav.library">Library</span>
+        </button>
+        <button class="nav-tab-btn" data-target="tabPrime" aria-label="Prime" data-i18n-aria="nav.prime">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span data-i18n="nav.prime">Prime</span>
+        </button>
+        <button class="nav-tab-btn" data-target="tabSettings" aria-label="Settings" data-i18n-aria="nav.settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span data-i18n="nav.settings">Settings</span>
+        </button>
+        <button class="nav-tab-btn" data-target="tabGuide" aria-label="Guide" data-i18n-aria="nav.guide">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <span data-i18n="nav.guide">Guide</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- TAB 1: READER (MAIN STAGE) -->
+    <div class="tab-panel active" id="tabReader">
+      <!-- Optical Reticle RSVP Stage -->
+      <section class="reader-stage" id="readerStage" title="Tap to Play or Pause" data-i18n-title="reader.stageTap">
+        <!-- Top Toolbar: Book Title Badge (only shown when a book is active) -->
+        <div class="stage-top-toolbar">
+          <div class="stage-toolbar-left">
+            <div class="stage-book-badge" id="stageBookBadge" style="display: none;">
+              <span id="stageBookTitle"></span>
+            </div>
+            <div class="warmup-live-pill" id="warmupLivePill" style="display: none;">
+              <span id="warmupLiveText">250 ➔ 350 WPM</span>
+            </div>
+          </div>
+          <div class="stage-toolbar-right">
+            <button class="stage-size-quick-btn" id="btnQuickSize" title="Cycle Word Size (Small, Medium, Large, XL)" data-i18n-title="reader.quickSize">
+              <span id="quickSizeLabel">Aa</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Optical Reticle Guides -->
+        <div class="optical-reticle">
+          <div class="reticle-mark-top"></div>
+          <div class="reticle-hairline"></div>
+          <div class="reticle-mark-bottom"></div>
+        </div>
+
+        <!-- RSVP Word Frame -->
+        <div class="rsvp-word-frame" id="rsvpWordFrame">
+          <span class="word-pre" id="wordPre"></span>
+          <span class="word-focal" id="wordFocal">—</span>
+          <span class="word-post" id="wordPost"></span>
+        </div>
+
+        <!-- Gesture Feedback Floating Pills -->
+        <div class="gesture-feedback left" id="gestureFeedbackLeft">↺ -10</div>
+        <div class="gesture-feedback right" id="gestureFeedbackRight">↻ +10</div>
+
+        <!-- Pause HUD Overlay -->
+        <div class="overlay-hud" id="pauseHud">
+          <div class="hud-title" data-i18n="reader.paused">Paused</div>
+          <div class="hud-stats-grid">
+            <div class="hud-stat-cell">
+              <span class="hud-stat-label" data-i18n="reader.position">Position</span>
+              <span class="hud-stat-val"><span id="hudWordPos">0</span> / <span id="hudWordTotal">0</span></span>
+            </div>
+            <div class="hud-stat-cell">
+              <span class="hud-stat-label" data-i18n="reader.speed">Speed</span>
+              <span class="hud-stat-val"><span id="hudWpm">350</span> WPM</span>
+            </div>
+            <div class="hud-stat-cell">
+              <span class="hud-stat-label" data-i18n="reader.progress">Progress</span>
+              <span class="hud-stat-val" id="hudProgress">0%</span>
+            </div>
+          </div>
+          <div class="hud-actions">
+            <button class="btn-media-circle" id="hudJumpBackBtn" title="Rewind 10 words" aria-label="Rewind 10 words" data-i18n-title="reader.rewind10" data-i18n-aria="reader.rewind10">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                <text x="12" y="15.5" font-size="7" font-weight="900" text-anchor="middle" fill="currentColor" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif">10</text>
+              </svg>
+            </button>
+            <button class="btn-media-hero" id="hudResumeBtn" title="Resume reading" aria-label="Resume reading" data-i18n-title="reader.resume" data-i18n-aria="reader.resume">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Resume Countdown Overlay (Authentic iOS 14 Activity Spinner: 3, 2, 1) -->
+        <div class="overlay-hud" id="countdownHud">
+          <div class="resume-loader-box">
+            <div class="countdown-dial-wrap">
+              <div class="ios-activity-spinner" aria-label="Loading">
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+                <div class="ios-spinner-blade"></div>
+              </div>
+              <div class="countdown-number" id="countdownNumber">3</div>
+            </div>
+            <div class="resume-affirmation" id="countdownAffirmation" data-i18n="reader.readyCountdown">Get Ready...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Progress Scrubber -->
+      <section class="scrubber-card">
+        <div class="scrubber-meta">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn-mini-reset" id="btnReset" title="Restart from beginning" aria-label="Restart from beginning" data-i18n-title="reader.restartAria" data-i18n-aria="reader.restartAria">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              </svg>
+              <span data-i18n="reader.restart">Restart</span>
+            </button>
+            <span id="scrubberWordLabel">Word <strong id="scrubberWordPos" style="color: var(--text-primary);">0</strong> of <span id="scrubberWordTotal">0</span></span>
+          </div>
+          <span id="scrubberPct" style="color: var(--text-primary); font-weight: 700;">0%</span>
+        </div>
+        <div class="scrubber-track-wrap">
+          <input type="range" class="scrubber-slider" id="progressScrubber" min="0" max="100" step="0.1" value="0" aria-label="Reading progress scrubber">
+        </div>
+      </section>
+
+      <!-- Intuitive Controls Deck (Centered YouTube-style Clean Icon Media Controls) -->
+      <section class="controls-deck">
+        <div class="primary-media-row">
+          <!-- Rewind 10 Words (Points Counter-Clockwise Left) -->
+          <button class="btn-media-circle" id="btnRewind10" title="Rewind 10 words" aria-label="Rewind 10 words" data-i18n-title="reader.rewind10" data-i18n-aria="reader.rewind10">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+              <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+              <text x="12" y="15.5" font-size="7" font-weight="900" text-anchor="middle" fill="currentColor" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif">10</text>
+            </svg>
+          </button>
+
+          <!-- Main Hero Play/Pause Button (Icon Only) -->
+          <button class="btn-media-hero" id="btnPlayHero" title="Play or Pause" aria-label="Play or Pause" data-i18n-title="reader.playOrPause" data-i18n-aria="reader.playOrPause">
+            <svg id="btnPlayHeroIcon" viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+              <polygon points="7 4 20 12 7 20 7 4"></polygon>
+            </svg>
+          </button>
+
+          <!-- Skip Forward 10 Words (Points Clockwise Right) -->
+          <button class="btn-media-circle" id="btnSkip10" title="Skip forward 10 words" aria-label="Skip forward 10 words" data-i18n-title="reader.skip10" data-i18n-aria="reader.skip10">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+              <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/>
+              <text x="12" y="15.5" font-size="7" font-weight="900" text-anchor="middle" fill="currentColor" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif">10</text>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Speed Presets & Steppers -->
+        <div class="speed-control-section">
+          <div class="speed-header-row">
+            <div class="speed-title-wrap">
+              <span data-i18n="reader.speed">Speed</span>
+            </div>
+            <div class="speed-stepper-wrap">
+              <button class="btn-stepper" id="btnSpeedMinus" title="Decrease speed" aria-label="Decrease speed" data-i18n-title="reader.decreaseSpeed" data-i18n-aria="reader.decreaseSpeed">−</button>
+              <div class="speed-badge"><span id="speedBadgeVal">350</span><small>WPM</small></div>
+              <button class="btn-stepper" id="btnSpeedPlus" title="Increase speed" aria-label="Increase speed" data-i18n-title="reader.increaseSpeed" data-i18n-aria="reader.increaseSpeed">+</button>
+            </div>
+          </div>
+
+          <!-- Speed Presets (Clean Single-Line Row) -->
+          <div class="speed-presets-row">
+            <button class="speed-preset-btn" data-wpm="250">250</button>
+            <button class="speed-preset-btn active" data-wpm="350">350</button>
+            <button class="speed-preset-btn" data-wpm="500">500</button>
+            <button class="speed-preset-btn" data-wpm="700">700</button>
+          </div>
+        </div>
+
+        <!-- Volume & Audio Toggle Strip -->
+        <div class="audio-strip">
+          <button class="btn-icon-mute" id="btnMute" title="Toggle audio mute" aria-label="Toggle mute" data-i18n-title="reader.toggleMute" data-i18n-aria="reader.toggleMute">
+            <svg id="volIconSvg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          </button>
+          <div class="vol-slider-wrap">
+            <input type="range" class="vol-slider" id="volSlider" min="0" max="1" step="0.01" value="0.3" aria-label="Audio volume">
+          </div>
+        </div>
+      </section>
+
+      <!-- Text Input Panel -->
+      <section class="input-panel">
+        <div class="input-header" id="inputHeader">
+          <div class="input-actions">
+            <button class="btn-mini-action" id="btnPasteClipboard" title="Paste text from clipboard" data-i18n-title="reader.pasteTooltip">
+              <svg viewBox="0 0 24 24" fill="none" width="13" height="13" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+              <span data-i18n="reader.paste">Paste</span>
+            </button>
+            <button class="btn-mini-action" id="btnClearText" title="Clear text" data-i18n-title="reader.clearTooltip">
+              <span data-i18n="reader.clear">Clear</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="returnScratchBtnWrap" style="display: none;">
+          <button class="btn-save" id="returnScratchBtn" style="width: 100%; padding: 12px; font-size: 14px;" data-i18n="reader.returnScratchpad">
+            Return to Scratchpad
+          </button>
+        </div>
+
+        <div class="text-box-wrap" id="scratchpadWrap">
+          <div class="scratchpad-quote-overlay" id="quoteOverlay" aria-hidden="true">
+            <div class="quote-text" id="quoteText">The more that you read, the more things you will know.</div>
+          </div>
+          <textarea class="modern-textarea" id="textInput" placeholder="" aria-label="Input text for reading"></textarea>
+        </div>
+
+        <div class="input-footer" id="inputFooter">
+          <div class="reading-estimate">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span id="readingEstimate">0 words</span>
+          </div>
+          <span id="tierWordLimitLabel" data-i18n="reader.freeStarter">Free Starter</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB 2: LIBRARY -->
+    <div class="tab-panel" id="tabLibrary">
+      <div class="library-header">
+        <div class="library-title-group">
+          <h2 data-i18n="library.title">Library</h2>
+        </div>
+        <button class="btn-primary-pill" id="btnAddBook">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span data-i18n="library.addBook">Add Book</span>
+        </button>
+      </div>
+
+      <div class="library-grid" id="libraryGrid">
+        <!-- Populated dynamically via modern-app.js with iOS swipe-to-delete -->
+      </div>
+    </div>
+
+    <!-- TAB 3: PRIME / PREMIUM -->
+    <div class="tab-panel" id="tabPrime">
+      <div class="prime-card-hero">
+        <span class="prime-badge" data-i18n="prime.badge">Prime</span>
+        <h2 data-i18n="prime.title">Unlimited Reading</h2>
+        <p data-i18n="prime.subtitle">Unlock books of any length, offline library storage, and custom themes.</p>
+
+        <div class="plan-cards-row">
+          <div class="plan-card">
+            <strong>$4.99</strong>
+            <span data-i18n="prime.monthly">Monthly</span>
+          </div>
+          <div class="plan-card selected">
+            <strong>$39.99</strong>
+            <span data-i18n="prime.annual">Annual</span>
+          </div>
+        </div>
+
+        <button class="btn-save" id="btnStartTrial" style="width: 100%; max-width: 320px; padding: 14px; font-size: 15px;" data-i18n="prime.startTrial">
+          Start Free Trial
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 4: SETTINGS -->
+    <div class="tab-panel" id="tabSettings">
+      <!-- Language Selector (Animated Collapsible Dropdown) -->
+      <section class="settings-section">
+        <div class="settings-group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          <span data-i18n="settings.language">Language</span>
+        </div>
+        <div class="ios-lang-dropdown" id="langDropdown">
+          <button type="button" class="ios-lang-trigger" id="langDropdownTrigger" aria-haspopup="listbox" aria-expanded="false">
+            <div class="ios-lang-trigger-left">
+              <span class="ios-lang-trigger-globe">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+              </span>
+              <span class="ios-lang-current" id="currentLangLabel">English</span>
+            </div>
+            <div class="ios-lang-trigger-right">
+              <svg class="ios-lang-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
+          </button>
+          <div class="ios-lang-collapse-wrapper" id="langCollapseWrapper">
+            <div class="ios-lang-collapse-inner">
+              <div class="ios-lang-options-list" role="listbox">
+                <button type="button" class="ios-lang-option active" data-lang="en" role="option" aria-selected="true">
+                  <span class="ios-lang-name" data-i18n="languages.en">English</span>
+                  <svg class="ios-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+                <button type="button" class="ios-lang-option" data-lang="zh" role="option" aria-selected="false">
+                  <span class="ios-lang-name" data-i18n="languages.zh">Chinese</span>
+                  <svg class="ios-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+                <button type="button" class="ios-lang-option" data-lang="es" role="option" aria-selected="false">
+                  <span class="ios-lang-name" data-i18n="languages.es">Spanish</span>
+                  <svg class="ios-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+                <button type="button" class="ios-lang-option" data-lang="de" role="option" aria-selected="false">
+                  <span class="ios-lang-name" data-i18n="languages.de">German</span>
+                  <svg class="ios-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+                <button type="button" class="ios-lang-option" data-lang="fr" role="option" aria-selected="false">
+                  <span class="ios-lang-name" data-i18n="languages.fr">French</span>
+                  <svg class="ios-lang-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Reading Font Selector -->
+      <section class="settings-section">
+        <div class="settings-group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+          <span data-i18n="settings.typography">Typography</span>
+        </div>
+        <div class="font-selector-row">
+          <button class="font-choice-btn active" data-font="sans" style="font-family: var(--font-main);">
+            <strong data-i18n="settings.fontSans">Helvetica Neue</strong>
+            <small data-i18n="settings.fontSansSub">Ultra Light</small>
+          </button>
+          <button class="font-choice-btn" data-font="serif" style="font-family: var(--font-serif);">
+            <strong data-i18n="settings.fontSerif">New York</strong>
+            <small data-i18n="settings.fontSerifSub">Serif</small>
+          </button>
+          <button class="font-choice-btn" data-font="mono" style="font-family: var(--font-mono);">
+            <strong data-i18n="settings.fontMono">SF Mono</strong>
+            <small data-i18n="settings.fontMonoSub">Mono</small>
+          </button>
+        </div>
+
+        <!-- Dynamic Word Size (Small, Medium, Large, Extra Large) -->
+        <div style="margin-top: 10px;">
+          <div class="font-size-segmented-row" id="fontSizeSegmented">
+            <button class="font-size-btn" data-size="sm" title="Small (38px)">
+              <span class="font-size-glyph" style="font-size: 13px;">A</span>
+              <span class="font-size-label" data-i18n="settings.sizeSmall">Small</span>
+            </button>
+            <button class="font-size-btn active" data-size="md" title="Medium (48px)">
+              <span class="font-size-glyph" style="font-size: 16px;">Aa</span>
+              <span class="font-size-label" data-i18n="settings.sizeMedium">Medium</span>
+            </button>
+            <button class="font-size-btn" data-size="lg" title="Large (60px)">
+              <span class="font-size-glyph" style="font-size: 20px;">Aa</span>
+              <span class="font-size-label" data-i18n="settings.sizeLarge">Large</span>
+            </button>
+            <button class="font-size-btn" data-size="xl" title="Extra Large (74px)">
+              <span class="font-size-glyph" style="font-size: 24px;">AA</span>
+              <span class="font-size-label" data-i18n="settings.sizeExtra">Extra</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Audio Feedback Settings -->
+      <section class="settings-section">
+        <div class="settings-group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          <span data-i18n="settings.soundProfile">Sound Profile</span>
+        </div>
+        <div class="sound-chips-grid">
+          <div class="sound-chip active" data-profile="organic_pop">
+            <span data-i18n="settings.soundHaptic">Haptic</span>
+            <small data-i18n="settings.soundHapticSub">Click</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+          <div class="sound-chip" data-profile="crystal_drop">
+            <span data-i18n="settings.soundCeramic">Ceramic</span>
+            <small data-i18n="settings.soundCeramicSub">Tap</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+          <div class="sound-chip" data-profile="mechanical_click">
+            <span data-i18n="settings.soundMechanical">Mechanical</span>
+            <small data-i18n="settings.soundMechanicalSub">Snap</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+          <div class="sound-chip" data-profile="soft_marimba">
+            <span data-i18n="settings.soundWood">Wood</span>
+            <small data-i18n="settings.soundWoodSub">Block</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+          <div class="sound-chip" data-profile="deep_focus">
+            <span data-i18n="settings.soundPulse">Pulse</span>
+            <small data-i18n="settings.soundPulseSub">Pulse</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+          <div class="sound-chip" data-profile="warm_vinyl">
+            <span data-i18n="settings.soundVinyl">Vinyl</span>
+            <small data-i18n="settings.soundVinylSub">Analog</small>
+            <div class="eq-bars"><span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- UI Audio Feedback Toggle -->
+      <section class="settings-section">
+        <div class="tier-toggle-row">
+          <div>
+            <div style="font-size: 14px; font-weight: 700;" data-i18n="settings.interfaceSounds">Interface Sounds</div>
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;" data-i18n="settings.interfaceSoundsDesc">Audio feedback on tabs, buttons & gestures</div>
+          </div>
+          <button class="btn-tier-switch" id="btnToggleUiSounds" data-i18n="settings.enabled">Enabled</button>
+        </div>
+      </section>
+
+      <!-- Appearance: Themes -->
+      <section class="settings-section">
+        <div class="settings-group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20"></path></svg>
+          <span data-i18n="settings.appearance">Appearance</span>
+        </div>
+        <div class="themes-grid">
+          <div class="theme-picker-card active" data-theme="obsidian">
+            <div class="theme-swatch-box" style="background: #000000; color: #fff;">Aa</div>
+            <div class="theme-title" data-i18n="settings.themeObsidian">Obsidian</div>
+          </div>
+          <div class="theme-picker-card" data-theme="graphite">
+            <div class="theme-swatch-box" style="background: #141416; color: #fff;">Aa</div>
+            <div class="theme-title" data-i18n="settings.themeGraphite">Graphite</div>
+          </div>
+          <div class="theme-picker-card" data-theme="parchment">
+            <div class="theme-swatch-box" style="background: #F5EEDB; color: #342718;">Aa</div>
+            <div class="theme-title" data-i18n="settings.themeParchment">Parchment</div>
+          </div>
+          <div class="theme-picker-card" data-theme="vellum">
+            <div class="theme-swatch-box" style="background: #F8F9FA; color: #111827;">Aa</div>
+            <div class="theme-title" data-i18n="settings.themeLight">Light</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Appearance: Focal Accent Color (Centered, Single-Line Swatches) -->
+      <section class="settings-section">
+        <div class="settings-group-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+          <span data-i18n="settings.focalColor">Focal Color</span>
+        </div>
+        <div class="accent-swatches-wrap" id="accentDots">
+          <div class="accent-dot active" data-color="white" style="background: var(--palette-white); --swatch-color: var(--palette-white);" title="White"></div>
+          <div class="accent-dot" data-color="black" style="background: var(--palette-black); --swatch-color: var(--palette-black);" title="Black"></div>
+          <div class="accent-dot" data-color="red" style="background: var(--palette-red); --swatch-color: var(--palette-red);" title="Crimson"></div>
+          <div class="accent-dot" data-color="pink" style="background: var(--palette-pink); --swatch-color: var(--palette-pink);" title="Pink"></div>
+          <div class="accent-dot" data-color="purple" style="background: var(--palette-purple); --swatch-color: var(--palette-purple);" title="Purple"></div>
+          <div class="accent-dot" data-color="blue" style="background: var(--palette-blue); --swatch-color: var(--palette-blue);" title="Cyan"></div>
+          <div class="accent-dot" data-color="green" style="background: var(--palette-green); --swatch-color: var(--palette-green);" title="Green"></div>
+          <div class="accent-dot" data-color="yellow" style="background: var(--palette-yellow); --swatch-color: var(--palette-yellow);" title="Yellow"></div>
+          <div class="accent-dot" data-color="orange" style="background: var(--palette-orange); --swatch-color: var(--palette-orange);" title="Orange"></div>
+        </div>
+      </section>
+
+      <!-- Membership Status -->
+      <section class="settings-section">
+        <div class="tier-toggle-row">
+          <div>
+            <div style="font-size: 14px; font-weight: 700;" data-i18n="settings.membership">Membership</div>
+            <div class="tier-badge" id="tierStatusBadge" style="color: var(--text-secondary); margin-top: 2px;">Free Starter</div>
+          </div>
+          <button class="btn-tier-switch" id="btnSwitchTier" data-i18n="settings.togglePrime">Toggle Prime</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB 5: GUIDE / WALKTHROUGH -->
+    <div class="tab-panel" id="tabGuide">
+      <div class="guide-card">
+        <h2 style="font-size: 20px; font-weight: 800; letter-spacing: -0.5px;" data-i18n="guide.title">How It Works</h2>
+        <div class="guide-step">
+          <div class="step-number">1</div>
+          <div class="step-text">
+            <h3 data-i18n="guide.step1Title">Focus on the Highlighted Letter</h3>
+            <p data-i18n="guide.step1Desc">Every word aligns its focal letter with the reticle guide. Keeping your eyes steady eliminates scanning fatigue.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="step-number">2</div>
+          <div class="step-text">
+            <h3 data-i18n="guide.step2Title">Direct Visual Processing</h3>
+            <p data-i18n="guide.step2Desc">At 350+ words per minute, inner verbal pronunciation fades and words are comprehended directly.</p>
+          </div>
+        </div>
+        <div class="guide-step">
+          <div class="step-number">3</div>
+          <div class="step-text">
+            <h3 data-i18n="guide.step3Title">Intuitive Controls</h3>
+            <p data-i18n="guide.step3Desc">Tap the screen to play or pause. Double-tap to rewind or skip words. Slide the progress bar to navigate anywhere.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================================
+       MODALS
+       ======================================================================== -->
+
+  <!-- Unified Book Details Modal (Read & Progress + Edit Tabs) -->
+  <div class="modern-modal-backdrop" id="bookDetailModal">
+    <div class="modern-dialog" style="max-width: 480px;">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="bookModalTitle" data-i18n="modal.bookDetails.title">Book Details</h3>
+          <p id="bookModalAuthor" style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;" data-i18n="modal.bookDetails.authorDefault">Author</p>
+        </div>
+        <button class="btn-close-modal" id="btnCloseBookDetailModal">&times;</button>
+      </div>
+
+      <!-- Segmented Tab Navigation -->
+      <div class="modal-tabs-nav" id="bookModalTabsNav">
+        <button class="modal-tab-btn active" id="btnBookTabRead" data-tab="read">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+          <span data-i18n="modal.bookDetails.tabRead">Read & Progress</span>
+        </button>
+        <button class="modal-tab-btn" id="btnBookTabEdit" data-tab="edit">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          <span data-i18n="modal.bookDetails.tabEdit">Edit Details</span>
+        </button>
+      </div>
+
+      <!-- Sliding Tab Viewport for Smooth Transitions -->
+      <div class="modal-tabs-viewport">
+        <div class="modal-tabs-slider" id="bookModalTabsSlider">
+          <!-- Tab 1: Read & Progress Panel -->
+          <div class="modal-tab-panel" id="bookModalReadPanel">
+            <!-- Modern Telemetry Grid -->
+            <div class="launch-telemetry-grid">
+              <div class="launch-telemetry-chip">
+                <span class="launch-chip-label" data-i18n="modal.bookDetails.totalWords">Total Words</span>
+                <span class="launch-chip-val" id="launchTotalWords">0</span>
+              </div>
+              <div class="launch-telemetry-chip">
+                <span class="launch-chip-label" data-i18n="modal.bookDetails.progress">Progress</span>
+                <span class="launch-chip-val" id="launchProgressPct">0%</span>
+              </div>
+              <div class="launch-telemetry-chip">
+                <span class="launch-chip-label" data-i18n="modal.bookDetails.estTime">Est. Time</span>
+                <span class="launch-chip-val" id="launchEstTime">0m</span>
+              </div>
+            </div>
+
+            <!-- Glowing Liquid Progress Track -->
+            <div class="launch-progress-wrap">
+              <div class="launch-progress-track">
+                <div class="launch-progress-bar" id="launchProgressBar" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- Starting Needle Text Selector -->
+            <div class="needle-editor-wrap">
+              <div class="needle-header-row">
+                <div class="needle-pos-info">
+                  <span class="needle-pos-label-text" data-i18n="modal.bookDetails.startPosition">Start Position:</span>
+                  <strong id="needlePosLabel" style="color: var(--text-primary); font-variant-numeric: tabular-nums;">Word 0 (0%)</strong>
+                </div>
+                <button class="btn-mini-reset" id="btnLaunchResetProg" title="Reset needle to start">
+                  <span data-i18n="modal.bookDetails.resetToStart">Reset to Start</span>
+                </button>
+              </div>
+              <p class="needle-hint" data-i18n="modal.bookDetails.needleHint">Tap any word in the text below to place your starting needle:</p>
+              <div class="needle-preview-box" id="needlePreviewBox">
+                <!-- Dynamically populated interactive word spans -->
+              </div>
+            </div>
+
+            <button class="btn-save" id="btnLaunchRead" style="width: 100%; margin-top: 4px; padding: 14px; font-size: 16px; font-weight: 400; border-radius: 14px;" data-i18n="modal.bookDetails.readBtn">Read</button>
+          </div>
+
+          <!-- Tab 2: Edit Details Panel -->
+          <div class="modal-tab-panel" id="bookModalEditPanel" style="gap: 12px;">
+            <!-- Document File Import Drop Zone (.txt & .epub) -->
+            <div class="file-import-dropzone" id="fileImportDropzone" title="Tap or drag & drop a .txt or .epub file">
+              <input type="file" id="bookFileInput" accept=".txt,.epub,text/plain,application/epub+zip" style="display: none;">
+              <div class="dropzone-content" id="dropzoneContent">
+                <div class="dropzone-icon-wrap">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                  </svg>
+                </div>
+                <div class="dropzone-text-group">
+                  <strong class="dropzone-title" data-i18n="modal.bookDetails.importDoc">Import Document</strong>
+                  <span class="dropzone-sub" data-i18n="modal.bookDetails.importSub">Tap or drop .epub or .txt file</span>
+                </div>
+              </div>
+              <div class="dropzone-loading" id="dropzoneLoading" style="display: none;">
+                <div class="ios-activity-spinner" style="width: 26px; height: 26px; position: relative;">
+                  <div class="ios-spinner-blade"></div>
+                  <div class="ios-spinner-blade"></div>
+                  <div class="ios-spinner-blade"></div>
+                  <div class="ios-spinner-blade"></div>
+                  <div class="ios-spinner-blade"></div>
+                  <div class="ios-spinner-blade"></div>
+                  <div class="ios-spinner-blade"></div>
+                  <div class="ios-spinner-blade"></div>
+                  <div class="ios-spinner-blade"></div>
+                  <div class="ios-spinner-blade"></div>
+                  <div class="ios-spinner-blade"></div>
+                  <div class="ios-spinner-blade"></div>
+                </div>
+                <span id="dropzoneLoadingText" data-i18n="modal.bookDetails.extracting">Extracting text &amp; chapters...</span>
+              </div>
+            </div>
+
+            <div class="modal-section-divider">
+              <span data-i18n="modal.bookDetails.orEnterDetails">or enter details</span>
+            </div>
+
+            <input type="text" class="modern-textarea" id="editBookTitleInput" placeholder="Title" style="height: 44px; padding: 10px 14px;" data-i18n-placeholder="modal.bookDetails.titlePlaceholder">
+            <input type="text" class="modern-textarea" id="editBookAuthorInput" placeholder="Author (optional)" style="height: 44px; padding: 10px 14px;" data-i18n-placeholder="modal.bookDetails.authorPlaceholder">
+            <textarea class="modern-textarea" id="editBookContentInput" placeholder="Paste or edit content here..." style="height: 140px;" data-i18n-placeholder="modal.bookDetails.contentPlaceholder"></textarea>
+
+            <div>
+              <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 8px; text-align: center;" data-i18n="modal.bookDetails.tagColor">Tag Color:</label>
+              <div class="accent-swatches-wrap" id="modalColorDots">
+                <div class="accent-dot active" data-color="white" style="background: var(--palette-white); --swatch-color: var(--palette-white);"></div>
+                <div class="accent-dot" data-color="red" style="background: var(--palette-red); --swatch-color: var(--palette-red);"></div>
+                <div class="accent-dot" data-color="pink" style="background: var(--palette-pink); --swatch-color: var(--palette-pink);"></div>
+                <div class="accent-dot" data-color="purple" style="background: var(--palette-purple); --swatch-color: var(--palette-purple);"></div>
+                <div class="accent-dot" data-color="blue" style="background: var(--palette-blue); --swatch-color: var(--palette-blue);"></div>
+                <div class="accent-dot" data-color="green" style="background: var(--palette-green); --swatch-color: var(--palette-green);"></div>
+                <div class="accent-dot" data-color="yellow" style="background: var(--palette-yellow); --swatch-color: var(--palette-yellow);"></div>
+                <div class="accent-dot" data-color="orange" style="background: var(--palette-orange); --swatch-color: var(--palette-orange);"></div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <button class="btn-save" id="btnSaveAddModal" style="flex: 2; padding: 13px; font-size: 15px;" data-i18n="modal.bookDetails.saveChanges">Save Changes</button>
+              <button type="button" class="btn-delete-book-modal" id="btnDeleteCurrentBook" title="Delete this book" data-i18n="modal.bookDetails.deleteBook">Delete Book</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session Completion Modal (Clean Centered Stats, No Bubbles) -->
+  <div class="modern-modal-backdrop" id="completionModal">
+    <div class="modern-dialog" style="text-align: center; align-items: center; max-width: 380px;">
+      <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; box-shadow: 0 0 20px var(--accent-glow);">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <h2 style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px;" data-i18n="modal.completion.title">Reading Finished</h2>
+
+      <div class="completion-metrics-center">
+        <div class="completion-metric-group">
+          <div class="completion-metric-val" id="statWordsRead">0</div>
+          <div class="completion-metric-sub" data-i18n="modal.completion.wordsRead">words read</div>
+        </div>
+        <div class="completion-metric-sep">•</div>
+        <div class="completion-metric-group">
+          <div class="completion-metric-val" id="statTimeSaved">0s</div>
+          <div class="completion-metric-sub" data-i18n="modal.completion.timeSaved">time saved</div>
+        </div>
+      </div>
+
+      <button class="btn-save" id="btnCloseCompletion" style="width: 100%; margin-top: 18px; padding: 13px; font-size: 15px;" data-i18n="modal.completion.done">Done</button>
+    </div>
+  </div>
+
+  <!-- About Tachyon Modal -->
+  <div class="modern-modal-backdrop" id="aboutModal">
+    <div class="modern-dialog" style="text-align: center; max-width: 380px;">
+      <div class="about-hero-logo">
+        <div class="about-icon-glow">
+          <svg viewBox="0 0 24 24" width="38" height="38" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
+      </div>
+      <h2 style="font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin: 10px 0 2px;">TACHYON</h2>
+      <div class="about-version-tag" data-i18n="modal.about.version">Version 2.5 • Liquid Glass</div>
+      <p style="font-size: 13px; color: var(--text-secondary); margin: 12px 0 16px; line-height: 1.5;" data-i18n="modal.about.description">
+        Rapid Serial Visual Presentation speed reader. Read faster than thought with optical anchoring, tactile haptic feedback, and borderless liquid glass.
+      </p>
+
+      <div class="about-specs-list">
+        <div class="about-spec-row">
+          <span data-i18n="modal.about.engine">Engine</span>
+          <strong data-i18n="modal.about.engineVal">RSVP Reticle 2.5</strong>
+        </div>
+        <div class="about-spec-row">
+          <span data-i18n="modal.about.audio">Audio</span>
+          <strong data-i18n="modal.about.audioVal">Console Synthesis Engine</strong>
+        </div>
+        <div class="about-spec-row">
+          <span data-i18n="modal.about.storage">Storage</span>
+          <strong data-i18n="modal.about.storageVal">Offline IndexedDB</strong>
+        </div>
+      </div>
+
+      <button class="btn-save" id="btnCloseAboutModal" style="width: 100%; margin-top: 18px; padding: 12px; font-size: 14px;" data-i18n="modal.about.done">Done</button>
+    </div>
+  </div>
+
+  <!-- Daily Streak & Goal Hub Modal -->
+  <div class="modern-modal-backdrop" id="streakModal">
+    <div class="modern-dialog streak-dialog" style="text-align: center; max-width: 390px;">
+      <div class="streak-hero-flame-container">
+        <svg class="cartoon-flame-hero" viewBox="0 0 48 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path class="flame-outer" d="M24 3C24 3 33 12 33 22.5C33 26.2 31.5 29.2 29.2 31.5C32.2 28.5 33.7 24 33 19.5C36.7 23.2 40.5 29.2 40.5 36C40.5 45 33 51 24 51C15 51 7.5 45 7.5 36C7.5 27 13.5 18 19.5 12C19.5 18 22.5 21 24 21C24 16.5 24 3 24 3Z" fill="url(#heroFlameGradOuter)"/>
+          <path class="flame-middle" d="M24 18C24 18 30 24 30 31.5C30 34.5 28.5 36.7 27 38.2C28.5 36 29.2 33 28.5 30C30.7 32.2 33 35.2 33 39C33 44.2 28.5 48 24 48C19.5 48 15 44.2 15 39C15 32.2 19.5 27 22.5 22.5C22.5 25.5 24 27 24 27C24 24 24 18 24 18Z" fill="url(#heroFlameGradMiddle)"/>
+          <path class="flame-core" d="M24 30C24 30 27 34.5 27 39C27 42 25.5 44.2 24 45C22.5 44.2 21 42 21 39C21 34.5 24 30 24 30Z" fill="#FFFBE6"/>
+          <defs>
+            <linearGradient id="heroFlameGradOuter" x1="24" y1="3" x2="24" y2="51" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FF3B30"/>
+              <stop offset="0.5" stop-color="#FF9500"/>
+              <stop offset="1" stop-color="#FFCC00"/>
+            </linearGradient>
+            <linearGradient id="heroFlameGradMiddle" x1="24" y1="18" x2="24" y2="48" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FF9500"/>
+              <stop offset="1" stop-color="#FFD60A"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      <div class="streak-hero-days" id="modalStreakDays">1</div>
+      <div class="streak-hero-label" id="modalStreakHeroUnit" data-i18n="modal.streak.title">DAY STREAK</div>
+      <div class="streak-hero-motto" id="modalStreakMotto" data-i18n="modal.streak.motto">Your daily reading habit is active. Keep the flame glowing!</div>
+
+      <!-- Weekly Progress Circles (Mon to Sun) -->
+      <div class="streak-week-grid" id="streakWeekGrid">
+        <div class="week-day-col" data-day="1"><span class="day-label">M</span><div class="day-dot"><svg class="dot-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+        <div class="week-day-col" data-day="2"><span class="day-label">T</span><div class="day-dot"><svg class="dot-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+        <div class="week-day-col" data-day="3"><span class="day-label">W</span><div class="day-dot"><svg class="dot-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+        <div class="week-day-col" data-day="4"><span class="day-label">T</span><div class="day-dot"><svg class="dot-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+        <div class="week-day-col" data-day="5"><span class="day-label">F</span><div class="day-dot"><svg class="dot-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+        <div class="week-day-col" data-day="6"><span class="day-label">S</span><div class="day-dot"><svg class="dot-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+        <div class="week-day-col" data-day="0"><span class="day-label">S</span><div class="day-dot"><svg class="dot-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+      </div>
+
+      <!-- Daily Goal Target -->
+      <div class="streak-goal-card">
+        <div class="goal-header-row">
+          <span data-i18n="modal.streak.target">Today's Target</span>
+          <strong id="modalGoalTimeTxt">0m / 15m</strong>
+        </div>
+        <div class="goal-bar-track">
+          <div class="goal-bar-fill" id="modalGoalBarFill" style="width: 10%;"></div>
+        </div>
+      </div>
+
+      <!-- Milestone Metrics -->
+      <div class="streak-stats-row">
+        <div class="streak-stat-box">
+          <span class="streak-stat-val" id="modalBestStreak">1</span>
+          <span class="streak-stat-lbl" data-i18n="modal.streak.bestStreak">BEST STREAK</span>
+        </div>
+        <div class="streak-stat-box">
+          <span class="streak-stat-val" id="modalTotalSessions">1</span>
+          <span class="streak-stat-lbl" data-i18n="modal.streak.sessions">SESSIONS</span>
+        </div>
+        <div class="streak-stat-box">
+          <span class="streak-stat-val" id="modalTotalMinutes">0m</span>
+          <span class="streak-stat-lbl" data-i18n="modal.streak.totalTime">TOTAL TIME</span>
+        </div>
+      </div>
+
+      <button class="btn-save" id="btnCloseStreakModal" style="width: 100%; margin-top: 20px; padding: 13px; font-size: 15px;" data-i18n="modal.streak.done">Done</button>
+    </div>
+  </div>
+
+  <!-- Session Comprehension Recall Check Modal -->
+  <div class="modern-modal-backdrop" id="comprehensionModal">
+    <div class="modern-dialog comprehension-dialog" style="text-align: center; max-width: 390px;">
+      <div class="comprehension-header">
+        <div class="comprehension-badge" data-i18n="modal.comprehension.badge">RSVP RETENTION</div>
+        <h2 class="comprehension-title" data-i18n="modal.comprehension.title">Comprehension Check</h2>
+        <p class="comprehension-sub" data-i18n="modal.comprehension.sub">How much did you absorb from this reading sprint?</p>
+      </div>
+
+      <div class="comprehension-metric-pill">
+        <div class="comp-metric-col">
+          <span class="comp-metric-num" id="recallSessionWords">0</span>
+          <span class="comp-metric-lbl" data-i18n="modal.comprehension.wordsRead">WORDS READ</span>
+        </div>
+        <div class="comp-metric-sep">•</div>
+        <div class="comp-metric-col">
+          <span class="comp-metric-num" id="recallSessionSpeed">350</span>
+          <span class="comp-metric-lbl" data-i18n="modal.comprehension.avgWpm">AVG WPM</span>
+        </div>
+      </div>
+
+      <div class="comprehension-options">
+        <button class="comprehension-opt-btn haze" data-rating="hazy">
+          <div class="comp-btn-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          </div>
+          <div class="comp-btn-info">
+            <div class="comp-btn-title" data-i18n="modal.comprehension.ratingHazy">Hazy (&lt; 50%)</div>
+            <div class="comp-btn-desc" data-i18n="modal.comprehension.ratingHazyDesc">Fast pace; missed key nuances</div>
+          </div>
+        </button>
+
+        <button class="comprehension-opt-btn good" data-rating="good">
+          <div class="comp-btn-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          </div>
+          <div class="comp-btn-info">
+            <div class="comp-btn-title" data-i18n="modal.comprehension.ratingGood">Good (~75%)</div>
+            <div class="comp-btn-desc" data-i18n="modal.comprehension.ratingGoodDesc">Comfortable grasp of the concepts</div>
+          </div>
+        </button>
+
+        <button class="comprehension-opt-btn master" data-rating="master">
+          <div class="comp-btn-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="comp-btn-info">
+            <div class="comp-btn-title" data-i18n="modal.comprehension.ratingMaster">Total Recall (100%)</div>
+            <div class="comp-btn-desc" data-i18n="modal.comprehension.ratingMasterDesc">Crystal clear comprehension</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="comprehension-footer">
+        <button class="btn-comp-skip" id="btnSkipComprehension" data-i18n="modal.comprehension.skip">Skip for now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Modular Hybrid Application Script -->
+  <script type="module" src="assets/js/hybrid-app.js?v=8"></script>
+</body>
+</html>
