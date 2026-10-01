@@ -356,6 +356,18 @@
         <button class="btn-save" id="btnStartTrial" style="width: 100%; max-width: 320px; padding: 14px; font-size: 15px;" data-i18n="prime.startTrial">
           Start Free Trial
         </button>
+
+        <button class="btn-restore-purchases" id="btnRestorePurchasesPrime">
+          Restore Purchases
+        </button>
+
+        <div class="legal-links-row">
+          <button class="legal-link-btn" data-legal-tab="terms">Terms of Service</button>
+          <span>•</span>
+          <button class="legal-link-btn" data-legal-tab="privacy">Privacy Policy</button>
+          <span>•</span>
+          <button class="legal-link-btn" data-legal-tab="eula">EULA</button>
+        </div>
       </div>
 
       <!-- Active Prime Benefits Showcase (Visible when Prime is unlocked) -->
@@ -432,6 +444,16 @@
         <button class="btn-save" id="btnManagePrime" style="width: 100%; max-width: 320px; padding: 13px; font-size: 14px; margin-top: 6px; opacity: 0.85;">
           Prime Membership Active
         </button>
+
+        <div class="legal-links-row" style="margin-top: 14px;">
+          <button class="legal-link-btn" data-legal-tab="terms">Terms of Service</button>
+          <span>•</span>
+          <button class="legal-link-btn" data-legal-tab="privacy">Privacy Policy</button>
+          <span>•</span>
+          <button class="legal-link-btn" data-legal-tab="eula">EULA</button>
+          <span>•</span>
+          <button class="legal-link-btn" id="btnRestorePurchasesActive">Restore</button>
+        </div>
       </div>
     </div>
 
@@ -584,6 +606,36 @@
             <div class="tier-badge" id="tierStatusBadge" style="color: var(--text-secondary); margin-top: 2px;">Free Starter</div>
           </div>
           <button class="btn-tier-switch" id="btnSwitchTier" data-i18n="settings.togglePrime">Toggle Prime</button>
+        </div>
+      </section>
+
+      <!-- Restore Purchases -->
+      <section class="settings-section">
+        <div class="tier-toggle-row">
+          <div>
+            <div style="font-size: 14px; font-weight: 700;">Restore Purchases</div>
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Re-sync active Apple Subscriptions</div>
+          </div>
+          <button class="btn-tier-switch" id="btnRestorePurchasesSettings">Restore</button>
+        </div>
+      </section>
+
+      <!-- Legal & Privacy -->
+      <section class="settings-section">
+        <label class="settings-label" style="font-size: 13.5px; font-weight: 700; margin-bottom: 8px; display: block;">Legal & Privacy</label>
+        <div class="settings-links-card">
+          <button class="settings-link-row" data-legal-tab="privacy">
+            <span>Privacy Policy (100% On-Device)</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+          <button class="settings-link-row" data-legal-tab="terms">
+            <span>Terms of Service</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+          <button class="settings-link-row" data-legal-tab="eula">
+            <span>End User License Agreement (EULA)</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
         </div>
       </section>
 
@@ -956,6 +1008,86 @@
 
       <div class="comprehension-footer">
         <button class="btn-comp-skip" id="btnSkipComprehension" data-i18n="modal.comprehension.skip">Skip for now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legal & Privacy Modal (Privacy Policy, Terms of Service, EULA) -->
+  <div class="modern-modal-backdrop" id="legalModal">
+    <div class="modern-dialog legal-dialog" style="max-width: 500px; max-height: 85vh; display: flex; flex-direction: column;">
+      <div class="modal-notch-handle" aria-hidden="true"></div>
+      
+      <div class="modal-header" style="flex-shrink: 0; padding-bottom: 8px;">
+        <div>
+          <h3 class="modal-title" id="legalModalTitle">Legal & Privacy</h3>
+          <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 2px;">App Store Compliance & Data Privacy</div>
+        </div>
+        <button class="btn-modal-close" id="btnCloseLegalModal" aria-label="Close Legal Modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <!-- Legal Navigation Tabs -->
+      <div class="legal-tabs-nav" id="legalTabsNav">
+        <button class="legal-tab-btn active" data-tab="privacy">Privacy Policy</button>
+        <button class="legal-tab-btn" data-tab="terms">Terms of Service</button>
+        <button class="legal-tab-btn" data-tab="eula">EULA</button>
+      </div>
+
+      <!-- Legal Tab Panels (Scrollable Content) -->
+      <div class="legal-content-scroll" id="legalContentScroll">
+        <!-- Panel 1: Privacy Policy -->
+        <div class="legal-panel active" id="legalPanelPrivacy">
+          <h4>Privacy Policy</h4>
+          <p class="legal-date">Last Updated: October 2026</p>
+          <div class="legal-badge-pill">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>100% On-Device Processing — Zero Tracking</span>
+          </div>
+          <p>TACHYON is built with a privacy-first foundation. Your personal data, reading material, reading statistics, and comprehension records are strictly private.</p>
+          <h5>1. On-Device Text & Document Processing</h5>
+          <p>All text you paste into the scratchpad and all files you import (such as EPUB or TXT documents) are processed, tokenized, and stored exclusively on your device using local storage (IndexedDB). Your content is never uploaded to any remote server or third-party cloud.</p>
+          <h5>2. Zero Tracking & No Analytics</h5>
+          <p>TACHYON does not use any third-party tracking scripts, telemetry tools, or advertising networks. We do not track your reading speeds, reading habits, or library contents.</p>
+          <h5>3. In-App Purchases & Subscriptions</h5>
+          <p>All subscription transactions and purchases are processed directly by Apple through StoreKit 2. Apple handles all billing information securely. TACHYON receives only an anonymous receipt confirming active membership.</p>
+          <h5>4. GDPR & CCPA Compliance</h5>
+          <p>Because all data is stored locally on your device, you have full ownership and control. You can permanently delete any book, document, or reading history at any time directly within the app.</p>
+        </div>
+
+        <!-- Panel 2: Terms of Service -->
+        <div class="legal-panel" id="legalPanelTerms">
+          <h4>Terms of Service</h4>
+          <p class="legal-date">Last Updated: October 2026</p>
+          <p>Please read these Terms of Service carefully before using TACHYON.</p>
+          <h5>1. Acceptance of Terms</h5>
+          <p>By downloading, installing, or using TACHYON, you agree to be bound by these Terms. If you disagree with any part of these terms, you may not use the application.</p>
+          <h5>2. TACHYON Prime Subscriptions</h5>
+          <p>TACHYON Prime offers premium features including unlimited book imports, full custom themes, all sound profiles, and all focal accent colors.</p>
+          <ul>
+            <li><strong>Billing:</strong> Payment will be charged to your Apple ID account at confirmation of purchase.</li>
+            <li><strong>Auto-Renewal:</strong> Subscriptions automatically renew unless auto-renew is turned off at least 24 hours before the end of the current billing cycle.</li>
+            <li><strong>Account Charges:</strong> Your account will be charged for renewal within 24 hours prior to the end of the current period at the rate of the selected plan.</li>
+            <li><strong>Managing Subscriptions:</strong> You can manage and cancel your subscriptions by going to your App Store Account Settings after purchase.</li>
+          </ul>
+          <h5>3. User-Provided Content</h5>
+          <p>You are solely responsible for any text, books, or documents you import into TACHYON. You represent and warrant that you own or have the necessary licenses and rights to view and store any imported materials.</p>
+          <h5>4. Disclaimer & Limitations</h5>
+          <p>TACHYON is provided "as is" without warranty of any kind. RSVP reading speed gains may vary by individual comprehension level.</p>
+        </div>
+
+        <!-- Panel 3: EULA -->
+        <div class="legal-panel" id="legalPanelEula">
+          <h4>End User License Agreement (EULA)</h4>
+          <p class="legal-date">Standard Apple EULA Applicable</p>
+          <p>TACHYON is licensed, not sold, to you for use strictly in accordance with Apple's Standard Licensed Application End User License Agreement.</p>
+          <h5>1. Scope of License</h5>
+          <p>A non-transferable license to use the Application on any Apple-branded products that you own or control as permitted by the Usage Rules set forth in the Apple Media Services Terms and Conditions.</p>
+          <h5>2. Termination</h5>
+          <p>The license is effective until terminated by you or the Licensor. Your rights under this license will terminate automatically without notice if you fail to comply with any of its terms.</p>
+          <h5>3. Governing Law</h5>
+          <p>This Agreement and the relationship between you and Apple shall be governed by the laws of the State of California, excluding its conflicts of law provisions.</p>
+        </div>
       </div>
     </div>
   </div>

@@ -2221,22 +2221,113 @@ async function initApp() {
     });
   });
 
+  // --------------------------------------------------------------------------
+  // Apple StoreKit 2 Native Bridge & Subscriptions
+  // --------------------------------------------------------------------------
+  const NativeStoreKit = {
+    isAvailable() {
+      return typeof window.webkit !== 'undefined' &&
+             window.webkit.messageHandlers &&
+             typeof window.webkit.messageHandlers.storeKit !== 'undefined';
+    },
+    purchase(productId) {
+      if (this.isAvailable()) {
+        window.webkit.messageHandlers.storeKit.postMessage({
+          action: 'purchase',
+          productId: productId || 'com.tachyon.reader.annual'
+        });
+        return true;
+      }
+      return false;
+    },
+    restore() {
+      if (this.isAvailable()) {
+        window.webkit.messageHandlers.storeKit.postMessage({
+          action: 'restore'
+        });
+        return true;
+      }
+      return false;
+    }
+  };
+
+  // Global callbacks invoked by native iOS Swift layer
+  window.__onNativePurchaseSuccess = function(productId) {
+    state.isPro = true;
+    Storage.saveSettings(state);
+    applyTierMode();
+    AudioSystem.playSuccessChime();
+    triggerGestureFeedback('right', 'TACHYON Prime Active!');
+    const readerTab = document.querySelector('[data-target="tabReader"]');
+    if (readerTab) readerTab.click();
+  };
+
+  window.__onNativeRestoreSuccess = function(hasActiveSubscription) {
+    if (hasActiveSubscription) {
+      state.isPro = true;
+      Storage.saveSettings(state);
+      applyTierMode();
+      AudioSystem.playSuccessChime();
+      triggerGestureFeedback('right', 'Subscriptions Restored!');
+    } else {
+      AudioSystem.playButtonPress();
+      triggerGestureFeedback('left', 'No active subscription found');
+    }
+  };
+
   if (btnStartTrial) {
     btnStartTrial.addEventListener('click', () => {
-      btnStartTrial.textContent = 'Unlocking...';
+      const selectedPlan = document.querySelector('.plan-card.selected');
+      const isAnnual = selectedPlan ? selectedPlan.textContent.includes('Annual') : true;
+      const productId = isAnnual ? 'com.tachyon.reader.annual' : 'com.tachyon.reader.monthly';
+
       AudioSystem.init();
+      AudioSystem.playButtonPress();
+
+      if (NativeStoreKit.isAvailable()) {
+        btnStartTrial.textContent = 'Contacting Apple Pay...';
+        NativeStoreKit.purchase(productId);
+      } else {
+        btnStartTrial.textContent = 'Unlocking...';
+        setTimeout(() => {
+          state.isPro = true;
+          Storage.saveSettings(state);
+          applyTierMode();
+          AudioSystem.playSuccessChime();
+          btnStartTrial.textContent = 'Prime Active';
+
+          const readerTab = document.querySelector('[data-target="tabReader"]');
+          if (readerTab) readerTab.click();
+        }, 800);
+      }
+    });
+  }
+
+  function handleRestorePurchases() {
+    AudioSystem.playTapSound();
+    triggerGestureFeedback('right', 'Verifying Apple Subscriptions...');
+
+    if (NativeStoreKit.isAvailable()) {
+      NativeStoreKit.restore();
+    } else {
       setTimeout(() => {
         state.isPro = true;
         Storage.saveSettings(state);
         applyTierMode();
         AudioSystem.playSuccessChime();
-        btnStartTrial.textContent = 'Prime Active';
-
-        const readerTab = document.querySelector('[data-target="tabReader"]');
-        if (readerTab) readerTab.click();
-      }, 800);
-    });
+        triggerGestureFeedback('right', 'Subscriptions Restored!');
+      }, 700);
+    }
   }
+
+  const btnRestorePurchasesPrime = document.getElementById('btnRestorePurchasesPrime');
+  if (btnRestorePurchasesPrime) btnRestorePurchasesPrime.addEventListener('click', handleRestorePurchases);
+
+  const btnRestorePurchasesSettings = document.getElementById('btnRestorePurchasesSettings');
+  if (btnRestorePurchasesSettings) btnRestorePurchasesSettings.addEventListener('click', handleRestorePurchases);
+
+  const btnRestorePurchasesActive = document.getElementById('btnRestorePurchasesActive');
+  if (btnRestorePurchasesActive) btnRestorePurchasesActive.addEventListener('click', handleRestorePurchases);
 
   const btnManagePrime = document.getElementById('btnManagePrime');
   if (btnManagePrime) {
@@ -2246,6 +2337,65 @@ async function initApp() {
       if (readerTab) readerTab.click();
     });
   }
+
+  // --------------------------------------------------------------------------
+  // Legal & App Store Compliance Modal
+  // --------------------------------------------------------------------------
+  const legalModal = document.getElementById('legalModal');
+  const btnCloseLegalModal = document.getElementById('btnCloseLegalModal');
+  const legalTabBtns = document.querySelectorAll('.legal-tab-btn');
+  const legalPanels = document.querySelectorAll('.legal-panel');
+
+  function openLegalModal(tabName = 'privacy') {
+    AudioSystem.playModalOpen();
+    switchLegalTab(tabName);
+    if (legalModal) {
+      const dialog = legalModal.querySelector('.modern-dialog');
+      if (dialog) {
+        dialog.style.transform = '';
+        dialog.style.transition = '';
+      }
+      legalModal.classList.add('active');
+    }
+  }
+
+  function closeLegalModal() {
+    AudioSystem.playModalClose();
+    if (legalModal) legalModal.classList.remove('active');
+  }
+
+  function switchLegalTab(tabName) {
+    legalTabBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tabName);
+    });
+    legalPanels.forEach(panel => {
+      const isTarget = panel.id.toLowerCase().includes(tabName.toLowerCase());
+      panel.classList.toggle('active', isTarget);
+    });
+  }
+
+  if (btnCloseLegalModal) {
+    btnCloseLegalModal.addEventListener('click', closeLegalModal);
+  }
+  if (legalModal) {
+    legalModal.addEventListener('click', (e) => {
+      if (e.target === legalModal) closeLegalModal();
+    });
+  }
+
+  legalTabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      AudioSystem.playTapSound();
+      switchLegalTab(btn.dataset.tab);
+    });
+  });
+
+  document.querySelectorAll('[data-legal-tab]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openLegalModal(btn.dataset.legalTab);
+    });
+  });
 
   // --------------------------------------------------------------------------
   // Session Completion Modal
@@ -2699,6 +2849,9 @@ async function initApp() {
   }
   if (comprehensionModal) {
     enableBottomSheetGestures(comprehensionModal, comprehensionModal.querySelector('.modern-dialog'), closeComprehensionModal);
+  }
+  if (legalModal) {
+    enableBottomSheetGestures(legalModal, legalModal.querySelector('.modern-dialog'), closeLegalModal);
   }
 
   updateReadingEstimate();
