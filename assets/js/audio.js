@@ -298,6 +298,10 @@ export const AudioSystem = {
     this.playNoiseTransient(0.32, 2800);
   },
 
+  playSelectionSound() {
+    this.playPresetSelect();
+  },
+
   playUiTick() {
     this.playPresetSelect();
   },

@@ -1853,7 +1853,15 @@ async function initApp() {
   accentDots.forEach(dot => {
     dot.addEventListener('click', () => {
       const color = dot.dataset.color;
-      AudioSystem.playSelectionSound();
+      try {
+        if (typeof AudioSystem.playSelectionSound === 'function') {
+          AudioSystem.playSelectionSound();
+        } else if (typeof AudioSystem.playTapSound === 'function') {
+          AudioSystem.playTapSound();
+        }
+      } catch (err) {
+        console.warn('Audio feedback error:', err);
+      }
       state.colorPalette = color;
       Storage.saveSettings(state);
       applyTheme();
