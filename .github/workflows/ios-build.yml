@@ -1,0 +1,32 @@
+name: Build & Validate iOS App
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build iOS Project (Xcode)
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Select Latest Xcode
+        run: sudo xcode-select -switch /Applications/Xcode_15.4.app/Contents/Developer
+
+      - name: Verify Xcode Version
+        run: xcodebuild -version
+
+      - name: Build iOS Application (Simulator Target)
+        run: |
+          xcodebuild build \
+            -project ios/TACHYON/TACHYON.xcodeproj \
+            -scheme TACHYON \
+            -destination "generic/platform=iOS Simulator" \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO
