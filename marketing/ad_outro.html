@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    width: 1290px;
+    height: 2796px;
+    overflow: hidden;
+    background-color: #F7F6F2;
+    color: #111116;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 140px 100px;
+    position: relative;
+    user-select: none;
+  }
+
+  .paper-grain {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.45) 0%, rgba(230, 228, 220, 0.6) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .center-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .brand-emblem-large {
+    width: 140px;
+    height: 140px;
+    margin-bottom: 48px;
+    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.12));
+  }
+
+  .brand-title-large {
+    font-size: 88px;
+    font-weight: 900;
+    letter-spacing: 0.36em;
+    color: #0D0D11;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    margin-left: 0.36em; /* compensate for letter-spacing */
+  }
+
+  .brand-tagline {
+    font-size: 42px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #42424A;
+    letter-spacing: -0.02em;
+    margin-bottom: 80px;
+  }
+
+  .brand-tagline strong {
+    color: #D32F2F;
+    font-weight: 700;
+  }
+
+  .badge-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .app-store-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    background: #0D0D11;
+    color: #FFFFFF;
+    padding: 22px 48px;
+    border-radius: 9999px;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.35);
+  }
+
+  .app-store-pill svg {
+    width: 28px;
+    height: 28px;
+    fill: currentColor;
+  }
+
+  .feature-pills-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 40px;
+  }
+
+  .feature-mini-pill {
+    padding: 12px 24px;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 9999px;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #6A6A74;
+  }
+</style>
+</head>
+<body>
+  <div class="paper-grain"></div>
+
+  <main class="center-content">
+    <svg class="brand-emblem-large" viewBox="0 0 100 100">
+      <line x1="50" y1="8" x2="50" y2="92" stroke="#7A7A85" stroke-width="2" />
+      <line x1="8" y1="50" x2="92" y2="50" stroke="#7A7A85" stroke-width="2" />
+      <circle cx="50" cy="50" r="30" fill="none" stroke="#7A7A85" stroke-width="2" />
+      <polygon points="24,24 76,24 76,36 56,36 56,76 44,76 44,36 24,36" fill="#0D0D11" />
+      <circle cx="50" cy="50" r="6" fill="#FF2A54" />
+    </svg>
+
+    <h1 class="brand-title-large">TACHYON</h1>
+    <p class="brand-tagline">Read faster than thought. <strong>Up to 1,200 WPM.</strong></p>
+
+    <div class="badge-container">
+      <div class="app-store-pill">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        <span>AVAILABLE ON iOS</span>
+      </div>
+
+      <div class="feature-pills-row">
+        <div class="feature-mini-pill">100% Offline</div>
+        <div class="feature-mini-pill">Zero Subvocalization</div>
+        <div class="feature-mini-pill">Private &amp; Secure</div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
