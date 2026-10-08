@@ -20,6 +20,8 @@ for ad in ads:
         "--headless",
         "--disable-gpu",
         "--hide-scrollbars",
+        "--disable-cache",
+        "--incognito",
         "--window-size=1290,2796",
         f"--screenshot={dst_abs}",
         f"file:///{src_abs}"
