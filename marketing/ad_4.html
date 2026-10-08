@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    width: 1290px;
+    height: 2796px;
+    overflow: hidden;
+    background-color: #F7F6F2;
+    color: #111116;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 130px 100px 110px 100px;
+    position: relative;
+    user-select: none;
+  }
+
+  .paper-grain {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.4) 0%, rgba(230, 228, 220, 0.55) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .ground-shadow {
+    position: absolute;
+    width: 680px;
+    height: 90px;
+    top: 1910px;
+    left: 50%;
+    transform: translateX(-50%) perspective(400px) rotateX(60deg);
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.38) 0%, rgba(0, 0, 0, 0.12) 45%, transparent 75%);
+    filter: blur(24px);
+    z-index: 2;
+  }
+
+  .ad-header {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    max-width: 1100px;
+  }
+
+  .ad-category-tag {
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: #D32F2F;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .ad-category-tag::before,
+  .ad-category-tag::after {
+    content: '';
+    display: inline-block;
+    width: 36px;
+    height: 1.5px;
+    background: #D32F2F;
+    opacity: 0.8;
+  }
+
+  .ad-headline {
+    font-size: 76px;
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+    color: #111116;
+    text-wrap: balance;
+  }
+
+  .device-stage {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+  }
+
+  .iphone-frame {
+    width: 742px;
+    height: 1570px;
+    background: #18181C;
+    border-radius: 80px;
+    padding: 16px;
+    box-shadow: 
+      0 0 0 2px rgba(0, 0, 0, 0.12),
+      0 0 0 6px #28282E,
+      0 0 0 8px rgba(0, 0, 0, 0.06),
+      0 38px 85px -15px rgba(0, 0, 0, 0.38);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .screen-display {
+    width: 710px;
+    height: 1538px;
+    border-radius: 66px;
+    overflow: hidden;
+    background: #08080A;
+    position: relative;
+  }
+
+  .screen-display img {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .screen-glare {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.015) 35%, transparent 60%);
+    pointer-events: none;
+    z-index: 15;
+  }
+
+  .ad-footer {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 1040px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ad-editorial-copy {
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.44;
+    color: #42424A;
+    letter-spacing: -0.015em;
+    margin-bottom: 52px;
+    text-wrap: balance;
+  }
+
+  .ad-editorial-copy strong {
+    color: #0D0D11;
+    font-weight: 700;
+  }
+
+  .brand-lockup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+  }
+
+  .brand-emblem-svg {
+    width: 48px;
+    height: 48px;
+    display: block;
+  }
+
+  .brand-logo-text {
+    font-size: 46px;
+    font-weight: 900;
+    letter-spacing: 0.32em;
+    color: #0D0D11;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+  <div class="paper-grain"></div>
+  <div class="ground-shadow"></div>
+
+  <!-- Header Section -->
+  <header class="ad-header">
+    <div class="ad-category-tag">Synthetic Rhythm &amp; Focus</div>
+    <h1 class="ad-headline">To keep you in deep flow, we removed every distraction. And tuned the sound of every word.</h1>
+  </header>
+
+  <!-- Product Stage -->
+  <main class="device-stage">
+    <div class="iphone-frame">
+      <div class="screen-display">
+        <img src="screen_4_settings.png" alt="TACHYON Audio & Customization Suite">
+        <div class="screen-glare"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Editorial Copy & Brand -->
+  <footer class="ad-footer">
+    <p class="ad-editorial-copy">
+      Synchronize your visual processing with <strong>precision Web Audio metronomic clicks</strong>. Organic, mechanical, pulse, and vinyl sound profiles lock your brain into effortless, rhythmic focus.
+    </p>
+
+    <div class="brand-lockup">
+      <svg class="brand-emblem-svg" viewBox="0 0 100 100">
+        <line x1="50" y1="10" x2="50" y2="90" stroke="#7A7A85" stroke-width="2" />
+        <line x1="10" y1="50" x2="90" y2="50" stroke="#7A7A85" stroke-width="2" />
+        <circle cx="50" cy="50" r="28" fill="none" stroke="#7A7A85" stroke-width="2" />
+        <polygon points="26,26 74,26 74,36 56,36 56,76 44,76 44,36 26,36" fill="#0D0D11" />
+        <circle cx="50" cy="50" r="5.5" fill="#FF2A54" />
+      </svg>
+      <div class="brand-logo-text">TACHYON</div>
+    </div>
+  </footer>
+</body>
+</html>

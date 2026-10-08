@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    width: 1290px;
+    height: 2796px;
+    overflow: hidden;
+    background-color: #F7F6F2;
+    color: #111116;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 130px 100px 110px 100px;
+    position: relative;
+    user-select: none;
+  }
+
+  .paper-grain {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.4) 0%, rgba(230, 228, 220, 0.55) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Dual ground shadows */
+  .ground-shadow-left {
+    position: absolute;
+    width: 480px;
+    height: 80px;
+    top: 1880px;
+    left: 120px;
+    transform: perspective(400px) rotateX(60deg);
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.1) 45%, transparent 75%);
+    filter: blur(20px);
+    z-index: 2;
+  }
+
+  .ground-shadow-right {
+    position: absolute;
+    width: 480px;
+    height: 80px;
+    top: 1880px;
+    right: 120px;
+    transform: perspective(400px) rotateX(60deg);
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.32) 0%, rgba(0, 0, 0, 0.08) 45%, transparent 75%);
+    filter: blur(20px);
+    z-index: 2;
+  }
+
+  .ad-header {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    max-width: 1100px;
+  }
+
+  .ad-category-tag {
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: #D32F2F;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .ad-category-tag::before,
+  .ad-category-tag::after {
+    content: '';
+    display: inline-block;
+    width: 36px;
+    height: 1.5px;
+    background: #D32F2F;
+    opacity: 0.8;
+  }
+
+  .ad-headline {
+    font-size: 76px;
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+    color: #111116;
+    text-wrap: balance;
+  }
+
+  /* Dual Device Stage */
+  .device-stage-dual {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 36px;
+    margin: 10px 0;
+    width: 100%;
+  }
+
+  /* Dual Phone Frames */
+  .iphone-frame-half {
+    width: 532px;
+    height: 1162px;
+    border-radius: 66px;
+    padding: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .frame-dark {
+    background: #18181C;
+    box-shadow: 
+      0 0 0 2px rgba(0, 0, 0, 0.12),
+      0 0 0 5px #26262B,
+      0 30px 70px -15px rgba(0, 0, 0, 0.38);
+  }
+
+  .frame-light {
+    background: #E5E5EA;
+    box-shadow: 
+      0 0 0 2px rgba(0, 0, 0, 0.08),
+      0 0 0 5px #D1D1D6,
+      0 30px 70px -15px rgba(0, 0, 0, 0.28);
+  }
+
+  .screen-display-half {
+    width: 508px;
+    height: 1138px;
+    border-radius: 54px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .screen-display-half img {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .screen-glare {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.015) 35%, transparent 60%);
+    pointer-events: none;
+    z-index: 15;
+  }
+
+  /* Mode Labels below devices */
+  .mode-pill-label {
+    position: absolute;
+    bottom: -46px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: #6A6A74;
+  }
+
+  .ad-footer {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 1040px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ad-editorial-copy {
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.44;
+    color: #42424A;
+    letter-spacing: -0.015em;
+    margin-bottom: 52px;
+    text-wrap: balance;
+  }
+
+  .ad-editorial-copy strong {
+    color: #0D0D11;
+    font-weight: 700;
+  }
+
+  .brand-lockup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+  }
+
+  .brand-emblem-svg {
+    width: 48px;
+    height: 48px;
+    display: block;
+  }
+
+  .brand-logo-text {
+    font-size: 46px;
+    font-weight: 900;
+    letter-spacing: 0.32em;
+    color: #0D0D11;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+  <div class="paper-grain"></div>
+  <div class="ground-shadow-left"></div>
+  <div class="ground-shadow-right"></div>
+
+  <!-- Header Section -->
+  <header class="ad-header">
+    <div class="ad-category-tag">Cinematic Themes &amp; Ambience</div>
+    <h1 class="ad-headline">Engineered for high noon. And 2:00 in the morning.</h1>
+  </header>
+
+  <!-- Product Stage: Dual Phones Side-by-Side -->
+  <main class="device-stage-dual">
+    <!-- Dark Mode Phone -->
+    <div class="iphone-frame-half frame-dark">
+      <div class="screen-display-half" style="background: #08080A;">
+        <img src="screen_3_dark.png" alt="TACHYON Dark Obsidian Theme">
+        <div class="screen-glare"></div>
+      </div>
+      <div class="mode-pill-label">Obsidian Dark</div>
+    </div>
+
+    <!-- Light Mode Phone -->
+    <div class="iphone-frame-half frame-light">
+      <div class="screen-display-half" style="background: #F2F2F7;">
+        <img src="screen_3_light.png" alt="TACHYON Daylight Theme">
+        <div class="screen-glare"></div>
+      </div>
+      <div class="mode-pill-label">Daylight Light</div>
+    </div>
+  </main>
+
+  <!-- Editorial Copy & Brand -->
+  <footer class="ad-footer">
+    <p class="ad-editorial-copy">
+      Read in complete comfort anywhere under the sun. Switch instantly between <strong>deep OLED Obsidian</strong> for zero eye strain in the dark, and <strong>crisp daylight themes</strong>. Tuned for effortless focus.
+    </p>
+
+    <div class="brand-lockup">
+      <svg class="brand-emblem-svg" viewBox="0 0 100 100">
+        <line x1="50" y1="10" x2="50" y2="90" stroke="#7A7A85" stroke-width="2" />
+        <line x1="10" y1="50" x2="90" y2="50" stroke="#7A7A85" stroke-width="2" />
+        <circle cx="50" cy="50" r="28" fill="none" stroke="#7A7A85" stroke-width="2" />
+        <polygon points="26,26 74,26 74,36 56,36 56,76 44,76 44,36 26,36" fill="#0D0D11" />
+        <circle cx="50" cy="50" r="5.5" fill="#FF2A54" />
+      </svg>
+      <div class="brand-logo-text">TACHYON</div>
+    </div>
+  </footer>
+</body>
+</html>

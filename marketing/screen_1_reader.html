@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=430, height=932, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TACHYON Screen 1 - RSVP Reader</title>
+  <link rel="stylesheet" href="../assets/css/hybrid.css?v=10">
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+    html, body {
+      width: 430px;
+      height: 932px;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #08080A;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* iOS 18/27 Authentic Status Bar */
+    .ios-status-bar {
+      height: 54px;
+      padding: 14px 28px 0 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 100;
+      color: #FFFFFF;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .status-time {
+      font-weight: 600;
+      font-size: 15.5px;
+    }
+
+    /* Hardware Dynamic Island centered in status bar */
+    .hardware-dynamic-island {
+      position: absolute;
+      top: 11px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 124px;
+      height: 35px;
+      background: #000000;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 11px;
+      box-shadow: 0 0 1px 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .island-lens {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #080914;
+      border: 1px solid #1c1d28;
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    /* iOS Home Bar Indicator at bottom */
+    .ios-home-indicator {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 140px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.55);
+      border-radius: 3px;
+      z-index: 100;
+    }
+
+    /* Adjust main app layout to sit cleanly below status bar */
+    .modern-app {
+      padding-top: 0px !important;
+      height: calc(932px - 54px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .top-bar {
+      padding: 6px 20px 10px 20px !important;
+      margin-top: 0 !important;
+    }
+
+    .floating-nav {
+      bottom: 26px !important;
+    }
+  </style>
+</head>
+<body data-theme="obsidian">
+
+  <!-- Ambient Blurry Wallpaper Backdrop -->
+  <div class="wallpaper-backdrop">
+    <div class="wallpaper-layer wallpaper-obsidian" style="opacity: 1;"></div>
+  </div>
+
+  <!-- Atmospheric Ambient Liquid Glow -->
+  <div class="ambient-glow">
+    <div class="ambient-circle-1"></div>
+    <div class="ambient-circle-2"></div>
+  </div>
+
+  <!-- iOS Status Bar -->
+  <div class="ios-status-bar">
+    <span class="status-time">9:41</span>
+    <div class="hardware-dynamic-island">
+      <div class="island-lens"></div>
+    </div>
+    <div class="status-icons">
+      <!-- Signal -->
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor">
+        <rect x="0" y="8" width="3" height="4" rx="1"/>
+        <rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/>
+        <rect x="9" y="3" width="3" height="9" rx="1"/>
+        <rect x="13.5" y="0" width="3" height="12" rx="1"/>
+      </svg>
+      <!-- Wi-Fi -->
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor">
+        <path d="M8 9.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+        <path d="M4.5 7.5a5 5 0 0 1 7 0 .8.8 0 0 0 1.1-1.1 6.6 6.6 0 0 0-9.2 0 .8.8 0 0 0 1.1 1.1z"/>
+        <path d="M1.5 4.5a9.2 9.2 0 0 1 13 0 .8.8 0 0 0 1.1-1.1 10.8 10.8 0 0 0-15.2 0 .8.8 0 0 0 1.1 1.1z"/>
+      </svg>
+      <!-- Battery -->
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none">
+        <rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity="0.5"/>
+        <rect x="2" y="2" width="18" height="8" rx="2" fill="currentColor"/>
+        <path d="M23 4.5v3c.8 0 1.5-.7 1.5-1.5s-.7-1.5-1.5-1.5z" fill="currentColor" fill-opacity="0.5"/>
+      </svg>
+    </div>
+  </div>
+
+  <main class="modern-app">
+    <!-- Top Header Bar -->
+    <header class="top-bar">
+      <div class="brand-lockup">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
+        <div class="brand-title">TACHYON</div>
+      </div>
+
+      <div class="top-bar-actions">
+        <!-- Streak Widget Pill Button -->
+        <button class="streak-pill-btn">
+          <div class="streak-flame-wrapper">
+            <svg class="cartoon-flame" viewBox="0 0 32 36" fill="none">
+              <path class="flame-outer" d="M16 2C16 2 22 8 22 15C22 17.5 21 19.5 19.5 21C21.5 19 22.5 16 22 13C24.5 15.5 27 19.5 27 24C27 30 22 34 16 34C10 34 5 30 5 24C5 18 9 12 13 8C13 12 15 14 16 14C16 11 16 2 16 2Z" fill="url(#flameGradOuter)"/>
+              <path class="flame-middle" d="M16 12C16 12 20 16 20 21C20 23 19 24.5 18 25.5C19 24 19.5 22 19 20C20.5 21.5 22 23.5 22 26C22 29.5 19 32 16 32C13 32 10 29.5 10 26C10 21.5 13 18 15 15C15 17 16 18 16 18C16 16 16 12 16 12Z" fill="url(#flameGradMiddle)"/>
+              <path class="flame-core" d="M16 20C16 20 18 23 18 26C18 28 17 29.5 16 30C15 29.5 14 28 14 26C14 23 16 20 16 20Z" fill="#FFFBE6"/>
+              <defs>
+                <linearGradient id="flameGradOuter" x1="16" y1="2" x2="16" y2="34" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#FF3B30"/>
+                  <stop offset="0.6" stop-color="#FF9500"/>
+                  <stop offset="1" stop-color="#FFCC00"/>
+                </linearGradient>
+                <linearGradient id="flameGradMiddle" x1="16" y1="12" x2="16" y2="32" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#FF9500"/>
+                  <stop offset="1" stop-color="#FFD60A"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <span class="streak-count-txt">14</span>
+          <span class="streak-unit-txt">DAYS</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- TAB 1: READER (MAIN STAGE) -->
+    <div class="tab-panel active" id="tabReader" style="padding: 0 16px;">
+      <!-- Optical Reticle RSVP Stage -->
+      <section class="reader-stage" style="height: 250px;">
+        <!-- Top Toolbar: Book Title Badge -->
+        <div class="stage-top-toolbar">
+          <div class="stage-toolbar-left">
+            <div class="stage-book-badge" style="display: flex;">
+              <span>Meditations • Marcus Aurelius</span>
+            </div>
+          </div>
+          <div class="stage-toolbar-right">
+            <button class="stage-size-quick-btn">
+              <span>Aa</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Optical Reticle Guides -->
+        <div class="optical-reticle">
+          <div class="reticle-mark-top"></div>
+          <div class="reticle-hairline"></div>
+          <div class="reticle-mark-bottom"></div>
+        </div>
+
+        <!-- RSVP Word Frame (Hero Word: VELOCITY with glowing crimson O) -->
+        <div class="rsvp-word-frame" style="transform: translateY(-4px);">
+          <span class="word-pre" style="font-size: 46px; font-weight: 300; letter-spacing: -1px;">Vel</span>
+          <span class="word-focal" style="font-size: 46px; font-weight: 600; color: #FF2A54; text-shadow: 0 0 16px rgba(255, 42, 84, 0.8);">o</span>
+          <span class="word-post" style="font-size: 46px; font-weight: 300; letter-spacing: -1px;">city</span>
+        </div>
+      </section>
+
+      <!-- Interactive Progress Scrubber -->
+      <section class="scrubber-card" style="margin-top: 14px;">
+        <div class="scrubber-meta">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn-mini-reset">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              </svg>
+              <span>Restart</span>
+            </button>
+            <span style="font-size: 13px; color: var(--text-secondary);">Word <strong style="color: var(--text-primary);">148</strong> of 380</span>
+          </div>
+          <span style="color: var(--text-primary); font-weight: 700; font-size: 13px;">39%</span>
+        </div>
+        <div class="scrubber-track-wrap" style="margin-top: 8px;">
+          <div style="width: 100%; height: 6px; background: rgba(255, 255, 255, 0.12); border-radius: 3px; position: relative;">
+            <div style="width: 39%; height: 100%; background: #FF2A54; border-radius: 3px; box-shadow: 0 0 10px rgba(255,42,84,0.6);"></div>
+            <div style="position: absolute; left: 39%; top: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; background: #FFFFFF; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.5);"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Controls Deck -->
+      <section class="controls-deck" style="margin-top: 14px;">
+        <div class="primary-media-row">
+          <button class="btn-media-circle">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+              <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+              <text x="12" y="15.5" font-size="7" font-weight="900" text-anchor="middle" fill="currentColor">10</text>
+            </svg>
+          </button>
+
+          <button class="btn-media-hero" style="background: #FF2A54; color: #FFFFFF; box-shadow: 0 4px 20px rgba(255, 42, 84, 0.4);">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+              <rect x="6" y="4" width="4" height="16" rx="1.5"/>
+              <rect x="14" y="4" width="4" height="16" rx="1.5"/>
+            </svg>
+          </button>
+
+          <button class="btn-media-circle">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+              <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/>
+              <text x="12" y="15.5" font-size="7" font-weight="900" text-anchor="middle" fill="currentColor">10</text>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Speed Presets & Steppers -->
+        <div class="speed-control-section" style="margin-top: 12px;">
+          <div class="speed-header-row">
+            <div class="speed-title-wrap">
+              <span>Speed</span>
+            </div>
+            <div class="speed-stepper-wrap">
+              <button class="btn-stepper">−</button>
+              <div class="speed-badge" style="background: rgba(255,42,84,0.15); border: 1px solid rgba(255,42,84,0.3); color: #FF4D6D;"><span>700</span><small>WPM</small></div>
+              <button class="btn-stepper">+</button>
+            </div>
+          </div>
+
+          <div class="speed-presets-row" style="margin-top: 8px;">
+            <button class="speed-preset-btn">250</button>
+            <button class="speed-preset-btn">350</button>
+            <button class="speed-preset-btn">500</button>
+            <button class="speed-preset-btn active" style="background: rgba(255,255,255,0.22); color: #FFFFFF; font-weight: 700;">700</button>
+          </div>
+        </div>
+
+        <!-- Volume & Audio Toggle Strip -->
+        <div class="audio-strip" style="margin-top: 10px;">
+          <button class="btn-icon-mute">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          </button>
+          <div class="vol-slider-wrap">
+            <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; position: relative;">
+              <div style="width: 65%; height: 100%; background: rgba(255,255,255,0.5); border-radius: 2px;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Floating Liquid Navigation Pill -->
+    <nav class="floating-nav">
+      <div class="nav-pill-container">
+        <button class="nav-tab-btn active">
+          <svg viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+          <span>Reader</span>
+        </button>
+        <button class="nav-tab-btn">
+          <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <span>Library</span>
+        </button>
+        <button class="nav-tab-btn">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span>Prime</span>
+        </button>
+        <button class="nav-tab-btn">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Settings</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- iOS Home Indicator -->
+    <div class="ios-home-indicator"></div>
+  </main>
+</body>
+</html>

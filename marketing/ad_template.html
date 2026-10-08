@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,400;1,600&display=swap');
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    width: 1290px;
+    height: 2796px;
+    overflow: hidden;
+    background-color: #060608;
+    color: #FFFFFF;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 140px 100px 120px 100px;
+    position: relative;
+    user-select: none;
+  }
+
+  /* Subtle vintage photographic grain & vignette */
+  .vignette-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 45%, rgba(18, 18, 24, 0.4) 0%, rgba(3, 3, 5, 0.95) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Pirelli-inspired dramatic warm amber/crimson ground reflection */
+  .ground-light-beam {
+    position: absolute;
+    width: 820px;
+    height: 120px;
+    top: 1880px;
+    left: 50%;
+    transform: translateX(-50%) perspective(400px) rotateX(65deg);
+    background: radial-gradient(ellipse at center, rgba(255, 68, 40, 0.55) 0%, rgba(255, 140, 0, 0.25) 40%, transparent 75%);
+    filter: blur(28px);
+    z-index: 2;
+  }
+
+  /* Editorial Top Section */
+  .ad-header {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    max-width: 1090px;
+    margin-bottom: 20px;
+  }
+
+  .ad-category-tag {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: #FF3B30;
+    margin-bottom: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .ad-category-tag::before,
+  .ad-category-tag::after {
+    content: '';
+    display: inline-block;
+    width: 40px;
+    height: 1.5px;
+    background: #FF3B30;
+    opacity: 0.8;
+  }
+
+  .ad-headline {
+    font-size: 78px;
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+    color: #F8F8FA;
+    margin-bottom: 0px;
+    text-wrap: balance;
+  }
+
+  /* Middle Device Showcase */
+  .device-stage {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+  }
+
+  /* iPhone Titanium & Ceramic Bezel Frame */
+  .iphone-frame {
+    width: 760px;
+    height: 1540px;
+    background: #151518;
+    border-radius: 92px;
+    padding: 18px;
+    box-shadow: 
+      0 0 0 2px rgba(255, 255, 255, 0.12),
+      0 0 0 7px #232328,
+      0 0 0 9px rgba(255, 255, 255, 0.05),
+      0 40px 100px -20px rgba(0, 0, 0, 0.95),
+      0 20px 50px -10px rgba(255, 42, 84, 0.15);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Dynamic Island */
+  .dynamic-island {
+    position: absolute;
+    top: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 210px;
+    height: 52px;
+    background: #000000;
+    border-radius: 26px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 20px;
+  }
+
+  .dynamic-island-sensor {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #090a14;
+    border: 1px solid #1a1b24;
+  }
+
+  /* Screen Display Container */
+  .screen-display {
+    width: 100%;
+    height: 100%;
+    border-radius: 76px;
+    overflow: hidden;
+    background: #08080A;
+    position: relative;
+  }
+
+  .screen-display img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Glossy glass reflection sweep across screen */
+  .screen-glare {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(130deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 30%, transparent 60%);
+    pointer-events: none;
+    z-index: 15;
+  }
+
+  /* Lower Editorial Copy & Brand Lockup */
+  .ad-footer {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 1020px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ad-editorial-copy {
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.45;
+    color: #B5B5BE;
+    letter-spacing: -0.015em;
+    margin-bottom: 54px;
+    text-wrap: balance;
+  }
+
+  .ad-editorial-copy strong {
+    color: #FFFFFF;
+    font-weight: 600;
+  }
+
+  .brand-lockup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+  }
+
+  .brand-logo-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  }
+
+  .brand-logo-text {
+    font-size: 44px;
+    font-weight: 900;
+    letter-spacing: 0.28em;
+    color: #FFFFFF;
+    text-transform: uppercase;
+  }
+
+  .brand-tagline {
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: #727280;
+    text-transform: uppercase;
+    margin-top: 14px;
+  }
+</style>
+</head>
+<body>
+  <div class="vignette-overlay"></div>
+  <div class="ground-light-beam"></div>
+
+  <!-- Header Section -->
+  <header class="ad-header">
+    <div class="ad-category-tag">Rapid Serial Visual Presentation</div>
+    <h1 class="ad-headline">Honestly now, did you learn to read just to move your eyes back and forth 40,000 times a book?</h1>
+  </header>
+
+  <!-- Product Stage -->
+  <main class="device-stage">
+    <div class="iphone-frame">
+      <div class="dynamic-island">
+        <div class="dynamic-island-sensor"></div>
+      </div>
+      <div class="screen-display">
+        <img src="test_capture.png" alt="TACHYON RSVP Speed Reader">
+        <div class="screen-glare"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Editorial Copy & Brand -->
+  <footer class="ad-footer">
+    <p class="ad-editorial-copy">
+      Traditional reading exhausts <strong>80% of mental energy</strong> on eye saccades and subvocalization. TACHYON locks every word directly onto your Optimal Recognition Point at <strong>300 to 1,200 WPM</strong>. Read faster than thought.
+    </p>
+
+    <div class="brand-lockup">
+      <img src="../assets/icons/icon-512.png" alt="TACHYON Logo" class="brand-logo-icon">
+      <div class="brand-logo-text">TACHYON</div>
+    </div>
+    <div class="brand-tagline">Optimal Recognition Point • On-Device Engine</div>
+  </footer>
+</body>
+</html>
