@@ -272,66 +272,48 @@
           });
 
         } else if (screen === 'themes_dark') {
-          setActiveTab('tabReader');
+          // Authentic Obsidian Dark reading stage
+          const settingsBtn = idoc.querySelector('.nav-tab-btn[data-target="tabSettings"]');
+          if (settingsBtn) settingsBtn.click();
+          const themeCard = idoc.querySelector('.theme-picker-card[data-theme="obsidian"]');
+          if (themeCard) themeCard.click();
+          const redDot = idoc.querySelector('.accent-dot[data-color="red"]');
+          if (redDot) redDot.click();
 
+          const libBtn = idoc.querySelector('.nav-tab-btn[data-target="tabLibrary"]');
+          if (libBtn) libBtn.click();
+          const book1 = idoc.querySelector('.book-card-item[data-id="doc1"] .book-card');
+          if (book1) {
+            book1.click();
+            const launchBtn = idoc.getElementById('btnLaunchRead');
+            if (launchBtn) launchBtn.click();
+          }
+          const readerBtn = idoc.querySelector('.nav-tab-btn[data-target="tabReader"]');
+          if (readerBtn) readerBtn.click();
           const p500D = idoc.querySelector('.speed-preset-btn[data-wpm="500"]');
           if (p500D) p500D.click();
 
-          const wPre = idoc.getElementById('wordPre');
-          const wFocal = idoc.getElementById('wordFocal');
-          const wPost = idoc.getElementById('wordPost');
-          if (wPre && wFocal && wPost) {
-            wPre.textContent = 'SYN';
-            wFocal.textContent = 'A';
-            wPost.textContent = 'PSE';
-          }
-
-          const bookBadge = idoc.getElementById('stageBookBadge');
-          const bookTitle = idoc.getElementById('stageBookTitle');
-          if (bookBadge && bookTitle) {
-            bookTitle.textContent = 'Neuromancer • William Gibson';
-            bookBadge.style.display = 'inline-flex';
-          }
-
-          const sPos = idoc.getElementById('scrubberWordPos');
-          const sTot = idoc.getElementById('scrubberWordTotal');
-          const sPct = idoc.getElementById('scrubberPct');
-          const sSlider = idoc.getElementById('progressScrubber');
-          if (sPos) sPos.textContent = '840';
-          if (sTot) sTot.textContent = '2,400';
-          if (sPct) sPct.textContent = '35%';
-          if (sSlider) sSlider.value = 35;
-
         } else if (screen === 'themes_light') {
-          setActiveTab('tabReader');
+          // Authentic Vellum Light reading stage
+          const settingsBtn = idoc.querySelector('.nav-tab-btn[data-target="tabSettings"]');
+          if (settingsBtn) settingsBtn.click();
+          const themeCard = idoc.querySelector('.theme-picker-card[data-theme="vellum"]');
+          if (themeCard) themeCard.click();
+          const redDot = idoc.querySelector('.accent-dot[data-color="red"]');
+          if (redDot) redDot.click();
 
+          const libBtn = idoc.querySelector('.nav-tab-btn[data-target="tabLibrary"]');
+          if (libBtn) libBtn.click();
+          const book2 = idoc.querySelector('.book-card-item[data-id="doc2"] .book-card');
+          if (book2) {
+            book2.click();
+            const launchBtn = idoc.getElementById('btnLaunchRead');
+            if (launchBtn) launchBtn.click();
+          }
+          const readerBtn = idoc.querySelector('.nav-tab-btn[data-target="tabReader"]');
+          if (readerBtn) readerBtn.click();
           const p500L = idoc.querySelector('.speed-preset-btn[data-wpm="500"]');
           if (p500L) p500L.click();
-
-          const wPre = idoc.getElementById('wordPre');
-          const wFocal = idoc.getElementById('wordFocal');
-          const wPost = idoc.getElementById('wordPost');
-          if (wPre && wFocal && wPost) {
-            wPre.textContent = 'LU';
-            wFocal.textContent = 'M';
-            wPost.textContent = 'EN';
-          }
-
-          const bookBadge = idoc.getElementById('stageBookBadge');
-          const bookTitle = idoc.getElementById('stageBookTitle');
-          if (bookBadge && bookTitle) {
-            bookTitle.textContent = 'Walden • Henry David Thoreau';
-            bookBadge.style.display = 'inline-flex';
-          }
-
-          const sPos = idoc.getElementById('scrubberWordPos');
-          const sTot = idoc.getElementById('scrubberWordTotal');
-          const sPct = idoc.getElementById('scrubberPct');
-          const sSlider = idoc.getElementById('progressScrubber');
-          if (sPos) sPos.textContent = '1,680';
-          if (sTot) sTot.textContent = '2,400';
-          if (sPct) sPct.textContent = '70%';
-          if (sSlider) sSlider.value = 70;
         }
 
         window.rendered = true;

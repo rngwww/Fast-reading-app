@@ -57,6 +57,10 @@ for screen, theme, wpm, out_path in tasks:
         cropped = full_img.crop((left, top, right, bottom))
         final_dest = os.path.abspath(out_path)
         cropped.save(final_dest)
+        try:
+            os.remove(temp_full)
+        except:
+            pass
         print(f"Captured {screen} ({theme}) -> {out_path} ({cropped.size})")
 
 try:
